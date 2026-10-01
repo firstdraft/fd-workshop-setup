@@ -1,0 +1,5 @@
+{
+  "name": "workshop",
+  "version": "0.1.0",
+  "description": "Signs workshop attendees in to the tools they need. Loaded only for the sign-in session started by the 'workshop' command."
+}

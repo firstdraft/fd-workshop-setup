@@ -1,0 +1,7 @@
+# Created on each laptop when the kit runs
+workshop-kit/logs/
+workshop-kit/state/
+
+# Superseded by "workshop-kit/Setup WSL without Claude.cmd"
+setup-wsl.cmd
+setup-wsl.ps1

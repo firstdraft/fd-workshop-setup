@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/*)",
+      "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/*)",
+      "PowerShell(Get-CimInstance Win32_ComputerSystem*)",
+      "Read(./**)"
+    ],
+    "deny": [
+      "PowerShell(*wsl* --unregister*)",
+      "PowerShell(*wsl* --uninstall*)",
+      "PowerShell(*manage-bde* -off*)",
+      "Bash(*wsl* --unregister*)",
+      "Bash(*wsl* --uninstall*)",
+      "Bash(*manage-bde* -off*)"
+    ]
+  }
+}

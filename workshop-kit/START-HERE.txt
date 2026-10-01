@@ -1,0 +1,21 @@
+WORKSHOP LAPTOP SETUP (Windows)
+===============================
+
+1. Right-click the zip file you downloaded and choose "Extract All...".
+   Extract it to your Documents folder.
+
+2. Open Claude Desktop, go to the Code tab, and open the extracted
+   "workshop-kit" folder.
+
+3. Type:   Set up my laptop for the workshop
+
+4. Claude will guide you. Your laptop may restart once or twice.
+   After each restart: open Claude, open this same folder, and type:  continue
+
+Before you start:
+- Plug in your charger.
+- Have your phone nearby (you may need it to look something up while
+  the laptop restarts).
+- Save and close other work.
+
+If Claude is not working, double-click "Setup WSL without Claude.cmd" instead.
