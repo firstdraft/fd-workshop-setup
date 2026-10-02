@@ -79,8 +79,11 @@ while ($true) {
         }
         'DONE' {
             Write-Host ''
-            Write-Host 'All done! An Ubuntu window will sign you in to the workshop tools.' -ForegroundColor Green
-            Write-Host 'Later, open "Ubuntu 24.04" from the Start menu and type  workshop  to start again.'
+            $appDir = (Invoke-Wsl -Arguments @('--distribution', $DistroName, '--exec', 'cat', "/home/$LinuxUser/.workshop/app-dir")).Output.Trim()
+            Write-Host 'All done! Next, in Claude Desktop:' -ForegroundColor Green
+            Write-Host "  1. In the Code tab, start a new session and open the environment picker."
+            Write-Host "  2. Under WSL, choose $DistroName, then the folder $appDir, and trust it."
+            Write-Host '  3. Type  /workshop-signin  and press Enter.'
             Read-Host 'Press Enter to close this window'
             exit 0
         }

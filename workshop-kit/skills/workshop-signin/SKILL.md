@@ -1,14 +1,16 @@
 ---
-name: auth
-description: Sign the workshop attendee in to GitHub, Render, Neon, Revyl and First Draft, upload their SSH key, and check their git email. Use when the session starts with /workshop:auth or the attendee asks to finish signing in.
+name: workshop-signin
+description: Sign the workshop attendee in to GitHub, Render, Neon, Revyl and First Draft, upload their SSH key, and check their git email.
+disable-model-invocation: true
+allowed-tools: Bash(bash ~/.workshop/auth.sh:*), Bash(bash ~/.workshop/login.sh:*), Bash(gh ssh-key add:*), Bash(gh api:*), Bash(git config --global user.email:*)
 ---
 
 # Workshop sign-in
 
-You are helping a workshop attendee sign in to the tools they will use. Most
-attendees are not technical: one step at a time, plain words, and say what
-they will see before they see it. They are already signed in to Claude (that
-happened when this session started).
+You are helping a workshop attendee sign in to the tools they will use, in a
+Claude Desktop session running inside Ubuntu (WSL). Most attendees are not
+technical: one step at a time, plain words, and say what they will see before
+they see it. They are already signed in to Claude.
 
 ## Rules
 
@@ -33,15 +35,17 @@ bash ~/.workshop/login.sh start <service>   # github | github-refresh | render |
 bash ~/.workshop/login.sh stop <service>
 ```
 
-`login.sh start` starts the sign-in in the background, opens the sign-in page
-in the attendee's Windows browser, and returns within about 30 seconds. It
-prints one of:
+`login.sh start` starts the sign-in in the background and returns within
+about 30 seconds. It prints one of:
 
-- `URL:` (and sometimes `CODE:`) followed by `WAITING`: give the attendee the
-  link as a clickable link, and the code if there is one. Say the page may
-  already have opened in their browser; if not, they can click the link. Ask
-  them to approve the sign-in and **tell you when they are done**. Then run
+- `URL:` (and sometimes `CODE:`), then `OPENED` and `COPIED`, then `WAITING`.
+  The sign-in page is already open in their Windows browser, and the link (or
+  the code, for GitHub) is on their clipboard. Tell them so, and also show the
+  link as a clickable Markdown link, `[Open the sign-in page](<URL>)`, in case
+  the page did not open. If there is a code, show it in **bold**. Ask them to
+  approve the sign-in and **tell you when they are done**, then run
   `auth.sh check <service>`.
+- `NOT OPENED`: the browser could not be opened; they click the link instead.
 - `FINISHED`: the command exited by itself, usually because they were already
   signed in. Run `auth.sh check <service>`.
 - `NO LINK`: show the output and run `login.sh start <service>` once more.
@@ -60,8 +64,8 @@ sign-ins are left, then do only the [FAIL] ones, in this order.
 If they do not have a GitHub account, they create one first at
 https://github.com/signup (they do this themselves).
 
-Run `login.sh start github`. The output has a `CODE:` (like `ABCD-1234`):
-they type that code into the GitHub page, then approve.
+Run `login.sh start github`. The GitHub page asks for the `CODE:` (like
+`ABCD-1234`), which is already on their clipboard: they paste it, then approve.
 
 ### 2. SSH key (`github-ssh-key`)
 
@@ -124,7 +128,7 @@ After approving, the browser is sent back to a page on `127.0.0.1`. If that
 page cannot be reached ("This site can't be reached"), or the check still
 fails after they approved, use the code-based sign-in instead:
 `login.sh start firstdraft-device`. The link includes the code, so they only
-approve; if the page asks for the code, give them the `CODE:`.
+approve; if the page asks for the code, it is the `CODE:`.
 
 If `login.sh` shows "Unknown command", their First Draft CLI is too old to
 sign in: tell them to raise their hand for the instructor.
@@ -134,9 +138,6 @@ sign in: tell them to raise their hand for the instructor.
 Run `bash ~/.workshop/auth.sh check all`. When every line shows [PASS], tell
 the attendee:
 
-> You're all signed in! Type **/exit** and press Enter. A fresh Claude
-> session will open in your app folder, ready for the workshop.
-
-The `workshop` command that started this session does the rest. If something
-is still failing, they can also type `/exit` and run `workshop` later: it
-brings them back here.
+> You're all signed in! To start building, open a **new session** in Claude
+> Desktop: choose **WSL > Ubuntu-24.04** and your app folder again (it is
+> under recent folders), then tell Claude what you'd like to build.

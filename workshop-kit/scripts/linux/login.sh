@@ -4,7 +4,9 @@
 # Starts a sign-in that waits for the browser, without blocking Claude:
 # the sign-in keeps running in the background, and this script prints its
 # link (and one-time code, if any) as soon as it appears, then returns.
-# Installed to ~/.workshop/login.sh by handoff.sh; used by the workshop:auth skill.
+# It also opens the link in the default Windows browser and copies it (or
+# the code, if the page asks for one) to the Windows clipboard.
+# Installed to ~/.workshop/login.sh by handoff.sh; used by the sign-in skill.
 #
 #   bash login.sh start <service>    github | github-refresh | render | neon | revyl
 #                                    | firstdraft | firstdraft-device
@@ -12,12 +14,15 @@
 #
 # Starting again cancels the previous attempt for that service, because its
 # link no longer works once a new one is created.
+# Set WORKSHOP_NO_OPEN=1 to skip opening the browser and the clipboard (for tests).
 
 set -uo pipefail
 
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$HOME/.revyl/bin:$PATH"
-# Open sign-in pages in the Windows browser. (WORKSHOP_BROWSER is for testing.)
-export BROWSER=${WORKSHOP_BROWSER:-wslview}
+# Stop the CLIs from opening a browser themselves (most ignore this setting
+# anyway, and the ones that do would open a second tab): this script opens
+# the link instead, the same way for every service.
+export BROWSER=/bin/false
 
 LOG_DIR="$HOME/.workshop/logs"
 mkdir -p "$LOG_DIR"
@@ -105,12 +110,37 @@ if ! kill -0 "$pid" 2>/dev/null; then
     exit 0
 fi
 
+# Opens a link in the default Windows browser: wslview asks Windows to open
+# it, with Windows PowerShell's Start-Process as a fallback.
+open_in_windows() {
+    wslview "$1" >/dev/null 2>&1 && return 0
+    powershell.exe -NoProfile -NonInteractive -Command "Start-Process '$1'" >/dev/null 2>&1
+}
+
+# Puts text on the Windows clipboard.
+copy_to_windows() {
+    local clip
+    clip=$(command -v clip.exe || echo /mnt/c/Windows/System32/clip.exe)
+    printf '%s' "$1" | "$clip" 2>/dev/null
+}
+
 url=$(find_link)
 # One-time codes: GitHub prints ABCD-1234, Render prints ABCD-EFGH-IJKL-MNOP.
 code=$(printf '%s\n' "$clean" | grep -oE '\b[A-Z0-9]{4}(-[A-Z0-9]{4})+\b' | head -n 1)
 if [ -n "$url" ]; then
     echo "URL: $url"
     [ -n "$code" ] && echo "CODE: $code"
+    if [ "${WORKSHOP_NO_OPEN:-}" != 1 ]; then
+        open_in_windows "$url" && echo "OPENED: the sign-in page in the default Windows browser" \
+            || echo "NOT OPENED: could not open the browser; the attendee must open the link"
+        # Copy what the attendee needs to paste: the code if the link does not
+        # already contain it (GitHub), otherwise the link.
+        if [ -n "$code" ] && [[ "$url" != *"$code"* ]]; then
+            copy_to_windows "$code" && echo "COPIED: the code, ready to paste into the page"
+        else
+            copy_to_windows "$url" && echo "COPIED: the link, ready to paste into a browser"
+        fi
+    fi
     echo "WAITING: the sign-in is running in the background until it is approved in the browser."
     echo "After the attendee approves it, run: bash ~/.workshop/auth.sh check $check_service"
     exit 0

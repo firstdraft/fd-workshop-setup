@@ -1,19 +1,20 @@
 # handoff.ps1
 #
-# Final step on the Windows side: creates the app folder in Ubuntu, installs
-# the 'workshop' command and its sign-in plugin, then opens an Ubuntu window
-# that starts it (unless -NoOpen). No administrator prompt. Safe to run again.
+# Last step on the Windows side: creates the app folder in Ubuntu and
+# installs the sign-in skill, its helpers and the First Draft skill there.
+# The rest of the workshop happens in a Claude Desktop session running inside
+# Ubuntu (WSL), which the attendee opens themselves. No administrator prompt.
+# Safe to run again.
 #
 #   powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/handoff.ps1 -AppName firstdraft-workshop
 
 param(
-    [string]$AppName,
-    [switch]$NoOpen
+    [string]$AppName
 )
 
 . "$PSScriptRoot\lib\common.ps1"
 
-Write-Output '=== Handing over to Claude Code in Ubuntu ==='
+Write-Output '=== Preparing Ubuntu for the workshop ==='
 
 $AppName = "$AppName".Trim()
 if ($AppName -eq '') {
@@ -38,8 +39,6 @@ if ($result.ExitCode -ne 0) {
     exit 1
 }
 
-if (-not $NoOpen) {
-    & (Join-Path $PSScriptRoot 'open-workshop.ps1')
-}
 Write-Output ''
-Write-Output "DONE: ~/$AppName is ready."
+Write-Output "DONE: /home/$LinuxUser/$AppName is ready. The attendee now opens a WSL session in Claude Desktop:"
+Write-Output "  New session > environment picker > WSL > $DistroName > folder /home/$LinuxUser/$AppName > Trust > type /workshop-signin"

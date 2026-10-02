@@ -2,16 +2,18 @@
 # auth.sh
 #
 # Authenticate phase: checks whether the attendee is signed in to each
-# workshop service. Read-only; the workshop:auth skill does the signing in.
-# Installed to ~/.workshop/auth.sh by handoff.sh and used by the 'workshop'
-# launcher to decide which Claude session to start.
+# workshop service. Read-only; the workshop-signin skill does the signing in.
+# Installed to ~/.workshop/auth.sh by handoff.sh.
 #
 #   bash auth.sh check all            one line per service; exit code = number missing
 #   bash auth.sh check <service>
 
 set -uo pipefail
 
-SERVICES="claude github github-ssh-key git-email render neon revyl firstdraft"
+# No 'claude' check: the workshop runs in Claude Desktop, which handles its own
+# sign-in. (The Claude Code CLI is installed too, as a fallback; 'claude auth
+# status' shows whether it is signed in.)
+SERVICES="github github-ssh-key git-email render neon revyl firstdraft"
 
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$HOME/.revyl/bin:$PATH"
 # Checks must never open a browser to start a sign-in.

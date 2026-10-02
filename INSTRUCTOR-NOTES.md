@@ -12,11 +12,24 @@ status check works out where they are from the machine itself, not from
 Claude's memory.
 
 ```
+Claude Desktop, Windows session (this folder):
 check-status -> ENABLE_VIRTUALIZATION -> prepare-bios (BitLocker suspend, reboot to UEFI)
              -> INSTALL_WSL           -> install-wsl (admin) -> RESTART
              -> SETUP_UBUNTU          -> setup-ubuntu (Ubuntu-24.04, user appdev/appdev, passwordless sudo)
-             -> VERIFY                -> verify (RESULT: READY)
+             -> INSTALL_TOOLS         -> install-tools (Install phase)
+             -> CONFIGURE             -> configure (git name/email, SSH key)
+             -> HANDOFF               -> verify, ask app name, handoff (app folder + skills in Ubuntu)
+             -> DONE                  -> attendee opens a WSL session
+
+Claude Desktop, WSL session (WSL > Ubuntu-24.04 > /home/appdev/<app>):
+/workshop-signin -> GitHub (+ SSH key upload, git email check), Render, Neon, Revyl, First Draft
+new WSL session  -> build the app with the First Draft skill (create-full-stack-app)
 ```
+
+WSL sessions in Claude Desktop use the Desktop app's Claude sign-in, but do
+not support plugins. So the handoff installs both skills as user skills in
+Ubuntu's `~/.claude/skills`: `workshop-signin` (only loads when typed) and a
+link to the First Draft plugin's one skill in its npm package.
 
 `Setup WSL without Claude.cmd` runs the same scripts in a plain window, as a
 fallback. It replaces the old `setup-wsl.cmd` / `setup-wsl.ps1` in this
@@ -49,6 +62,9 @@ folder, which can be deleted.
   expected until the key is uploaded). `verify` printed RESULT: READY.
   This test Ubuntu still has the test identity `Zoë O'Test
   <workshop-test@example.com>`.
+- (History: the next few notes describe the earlier terminal flow, where
+  sign-in and building happened in Claude Code in an Ubuntu terminal. It was
+  replaced by Claude Desktop WSL sessions; see the end of this list.)
 - Handoff (`handoff`, `open-workshop`): asks for an app name when none is
   given (exit 40) and rejects invalid names (exit 41). With
   `firstdraft-workshop` it created the folder, installed the plugin, the
@@ -89,6 +105,20 @@ folder, which can be deleted.
 - The Neon skills installer writes to `./.claude/skills` in the folder it
   runs from, so the script runs it from `~` (user-wide skills). It also
   leaves `~/skills-lock.json` behind.
+- Claude Desktop WSL session (tested by hand, with the skills installed into
+  `~/.claude/skills`): it used the Desktop app's Claude sign-in; every tool
+  was on the session's PATH; `/workshop-signin` loaded and ran the First
+  Draft sign-in, which opened the default Windows browser and put the link on
+  the clipboard; a new WSL session listed the First Draft skill.
+- `login.sh` now opens every sign-in page itself with `wslview` (which runs
+  Windows PowerShell `Start`, so the default Windows browser opens), falling
+  back to `powershell.exe Start-Process`, and stops the CLIs opening their
+  own (only Neon did). It copies the GitHub code, or the link for the other
+  services, to the Windows clipboard with `clip.exe`.
+- Render cannot be given access to a private repo from either CLI: Render's
+  CLI has no such command, and GitHub's API for adding a repo to an app
+  installation does not accept `gh`'s sign-in. The attendee uses
+  https://github.com/apps/render/installations/new instead.
 
 ## Test before the workshop (not yet verified)
 
@@ -110,6 +140,9 @@ folder, which can be deleted.
 6. **A company-managed laptop:** confirm it fails clearly and points to the
    instructor.
 7. **Laptop with VT-x off:** `shutdown /r /fw` lands in the UEFI screen.
+8. **The rewritten handoff on a fresh account:** that the WSL session picks up
+   both skills, and that the skill's `allowed-tools` lets the helper scripts
+   run without permission prompts (the rule syntax is a best guess).
 
 ## Deliberate choices
 

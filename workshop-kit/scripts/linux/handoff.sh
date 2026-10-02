@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 # handoff.sh
 #
-# Hands the attendee over from Claude Desktop to Claude Code in Ubuntu.
-# Runs inside Ubuntu as appdev, piped in by handoff.ps1. It:
+# Gets Ubuntu ready for the rest of the workshop, which happens in a Claude
+# Desktop session running inside Ubuntu (WSL). Runs inside Ubuntu as appdev,
+# piped in by handoff.ps1. It:
 #   - creates the app folder ~/<app name>
-#   - installs the workshop plugin (the sign-in skill) to ~/.workshop/plugin
 #   - installs the sign-in checks to ~/.workshop/auth.sh and the sign-in
 #     helper to ~/.workshop/login.sh
-#   - installs the 'workshop' command, which runs the sign-in session until
-#     every sign-in passes, then starts Claude Code with the First Draft plugin
-#   - makes the next Ubuntu terminal start 'workshop' by itself (once)
+#   - installs the sign-in skill to ~/.claude/skills/workshop-signin (it only
+#     loads when the attendee types /workshop-signin)
+#   - links the First Draft skill from the npm package into ~/.claude/skills
+#     (WSL sessions do not support plugins, but do read user skills)
+#   - removes what an earlier version of the kit installed for the terminal
+#     flow (the 'workshop' launcher, its plugin and its ~/.bashrc line)
 #
 #   bash handoff.sh check all
 #   bash handoff.sh apply     app name from WORKSHOP_APP_NAME, kit folder from
@@ -17,11 +20,11 @@
 
 set -uo pipefail
 
-ITEMS="app-folder plugin auth-checks login-helper launcher autostart-hook"
+ITEMS="app-folder auth-checks login-helper signin-skill firstdraft-skill"
 
 WORKSHOP_DIR="$HOME/.workshop"
-LAUNCHER="$HOME/.local/bin/workshop"
-AUTOSTART_LINE='[ -f "$HOME/.workshop/autostart" ] && rm -f "$HOME/.workshop/autostart" && "$HOME/.local/bin/workshop"'
+SKILLS_DIR="$HOME/.claude/skills"
+export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 cd "$HOME"
 
 
@@ -30,12 +33,6 @@ check_app_folder() {
     dir=$(cat "$WORKSHOP_DIR/app-dir" 2>/dev/null) || { echo "no app chosen yet"; return 1; }
     [ -d "$dir" ] || { echo "$dir does not exist"; return 1; }
     echo "$dir"
-}
-
-check_plugin() {
-    [ -f "$WORKSHOP_DIR/plugin/.claude-plugin/plugin.json" ] && [ -f "$WORKSHOP_DIR/plugin/skills/auth/SKILL.md" ] \
-        || { echo "not installed"; return 1; }
-    echo "$WORKSHOP_DIR/plugin"
 }
 
 check_auth_checks() {
@@ -48,14 +45,15 @@ check_login_helper() {
     echo "$WORKSHOP_DIR/login.sh"
 }
 
-check_launcher() {
-    [ -x "$LAUNCHER" ] || { echo "not installed"; return 1; }
-    echo "$LAUNCHER"
+check_signin_skill() {
+    [ -f "$SKILLS_DIR/workshop-signin/SKILL.md" ] || { echo "not installed"; return 1; }
+    echo "/workshop-signin"
 }
 
-check_autostart_hook() {
-    grep -qxF "$AUTOSTART_LINE" "$HOME/.bashrc" || { echo "not in ~/.bashrc"; return 1; }
-    echo "in ~/.bashrc"
+check_firstdraft_skill() {
+    # A link into the npm package: it breaks if Node is reinstalled elsewhere.
+    [ -f "$SKILLS_DIR/create-full-stack-app/SKILL.md" ] || { echo "not linked (or the link is broken)"; return 1; }
+    echo "create-full-stack-app"
 }
 
 
@@ -67,53 +65,35 @@ copy_from_kit() {
     find "$target" -type f \( -name '*.sh' -o -name '*.md' -o -name '*.json' \) -exec sed -i 's/\r$//' {} +
 }
 
+remove_terminal_flow() {
+    local autostart_line='[ -f "$HOME/.workshop/autostart" ] && rm -f "$HOME/.workshop/autostart" && "$HOME/.local/bin/workshop"'
+    local comment_line='# Added by workshop setup: start the workshop once when asked to'
+    rm -rf "$WORKSHOP_DIR/plugin" "$WORKSHOP_DIR/autostart" "$HOME/.local/bin/workshop"
+    if grep -qxF "$autostart_line" "$HOME/.bashrc"; then
+        grep -vxF -e "$autostart_line" -e "$comment_line" "$HOME/.bashrc" > "$HOME/.bashrc.workshop-tmp"
+        mv "$HOME/.bashrc.workshop-tmp" "$HOME/.bashrc"
+    fi
+}
+
 apply_all() {
-    local name=${WORKSHOP_APP_NAME:-} kit=${WORKSHOP_KIT_DIR:-}
+    local name=${WORKSHOP_APP_NAME:-} kit=${WORKSHOP_KIT_DIR:-} firstdraft_skill
     if ! printf '%s' "$name" | grep -qE '^[a-z][a-z0-9-]{0,49}$'; then
         echo "[FAIL] app name '$name' must be lowercase letters, numbers and dashes, starting with a letter"
         return 1
     fi
-    [ -d "$kit/workshop-plugin" ] || { echo "[FAIL] kit folder not found: '$kit'"; return 1; }
+    [ -d "$kit/skills/workshop-signin" ] || { echo "[FAIL] kit folder not found: '$kit'"; return 1; }
+    firstdraft_skill="$(npm root --global)/@firstdraft.com/claude-code/skills/create-full-stack-app"
+    [ -f "$firstdraft_skill/SKILL.md" ] || { echo "[FAIL] First Draft skill not found at $firstdraft_skill"; return 1; }
 
-    mkdir -p "$HOME/$name" "$WORKSHOP_DIR" "$HOME/.local/bin"
+    mkdir -p "$HOME/$name" "$WORKSHOP_DIR" "$SKILLS_DIR"
     printf '%s\n' "$HOME/$name" > "$WORKSHOP_DIR/app-dir"
 
-    copy_from_kit "$kit/workshop-plugin" "$WORKSHOP_DIR/plugin"
     copy_from_kit "$kit/scripts/linux/auth.sh" "$WORKSHOP_DIR/auth.sh"
     copy_from_kit "$kit/scripts/linux/login.sh" "$WORKSHOP_DIR/login.sh"
+    copy_from_kit "$kit/skills/workshop-signin" "$SKILLS_DIR/workshop-signin"
+    ln -sfn "$firstdraft_skill" "$SKILLS_DIR/create-full-stack-app"
 
-    cat > "$LAUNCHER" <<'EOF'
-#!/usr/bin/env bash
-# workshop: starts Claude Code for the workshop.
-# Until every sign-in passes, it starts a sign-in session (workshop plugin).
-# Then it starts Claude Code in the app folder with the First Draft plugin.
-
-export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$HOME/.revyl/bin:$PATH"
-app_dir=$(cat "$HOME/.workshop/app-dir")
-cd "$app_dir" || exit 1
-
-echo "Checking your sign-ins ..."
-if ! bash "$HOME/.workshop/auth.sh" check all >/dev/null 2>&1; then
-    echo "Starting Claude to sign you in to the workshop tools ..."
-    claude --plugin-dir "$HOME/.workshop/plugin" "/workshop:auth"
-
-    echo "Checking your sign-ins ..."
-    if ! bash "$HOME/.workshop/auth.sh" check all; then
-        echo ""
-        echo "Some sign-ins are not finished yet. Type  workshop  and press Enter to continue."
-        exit 1
-    fi
-    echo ""
-    echo "All signed in. Starting a fresh Claude session for your app ..."
-fi
-
-exec claude --plugin-dir "$(npm root --global)/@firstdraft.com/claude-code"
-EOF
-    chmod +x "$LAUNCHER"
-
-    if ! grep -qxF "$AUTOSTART_LINE" "$HOME/.bashrc"; then
-        printf '\n# Added by workshop setup: start the workshop once when asked to\n%s\n' "$AUTOSTART_LINE" >> "$HOME/.bashrc"
-    fi
+    remove_terminal_flow
 }
 
 

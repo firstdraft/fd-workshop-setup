@@ -2,7 +2,9 @@
 
 You are helping a workshop attendee get their Windows laptop ready: WSL 2 with
 Ubuntu 24.04, a Linux user named `appdev`, and the workshop's development
-tools (Ruby, Node, PostgreSQL, and several command-line tools). Most attendees are not
+tools (Ruby, Node, PostgreSQL, and several command-line tools). After that,
+the attendee continues in a Claude Desktop session running inside Ubuntu
+(see DONE). Most attendees are not
 technical. The scripts in `scripts/` do all the work. Your job is to run them
 in order, explain what is happening in plain language, and handle the steps
 that need the attendee (permission prompts, restarts, BIOS).
@@ -50,8 +52,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/<name>.ps1
 | `install-tools.ps1` | Installs the development tools inside Ubuntu (10-30 min; run in the background) | No |
 | `configure.ps1` | Sets git name/email, creates an SSH key, trusts github.com | No |
 | `verify.ps1` | Final check, prints `RESULT: READY` / `NOT READY` | No |
-| `handoff.ps1` | Creates the app folder, installs the `workshop` command, opens Ubuntu | No |
-| `open-workshop.ps1` | Opens the Ubuntu window running `workshop` again | No |
+| `handoff.ps1` | Creates the app folder, installs the sign-in and First Draft skills in Ubuntu | No |
 
 **Admin prompt:** when a script needs administrator rights it prints
 `WAITING FOR PERMISSION`. Before running it, tell the attendee: *"A Windows
@@ -133,19 +134,29 @@ creates is uploaded to GitHub later, when they sign in to GitHub.
 2. On `RESULT: READY`, ask what they want to call the app they will build.
    Suggest `firstdraft-workshop`; any name of lowercase letters, numbers and
    dashes works (turn "My Cool App" into `my-cool-app` and confirm it).
-3. Run `handoff.ps1 -AppName "<name>"`. It creates `~/<name>` in Ubuntu and
-   opens an Ubuntu window. Exit code 41 means the name is not valid.
-4. Explain what happens next, in that window (not in this chat):
-   - Claude Code starts and asks them to sign in to Claude first.
-   - Then Claude helps them sign in to GitHub, Render, Neon, Revyl and
-     First Draft.
-   - When Claude says they are done, they type `/exit`. A fresh Claude
-     session opens in their app folder, ready for the workshop.
-   - Later, they can open "Ubuntu 24.04" from the Start menu and type
-     `workshop` to get back to it.
+3. Run `handoff.ps1 -AppName "<name>"`. It creates `/home/appdev/<name>` in
+   Ubuntu and installs the sign-in and First Draft skills there. Exit code 41
+   means the name is not valid.
+4. Go to DONE.
 
-**DONE**: everything on this side is finished. If the attendee closed the
-Ubuntu window or it did not appear, run `open-workshop.ps1` to open it again.
+**DONE**: everything on this side is finished. The rest of the workshop
+happens in a **new Claude Desktop session running inside Ubuntu**, which the
+attendee opens themselves. Walk them through it, one step at a time:
+1. In the Code tab, start a **new session**.
+2. Open the **environment picker** (where it says where Claude runs) and,
+   under **WSL**, choose **Ubuntu-24.04**. (The first time takes a little
+   longer while Claude sets itself up inside Ubuntu.)
+3. With the **folder picker**, choose `/home/appdev/<name>` (their app
+   folder), and click **Trust** when asked.
+4. Type **/workshop-signin** and press Enter. Claude helps them sign in to
+   GitHub, Render, Neon, Revyl and First Draft. Sign-in pages open in their
+   browser by themselves.
+5. When that Claude says they are all signed in, they start one more new
+   session the same way (WSL > Ubuntu-24.04 > their app folder, now under
+   recent folders) and tell Claude what they want to build.
+
+If "WSL" is missing from the environment picker or the session will not
+start (for example "the device is managed"), get the instructor.
 
 ## Troubleshooting
 
@@ -165,8 +176,8 @@ Ubuntu window or it did not appear, run `open-workshop.ps1` to open it again.
 - `scripts/`: the setup scripts (`lib/common.ps1` holds shared settings:
   distro name, user name, minimum Windows build). `linux/tools.sh` lists the
   development tools and their versions.
-- `workshop-plugin/`: the sign-in skill for Claude Code in Ubuntu, copied to
-  `~/.workshop/plugin` by `handoff.ps1`. Not used by you (Claude Desktop).
+- `skills/workshop-signin/`: the sign-in skill for the WSL session, copied to
+  `~/.claude/skills` in Ubuntu by `handoff.ps1`. Not used by you.
 - `docs/BIOS-GUIDE.md`: how to turn on virtualization, by laptop brand.
 - `logs/`: output of the admin steps and each `verify.ps1` run.
 - `state/`: `status.json` from the last check, and a restart marker.

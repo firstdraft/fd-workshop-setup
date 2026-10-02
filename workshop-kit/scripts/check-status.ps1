@@ -15,7 +15,7 @@ $commands = @{
     'INSTALL_TOOLS'         = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install-tools.ps1'
     'CONFIGURE'             = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/configure.ps1 -Name "<full name>" -Email "<GitHub sign-in email>"'
     'HANDOFF'               = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/verify.ps1, then scripts/handoff.ps1 -AppName "<app name>"'
-    'DONE'                  = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/open-workshop.ps1 (only if the attendee needs the Ubuntu window again)'
+    'DONE'                  = '(none: the attendee continues in a Claude Desktop WSL session; see DONE in CLAUDE.md)'
 }
 
 Write-Output '=== WSL setup status ==='
