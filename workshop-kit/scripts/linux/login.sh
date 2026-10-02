@@ -32,12 +32,12 @@ service=${2:-}
 
 case "$service" in
     github)
-        # --skip-ssh-key: the skill uploads the key itself. user:email lets it
-        # check the git email against the account's verified emails.
-        command=(gh auth login --hostname github.com --git-protocol ssh --web --skip-ssh-key --scopes admin:public_key,user:email) ;;
+        # --skip-ssh-key: the skill uploads the key itself, which needs the
+        # admin:public_key permission.
+        command=(gh auth login --hostname github.com --git-protocol ssh --web --skip-ssh-key --scopes admin:public_key) ;;
     github-refresh)
         # Adds missing permissions to an existing GitHub sign-in.
-        command=(gh auth refresh --hostname github.com --scopes admin:public_key,user:email) ;;
+        command=(gh auth refresh --hostname github.com --scopes admin:public_key) ;;
     render) command=(render login) ;;
     neon)   command=(neonctl auth) ;;
     revyl)  command=(revyl auth login) ;;

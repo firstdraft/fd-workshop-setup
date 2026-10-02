@@ -1,8 +1,8 @@
 ---
 name: workshop-signin
-description: Sign the workshop attendee in to GitHub, Render, Neon, Revyl and First Draft, upload their SSH key, and check their git email.
+description: Sign the workshop attendee in to GitHub, Render, Neon, Revyl and First Draft, set their git name and email from their GitHub account, and upload their SSH key.
 disable-model-invocation: true
-allowed-tools: Bash(bash ~/.workshop/auth.sh:*), Bash(bash ~/.workshop/login.sh:*), Bash(gh ssh-key add:*), Bash(gh api:*), Bash(git config --global user.email:*)
+allowed-tools: Bash(bash ~/.workshop/auth.sh:*), Bash(bash ~/.workshop/login.sh:*), Bash(bash ~/.workshop/git-identity.sh), Bash(gh ssh-key add:*)
 ---
 
 # Workshop sign-in
@@ -18,7 +18,7 @@ they see it. They are already signed in to Claude.
   sign-in happens in the attendee's browser.
 - **Never** sign out of anything, and never run `gh auth logout`,
   `render logout`, `revyl auth logout` or similar.
-- Change the git email **only** after the attendee picks the new one (step 3).
+- Set the git name and email **only** with `git-identity.sh` (step 2).
 - Use the two helper scripts below rather than running sign-in commands
   yourself: a sign-in command run directly waits for the browser, and you
   would never see its link.
@@ -67,7 +67,21 @@ https://github.com/signup (they do this themselves).
 Run `login.sh start github`. The GitHub page asks for the `CODE:` (like
 `ABCD-1234`), which is already on their clipboard: they paste it, then approve.
 
-### 2. SSH key (`github-ssh-key`)
+### 2. Git name and email (`git-identity`)
+
+Right after the GitHub sign-in, set git's name and email from their GitHub
+account, without asking:
+
+```
+bash ~/.workshop/git-identity.sh
+```
+
+It uses the account's name (or username) and its private GitHub no-reply
+address, so their commits are linked to their GitHub profile without
+showing their real email. Tell them, in a sentence, the name and address it
+set.
+
+### 3. SSH key (`github-ssh-key`)
 
 Upload the key the setup created:
 
@@ -81,30 +95,6 @@ gh ssh-key add ~/.ssh/id_ed25519.pub --title "workshop-$(hostname)"
   `login.sh start github-refresh` (same code-and-approve flow), then retry.
 
 Then run `auth.sh check github-ssh-key`.
-
-### 3. Git email (`git-email`)
-
-The email in git labels their commits. It must be a verified email on their
-GitHub account, or their GitHub no-reply address, or their work will not be
-linked to their profile.
-
-If the check fails with "cannot read GitHub emails", run
-`login.sh start github-refresh` first. Otherwise gather the choices:
-
-```
-git config --global user.email
-gh api user/emails --jq '.[] | select(.verified) | "\(.email) (visibility: \(.visibility // "private"))"'
-gh api user --jq '"\(.id)+\(.login)@users.noreply.github.com"'
-```
-
-Explain the problem and offer the choices: their verified emails, and the
-no-reply address. If they keep their email private on GitHub, recommend the
-no-reply address: GitHub can block pushes that use a private email. Once they
-choose, set it:
-
-```
-git config --global user.email "<chosen email>"
-```
 
 ### 4. Render (`render`), Neon (`neon`), Revyl (`revyl`)
 
@@ -140,4 +130,7 @@ the attendee:
 
 > You're all signed in! To start building, open a **new session** in Claude
 > Desktop: choose **WSL > Ubuntu-24.04** and your app folder again (it is
-> under recent folders), then tell Claude what you'd like to build.
+> under recent folders). Then type `/create-full-stack-app` followed by a
+> description of your app idea, for example:
+>
+> `/create-full-stack-app A place for my book club to pick the next book and vote on meeting dates`

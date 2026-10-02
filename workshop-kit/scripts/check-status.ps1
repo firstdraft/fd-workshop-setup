@@ -13,7 +13,7 @@ $commands = @{
     'RESTART'               = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/restart.ps1'
     'SETUP_UBUNTU'          = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/setup-ubuntu.ps1'
     'INSTALL_TOOLS'         = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install-tools.ps1'
-    'CONFIGURE'             = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/configure.ps1 -Name "<full name>" -Email "<GitHub sign-in email>"'
+    'CONFIGURE'             = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/configure.ps1'
     'HANDOFF'               = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/verify.ps1, then scripts/handoff.ps1 -AppName "<app name>"'
     'DONE'                  = '(none: the attendee continues in a Claude Desktop WSL session; see DONE in CLAUDE.md)'
 }

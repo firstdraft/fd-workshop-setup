@@ -5,8 +5,9 @@
 # Desktop session running inside Ubuntu (WSL). Runs inside Ubuntu as appdev,
 # piped in by handoff.ps1. It:
 #   - creates the app folder ~/<app name>
-#   - installs the sign-in checks to ~/.workshop/auth.sh and the sign-in
-#     helper to ~/.workshop/login.sh
+#   - installs the sign-in checks to ~/.workshop/auth.sh, the sign-in helper
+#     to ~/.workshop/login.sh, and ~/.workshop/git-identity.sh (sets git's
+#     name and email from the GitHub account)
 #   - installs the sign-in skill to ~/.claude/skills/workshop-signin (it only
 #     loads when the attendee types /workshop-signin)
 #   - links the First Draft skill from the npm package into ~/.claude/skills
@@ -20,7 +21,7 @@
 
 set -uo pipefail
 
-ITEMS="app-folder auth-checks login-helper signin-skill firstdraft-skill"
+ITEMS="app-folder auth-checks login-helper git-identity-helper signin-skill firstdraft-skill"
 
 WORKSHOP_DIR="$HOME/.workshop"
 SKILLS_DIR="$HOME/.claude/skills"
@@ -43,6 +44,11 @@ check_auth_checks() {
 check_login_helper() {
     [ -f "$WORKSHOP_DIR/login.sh" ] || { echo "not installed"; return 1; }
     echo "$WORKSHOP_DIR/login.sh"
+}
+
+check_git_identity_helper() {
+    [ -f "$WORKSHOP_DIR/git-identity.sh" ] || { echo "not installed"; return 1; }
+    echo "$WORKSHOP_DIR/git-identity.sh"
 }
 
 check_signin_skill() {
@@ -90,6 +96,7 @@ apply_all() {
 
     copy_from_kit "$kit/scripts/linux/auth.sh" "$WORKSHOP_DIR/auth.sh"
     copy_from_kit "$kit/scripts/linux/login.sh" "$WORKSHOP_DIR/login.sh"
+    copy_from_kit "$kit/scripts/linux/git-identity.sh" "$WORKSHOP_DIR/git-identity.sh"
     copy_from_kit "$kit/skills/workshop-signin" "$SKILLS_DIR/workshop-signin"
     ln -sfn "$firstdraft_skill" "$SKILLS_DIR/create-full-stack-app"
 

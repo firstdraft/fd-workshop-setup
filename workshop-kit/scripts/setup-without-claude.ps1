@@ -67,9 +67,7 @@ while ($true) {
             if ((Invoke-Step 'install-tools.ps1') -ne 0) { Stop-Here 'Installing the tools failed. Please ask the instructor for help.' }
         }
         'CONFIGURE' {
-            $name = Read-Host 'Your full name (as you want it shown on GitHub)'
-            $email = Read-Host 'The email address you use to sign in to GitHub'
-            if ((Invoke-Step 'configure.ps1' @('-Name', $name, '-Email', $email)) -ne 0) { Stop-Here 'Configuring git failed. Please ask the instructor for help.' }
+            if ((Invoke-Step 'configure.ps1') -ne 0) { Stop-Here 'Configuring git failed. Please ask the instructor for help.' }
         }
         'HANDOFF' {
             if ((Invoke-Step 'verify.ps1') -ne 0) { Stop-Here 'Some checks failed (see above). Please show this window to the instructor.' }

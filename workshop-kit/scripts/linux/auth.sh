@@ -13,18 +13,13 @@ set -uo pipefail
 # No 'claude' check: the workshop runs in Claude Desktop, which handles its own
 # sign-in. (The Claude Code CLI is installed too, as a fallback; 'claude auth
 # status' shows whether it is signed in.)
-SERVICES="github github-ssh-key git-email render neon revyl firstdraft"
+SERVICES="github git-identity github-ssh-key render neon revyl firstdraft"
 
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$HOME/.revyl/bin:$PATH"
 # Checks must never open a browser to start a sign-in.
 export BROWSER=/bin/false
 cd "$HOME"
 
-
-check_claude() {
-    claude auth status 2>/dev/null | grep -q '"loggedIn": *true' || { echo "not signed in"; return 1; }
-    echo "signed in"
-}
 
 check_github() {
     local login
@@ -42,17 +37,16 @@ check_github_ssh_key() {
     esac
 }
 
-check_git_email() {
-    local email login verified
+check_git_identity() {
+    # git must use the GitHub account's private no-reply address (set by
+    # git-identity.sh), so commits link to the account without a real email.
+    local name email expected
+    expected=$(gh api user --jq '"\(.id)+\(.login)@users.noreply.github.com"' 2>/dev/null) \
+        || { echo "needs GitHub sign-in first"; return 1; }
+    name=$(git config --global user.name) || { echo "git name not set"; return 1; }
     email=$(git config --global user.email) || { echo "git email not set"; return 1; }
-    login=$(gh api user --jq .login 2>/dev/null) || { echo "needs GitHub sign-in first"; return 1; }
-    case "$email" in
-        *"+$login@users.noreply.github.com") echo "$email (GitHub no-reply address)"; return 0 ;;
-    esac
-    verified=$(gh api user/emails --jq '.[] | select(.verified) | .email' 2>/dev/null) \
-        || { echo "cannot read GitHub emails (sign-in lacks the user:email permission)"; return 1; }
-    printf '%s\n' "$verified" | grep -qixF "$email" || { echo "$email is not a verified email on GitHub account $login"; return 1; }
-    echo "$email is verified on $login"
+    [ "$email" = "$expected" ] || { echo "git email is '$email', not the account's no-reply address"; return 1; }
+    echo "$name <$email>"
 }
 
 check_render() {

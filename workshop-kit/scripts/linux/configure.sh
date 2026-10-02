@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # configure.sh
 #
-# Configure phase: git identity and defaults, an SSH key, and GitHub's host
-# key. Runs inside Ubuntu as appdev, piped in by configure.ps1. Uploading the
-# SSH key to GitHub needs a GitHub login, so it happens in the Authenticate phase.
+# Configure phase: git defaults, an SSH key, and GitHub's host key. Runs
+# inside Ubuntu as appdev, piped in by configure.ps1. The git name and email,
+# and uploading the SSH key, need the attendee's GitHub account, so they
+# happen after the GitHub sign-in (workshop-signin skill, git-identity.sh).
 #
 #   bash configure.sh check all        one line per item; exit code = number missing
-#   bash configure.sh apply            name and email come from WORKSHOP_GIT_NAME
-#                                      and WORKSHOP_GIT_EMAIL (passed in via WSLENV)
+#   bash configure.sh apply
 
 set -uo pipefail
 
-ITEMS="git-identity git-defaults ssh-key github-host-key"
+ITEMS="git-defaults ssh-key github-host-key"
 
 # GitHub's published ED25519 host key fingerprint:
 # https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints
@@ -22,13 +22,6 @@ KNOWN_HOSTS="$HOME/.ssh/known_hosts"
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 cd "$HOME"
 
-
-check_git_identity() {
-    local name email
-    name=$(git config --global user.name) || { echo "name not set"; return 1; }
-    email=$(git config --global user.email) || { echo "email not set"; return 1; }
-    echo "$name <$email>"
-}
 
 check_git_defaults() {
     [ "$(git config --global init.defaultBranch)" = "main" ] || { echo "default branch is not main"; return 1; }
@@ -47,16 +40,6 @@ check_github_host_key() {
 }
 
 
-apply_git_identity() {
-    local name=${WORKSHOP_GIT_NAME:-} email=${WORKSHOP_GIT_EMAIL:-}
-    if [ -z "$name" ] || [ -z "$email" ]; then
-        check_git_identity >/dev/null && return 0   # already set; nothing new given
-        echo "name and email are required"; return 1
-    fi
-    git config --global user.name "$name"
-    git config --global user.email "$email"
-}
-
 apply_git_defaults() {
     git config --global init.defaultBranch main
     gh config set git_protocol ssh
@@ -66,7 +49,8 @@ apply_ssh_key() {
     [ -f "$SSH_KEY" ] && return 0   # never replace an existing key
     install -d -m 700 "$HOME/.ssh"
     # No passphrase, so git never stops to ask for one.
-    ssh-keygen -q -t ed25519 -N "" -C "$(git config --global user.email)" -f "$SSH_KEY"
+    # The comment is only a label; GitHub does not check it.
+    ssh-keygen -q -t ed25519 -N "" -C "$USER@$(hostname)" -f "$SSH_KEY"
 }
 
 apply_github_host_key() {

@@ -50,7 +50,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/<name>.ps1
 | `prepare-bios.ps1` | Suspends BitLocker, restarts into the BIOS | Yes |
 | `setup-ubuntu.ps1` | Installs Ubuntu 24.04, creates the `appdev` user | No |
 | `install-tools.ps1` | Installs the development tools inside Ubuntu (10-30 min; run in the background) | No |
-| `configure.ps1` | Sets git name/email, creates an SSH key, trusts github.com | No |
+| `configure.ps1` | Sets git defaults, creates an SSH key, trusts github.com | No |
 | `verify.ps1` | Final check, prints `RESULT: READY` / `NOT READY` | No |
 | `handoff.ps1` | Creates the app folder, installs the sign-in and First Draft skills in Ubuntu | No |
 
@@ -116,17 +116,10 @@ line per component. If it prints `STOPPED`, run it once more (network
 failures are common); if the same component fails again, show the attendee
 the error lines and get the instructor.
 
-**CONFIGURE**: ask the attendee for two things, and explain that they label
-the code they save with git:
-1. Their full name, as they want it shown on GitHub.
-2. The email address they use to **sign in to GitHub**. If they do not have a
-   GitHub account yet, ask them to create one at https://github.com/signup
-   first (they do this themselves) and then give you that email.
-
-Then run `configure.ps1 -Name "<name>" -Email "<email>"`, using their answers
-exactly. If a name contains a double quote character, ask them to leave it
-out. Exit code 41 means the email looks mistyped: ask again. The SSH key it
-creates is uploaded to GitHub later, when they sign in to GitHub.
+**CONFIGURE**: run `configure.ps1` (no questions). It sets git defaults,
+creates an SSH key and trusts github.com. Their git name and email are set
+later from their GitHub account, and the SSH key is uploaded then too, when
+they sign in to GitHub.
 
 **HANDOFF**: the last step here.
 1. Run `verify.ps1`. On `NOT READY`, use the troubleshooting table below and

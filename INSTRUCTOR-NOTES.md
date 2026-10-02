@@ -17,13 +17,13 @@ check-status -> ENABLE_VIRTUALIZATION -> prepare-bios (BitLocker suspend, reboot
              -> INSTALL_WSL           -> install-wsl (admin) -> RESTART
              -> SETUP_UBUNTU          -> setup-ubuntu (Ubuntu-24.04, user appdev/appdev, passwordless sudo)
              -> INSTALL_TOOLS         -> install-tools (Install phase)
-             -> CONFIGURE             -> configure (git name/email, SSH key)
+             -> CONFIGURE             -> configure (git defaults, SSH key, GitHub host key)
              -> HANDOFF               -> verify, ask app name, handoff (app folder + skills in Ubuntu)
              -> DONE                  -> attendee opens a WSL session
 
 Claude Desktop, WSL session (WSL > Ubuntu-24.04 > /home/appdev/<app>):
-/workshop-signin -> GitHub (+ SSH key upload, git email check), Render, Neon, Revyl, First Draft
-new WSL session  -> build the app with the First Draft skill (create-full-stack-app)
+/workshop-signin -> GitHub (+ git name/email from the account, SSH key upload), Render, Neon, Revyl, First Draft
+new WSL session  -> /create-full-stack-app <app idea>
 ```
 
 WSL sessions in Claude Desktop use the Desktop app's Claude sign-in, but do
@@ -115,6 +115,12 @@ folder, which can be deleted.
   back to `powershell.exe Start-Process`, and stops the CLIs opening their
   own (only Neon did). It copies the GitHub code, or the link for the other
   services, to the Windows clipboard with `clip.exe`.
+- Git name and email are no longer asked for in the Configure phase. After
+  the GitHub sign-in, `git-identity.sh` sets them from the account: its name
+  (or username) and its private no-reply address,
+  `<id>+<username>@users.noreply.github.com`. The `git-identity` sign-in
+  check requires that address. The GitHub sign-in no longer asks for the
+  `user:email` permission.
 - Render cannot be given access to a private repo from either CLI: Render's
   CLI has no such command, and GitHub's API for adding a repo to an app
   installation does not accept `gh`'s sign-in. The attendee uses
