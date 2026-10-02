@@ -121,6 +121,17 @@ folder, which can be deleted.
   `<id>+<username>@users.noreply.github.com`. The `git-identity` sign-in
   check requires that address. The GitHub sign-in no longer asks for the
   `user:email` permission.
+- Neon sign-in failing the first time on fresh installs: `neonctl auth`
+  (7.0.1) closes its local listener for the browser's reply after a fixed 60
+  seconds (`AUTH_TIMEOUT_SECONDS` in `neon/dist/auth.js`, not configurable).
+  Creating a Neon account takes longer, so the first approval reached
+  nothing; on the retry the attendee was already signed in and approved in
+  time. It also always opens the link itself (the `open` package ignores
+  `BROWSER`), so `login.sh` opened a second tab. Fix: `login.sh` no longer
+  opens Neon's link (it still copies it) and warns that it expires; the
+  sign-in skill has the attendee create or sign in to their Neon account
+  first, then starts the sign-in; `login.sh status` reports a timeout.
+  Not yet tested live (a test opens a tab, since neonctl always opens one).
 - Render cannot be given access to a private repo from either CLI: Render's
   CLI has no such command, and GitHub's API for adding a repo to an app
   installation does not accept `gh`'s sign-in. The attendee uses

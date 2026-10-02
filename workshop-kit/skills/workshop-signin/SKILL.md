@@ -2,7 +2,7 @@
 name: workshop-signin
 description: Sign the workshop attendee in to GitHub, Render, Neon, Revyl and First Draft, set their git name and email from their GitHub account, and upload their SSH key.
 disable-model-invocation: true
-allowed-tools: Bash(bash ~/.workshop/auth.sh:*), Bash(bash ~/.workshop/login.sh:*), Bash(bash ~/.workshop/git-identity.sh), Bash(gh ssh-key add:*)
+allowed-tools: Bash(bash ~/.workshop/auth.sh:*), Bash(bash ~/.workshop/login.sh:*), Bash(bash ~/.workshop/git-identity.sh), Bash(gh ssh-key add:*), Bash(wslview:*)
 ---
 
 # Workshop sign-in
@@ -33,6 +33,8 @@ bash ~/.workshop/auth.sh check <service>
 bash ~/.workshop/login.sh start <service>   # github | github-refresh | render | neon | revyl
                                             # | firstdraft | firstdraft-device
 bash ~/.workshop/login.sh stop <service>
+bash ~/.workshop/login.sh status <service>  # still waiting, ended, or timed out?
+wslview <link>                              # open any page in their Windows browser
 ```
 
 `login.sh start` starts the sign-in in the background and returns within
@@ -46,13 +48,15 @@ about 30 seconds. It prints one of:
   approve the sign-in and **tell you when they are done**, then run
   `auth.sh check <service>`.
 - `NOT OPENED`: the browser could not be opened; they click the link instead.
+- `EXPIRES`: this sign-in gives up after the stated number of seconds. Ask
+  them to approve **right away**.
 - `FINISHED`: the command exited by itself, usually because they were already
   signed in. Run `auth.sh check <service>`.
 - `NO LINK`: show the output and run `login.sh start <service>` once more.
 
-If a check still fails after they approved, run `login.sh start <service>`
-again: each start makes a **new** link, and older links stop working, so only
-ever give them the newest one.
+If a check still fails after they approved, run `login.sh status <service>`
+to see why, then `login.sh start <service>` again: each start makes a **new**
+link, and older links stop working, so only ever give them the newest one.
 
 ## Steps
 
@@ -107,6 +111,19 @@ check. Before each, say in a sentence what the service is for:
 
 If they do not have an account, they can create one on the sign-in page
 (signing up with GitHub is the quickest).
+
+**Neon needs its account ready first.** Neon's sign-in gives up 60 seconds
+after it starts, which is not enough time to create an account. So before
+`login.sh start neon`:
+1. Run `wslview https://console.neon.tech/signup` and ask them to sign up (or
+   sign in, if they already have an account), using **Continue with
+   GitHub**, which is quickest. They should finish any welcome screens until
+   they see the Neon console, then tell you.
+2. Only then run `login.sh start neon`. The sign-in page opens by itself
+   (Neon opens it, so there is only one tab); they click to approve straight
+   away.
+3. If the check fails, run `login.sh status neon`. `TIMED OUT` means they took
+   over a minute: start it again and ask them to approve straight away.
 
 ### 5. First Draft (`firstdraft`)
 

@@ -11,6 +11,7 @@
 #   bash login.sh start <service>    github | github-refresh | render | neon | revyl
 #                                    | firstdraft | firstdraft-device
 #   bash login.sh stop <service>     cancel a sign-in that is still waiting
+#   bash login.sh status <service>   is it still waiting, or did it finish / time out?
 #
 # Starting again cancels the previous attempt for that service, because its
 # link no longer works once a new one is created.
@@ -29,6 +30,8 @@ mkdir -p "$LOG_DIR"
 
 action=${1:-}
 service=${2:-}
+opens_browser_itself=""   # set for CLIs that open the link whatever BROWSER says
+expires_after=""          # set for CLIs whose sign-in gives up quickly
 
 case "$service" in
     github)
@@ -39,14 +42,18 @@ case "$service" in
         # Adds missing permissions to an existing GitHub sign-in.
         command=(gh auth refresh --hostname github.com --scopes admin:public_key) ;;
     render) command=(render login) ;;
-    neon)   command=(neonctl auth) ;;
+    neon)
+        # neonctl always opens the link itself (the 'open' package ignores
+        # BROWSER), and its local listener for the browser's reply closes
+        # after 60 seconds, which cannot be changed.
+        command=(neonctl auth); opens_browser_itself=1; expires_after=60 ;;
     revyl)  command=(revyl auth login) ;;
     # The browser sends the approval back to a local address in Ubuntu.
     firstdraft) command=(firstdraft login) ;;
     # Fallback if that does not reach Ubuntu: approve with a code instead.
     firstdraft-device) command=(firstdraft login --device) ;;
     *)
-        echo "usage: login.sh start|stop github|github-refresh|render|neon|revyl|firstdraft|firstdraft-device"
+        echo "usage: login.sh start|stop|status github|github-refresh|render|neon|revyl|firstdraft|firstdraft-device"
         exit 2 ;;
 esac
 
@@ -69,7 +76,20 @@ if [ "$action" = stop ]; then
     echo "STOPPED: $service sign-in cancelled"
     exit 0
 fi
-[ "$action" = start ] || { echo "usage: login.sh start|stop <service>"; exit 2; }
+if [ "$action" = status ]; then
+    pid=$(cat "$pid_file" 2>/dev/null)
+    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+        echo "WAITING: the $service sign-in is still waiting for approval in the browser"
+    elif grep -qi 'timed out' "$log" 2>/dev/null; then
+        echo "TIMED OUT: the $service sign-in gave up before it was approved; start it again"
+    else
+        echo "ENDED: the $service sign-in is no longer running. Its last output:"
+        sed 's/\x1b\[[0-9;]*[A-Za-z]//g' "$log" 2>/dev/null | tail -n 5
+        echo "Run: bash ~/.workshop/auth.sh check $check_service"
+    fi
+    exit 0
+fi
+[ "$action" = start ] || { echo "usage: login.sh start|stop|status <service>"; exit 2; }
 
 stop_previous
 : > "$log"
@@ -131,8 +151,13 @@ if [ -n "$url" ]; then
     echo "URL: $url"
     [ -n "$code" ] && echo "CODE: $code"
     if [ "${WORKSHOP_NO_OPEN:-}" != 1 ]; then
-        open_in_windows "$url" && echo "OPENED: the sign-in page in the default Windows browser" \
-            || echo "NOT OPENED: could not open the browser; the attendee must open the link"
+        if [ -n "$opens_browser_itself" ]; then
+            # Opening it here too would give the attendee two tabs.
+            echo "OPENED: $service opened the sign-in page in the default Windows browser itself"
+        else
+            open_in_windows "$url" && echo "OPENED: the sign-in page in the default Windows browser" \
+                || echo "NOT OPENED: could not open the browser; the attendee must open the link"
+        fi
         # Copy what the attendee needs to paste: the code if the link does not
         # already contain it (GitHub), otherwise the link.
         if [ -n "$code" ] && [[ "$url" != *"$code"* ]]; then
@@ -142,6 +167,7 @@ if [ -n "$url" ]; then
         fi
     fi
     echo "WAITING: the sign-in is running in the background until it is approved in the browser."
+    [ -n "$expires_after" ] && echo "EXPIRES: this sign-in gives up ${expires_after} seconds after it started; the attendee must approve right away."
     echo "After the attendee approves it, run: bash ~/.workshop/auth.sh check $check_service"
     exit 0
 fi
