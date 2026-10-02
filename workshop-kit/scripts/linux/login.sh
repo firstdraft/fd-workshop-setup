@@ -7,6 +7,7 @@
 # Installed to ~/.workshop/login.sh by handoff.sh; used by the workshop:auth skill.
 #
 #   bash login.sh start <service>    github | github-refresh | render | neon | revyl
+#                                    | firstdraft | firstdraft-device
 #   bash login.sh stop <service>     cancel a sign-in that is still waiting
 #
 # Starting again cancels the previous attempt for that service, because its
@@ -35,13 +36,20 @@ case "$service" in
     render) command=(render login) ;;
     neon)   command=(neonctl auth) ;;
     revyl)  command=(revyl auth login) ;;
+    # The browser sends the approval back to a local address in Ubuntu.
+    firstdraft) command=(firstdraft login) ;;
+    # Fallback if that does not reach Ubuntu: approve with a code instead.
+    firstdraft-device) command=(firstdraft login --device) ;;
     *)
-        echo "usage: login.sh start|stop github|github-refresh|render|neon|revyl"
+        echo "usage: login.sh start|stop github|github-refresh|render|neon|revyl|firstdraft|firstdraft-device"
         exit 2 ;;
 esac
 
 log="$LOG_DIR/$service.log"
 pid_file="$LOG_DIR/$service.pid"
+# The auth.sh check for this service: github-refresh -> github, firstdraft-device -> firstdraft.
+check_service=${service%-refresh}
+check_service=${check_service%-device}
 
 stop_previous() {
     local pid
@@ -64,10 +72,18 @@ setsid nohup "${command[@]}" </dev/null >"$log" 2>&1 &
 pid=$!
 echo "$pid" > "$pid_file"
 
-# The first sign-in link in the output, ignoring links to documentation
-# (Revyl prints its docs link in a banner before the sign-in link).
+# The sign-in link in the output:
+#   - a link that already includes the code, if there is one (First Draft's
+#     device sign-in prints the link both without and with the code);
+#   - otherwise the longest link: sign-in links carry long parameters, while
+#     other links in the text are short (First Draft names its plain address
+#     first; Revyl's banner links to its docs, which are skipped anyway).
 find_link() {
-    sed 's/\x1b\[[0-9;]*[A-Za-z]//g' "$log" | grep -oE 'https://[^ "<>]+' | grep -vE '://docs\.' | head -n 1
+    local links
+    links=$(sed 's/\x1b\[[0-9;]*[A-Za-z]//g' "$log" | grep -oE 'https://[^ "<>]+' \
+        | sed 's/[.,;:)]*$//' | grep -vE '://docs\.')
+    printf '%s\n' "$links" | grep -E '[?&](user_)?code=' | head -n 1 | grep . \
+        || printf '%s\n' "$links" | awk '{ print length, $0 }' | sort -rn | head -n 1 | cut -d' ' -f2-
 }
 
 # Wait up to 30 seconds for a link, or for the command to finish by itself
@@ -85,7 +101,7 @@ if ! kill -0 "$pid" 2>/dev/null; then
     rm -f "$pid_file"
     echo "FINISHED: the sign-in command exited without waiting for the browser. Its output:"
     printf '%s\n' "$clean" | tail -n 15
-    echo "Run: bash ~/.workshop/auth.sh check ${service%-refresh}"
+    echo "Run: bash ~/.workshop/auth.sh check $check_service"
     exit 0
 fi
 
@@ -96,7 +112,7 @@ if [ -n "$url" ]; then
     echo "URL: $url"
     [ -n "$code" ] && echo "CODE: $code"
     echo "WAITING: the sign-in is running in the background until it is approved in the browser."
-    echo "After the attendee approves it, run: bash ~/.workshop/auth.sh check ${service%-refresh}"
+    echo "After the attendee approves it, run: bash ~/.workshop/auth.sh check $check_service"
     exit 0
 fi
 

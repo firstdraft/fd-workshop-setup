@@ -77,8 +77,11 @@ check_revyl() {
 }
 
 check_firstdraft() {
-    # Placeholder: the First Draft CLI gets a sign-in command in its next release.
-    echo "skipped (sign-in arrives in the next CLI release)"
+    # The CLI has no status command; 'firstdraft login' saves a token per
+    # origin in this file (the token itself is never printed).
+    local credentials="${XDG_CONFIG_HOME:-$HOME/.config}/firstdraft/credentials.json"
+    grep -qF 'https://firstdraft.com' "$credentials" 2>/dev/null || { echo "not signed in"; return 1; }
+    echo "signed in"
 }
 
 

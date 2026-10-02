@@ -77,6 +77,14 @@ folder, which can be deleted.
 - After the first sign-in session, `/exit` opened the second session (First
   Draft plugin) as intended.
 - Not yet tested: `github-refresh`.
+- First Draft sign-in (CLI 0.8.1, `firstdraft login`): the helper uses the
+  default mode (the browser sends the approval back to a listener on
+  127.0.0.1 in Ubuntu, as Neon's does), with `firstdraft-device`
+  (`firstdraft login --device`) as the fallback. The CLI has no status
+  command, so the check looks for `https://firstdraft.com` in
+  `~/.config/firstdraft/credentials.json`. Link capture tested for both modes
+  (not yet an approved sign-in). The Install phase now requires First Draft
+  CLI 0.8.1 or newer, so a machine set up earlier gets updated.
 - Revyl prints that v0.1.133 is available (pinned: v0.1.109).
 - The Neon skills installer writes to `./.claude/skills` in the folder it
   runs from, so the script runs it from `~` (user-wide skills). It also

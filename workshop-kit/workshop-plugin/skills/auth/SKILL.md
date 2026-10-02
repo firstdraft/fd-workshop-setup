@@ -29,6 +29,7 @@ happened when this session started).
 bash ~/.workshop/auth.sh check all          # one [PASS]/[FAIL] line per service
 bash ~/.workshop/auth.sh check <service>
 bash ~/.workshop/login.sh start <service>   # github | github-refresh | render | neon | revyl
+                                            # | firstdraft | firstdraft-device
 bash ~/.workshop/login.sh stop <service>
 ```
 
@@ -115,8 +116,18 @@ If they do not have an account, they can create one on the sign-in page
 
 ### 5. First Draft (`firstdraft`)
 
-Nothing to do yet: the First Draft CLI gets a sign-in in its next release.
-The check always passes for now.
+First Draft is what they will use to plan and build their app in this
+workshop. Run `login.sh start firstdraft`; they approve in the browser and
+you check, as above.
+
+After approving, the browser is sent back to a page on `127.0.0.1`. If that
+page cannot be reached ("This site can't be reached"), or the check still
+fails after they approved, use the code-based sign-in instead:
+`login.sh start firstdraft-device`. The link includes the code, so they only
+approve; if the page asks for the code, give them the `CODE:`.
+
+If `login.sh` shows "Unknown command", their First Draft CLI is too old to
+sign in: tell them to raise their hand for the instructor.
 
 ## Finishing
 

@@ -137,7 +137,8 @@ creates is uploaded to GitHub later, when they sign in to GitHub.
    opens an Ubuntu window. Exit code 41 means the name is not valid.
 4. Explain what happens next, in that window (not in this chat):
    - Claude Code starts and asks them to sign in to Claude first.
-   - Then Claude helps them sign in to GitHub, Render, Neon and Revyl.
+   - Then Claude helps them sign in to GitHub, Render, Neon, Revyl and
+     First Draft.
    - When Claude says they are done, they type `/exit`. A fresh Claude
      session opens in their app folder, ready for the workshop.
    - Later, they can open "Ubuntu 24.04" from the Start menu and type

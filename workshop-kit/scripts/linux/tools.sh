@@ -16,6 +16,7 @@ RUBY_VERSION=4.0.5
 NODE_VERSION=24.21.0
 POSTGRES_VERSION=18
 REVYL_VERSION=v0.1.109
+FIRSTDRAFT_CLI_MIN_VERSION=0.8.1   # first version with 'firstdraft login'
 
 # Installed in this order; later components depend on earlier ones.
 COMPONENTS="apt-repos apt-packages postgres mise ruby node claude npm-packages render neon-skills revyl"
@@ -180,8 +181,15 @@ check_npm_packages() {
     for package in $NPM_PACKAGES; do
         npm ls --global --depth=0 "$package" >/dev/null 2>&1 || missing="$missing $package"
     done
-    [ -z "$missing" ] && echo "$NPM_PACKAGES" && return 0
-    echo "missing:$missing"; return 1
+    [ -z "$missing" ] || { echo "missing:$missing"; return 1; }
+
+    # An older First Draft CLI (e.g. installed as pre-work) cannot sign in.
+    local version
+    version=$(firstdraft --version 2>/dev/null)
+    if [ "$(printf '%s\n%s\n' "$FIRSTDRAFT_CLI_MIN_VERSION" "$version" | sort -V | head -n 1)" != "$FIRSTDRAFT_CLI_MIN_VERSION" ]; then
+        echo "First Draft CLI '$version' is older than $FIRSTDRAFT_CLI_MIN_VERSION"; return 1
+    fi
+    echo "$NPM_PACKAGES (First Draft CLI $version)"
 }
 
 install_npm_packages() {
