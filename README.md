@@ -18,47 +18,47 @@
    Type `/workshop-signin` and hit Enter. Claude will open the browser for you at the authorization page for each service
    and copy any required codes to your clipboard so you can easily paste them.
    Continue with this until all services have been authorized.
-9. Open a new session in the same folder.
-   Enter a description f your app idea:
+8. Open a new session in the same folder.
+   Enter a description of your app idea:
    ```text
-    /create-full-stack-app
+   /create-full-stack-app
 
-    Build a Reading List.
-    Each book has a required title and author, an optional note, and a finished checkbox that starts unchecked.
-    Let anyone list, view, add, edit, and delete books.
-    Include three sample books.
-    Generate both iPhone and Android clients.
-    This is a public demonstration with disposable data and no accounts.
-    Use First Draft's service, put the compiled app in this local folder, and run it locally.
-    Show me the Plan, warnings, and support gaps before compiling.
-    Do not publish to GitHub or deploy.
+   Build a Reading List.
+   Each book has a required title and author, an optional note, and a finished checkbox that starts unchecked.
+   Let anyone list, view, add, edit, and delete books.
+   Include three sample books.
+   Generate both iPhone and Android clients.
+   This is a public demonstration with disposable data and no accounts.
+   Use First Draft's service, put the compiled app in this local folder, and run it locally.
+   Show me the Plan, warnings, and support gaps before compiling.
+   Do not publish to GitHub or deploy.
+   ```
+9. Answer any questions and clarify any features.
+10. Approve when you are ready and Claude will generate the code for your app.
+11. Save a checkpoint.
+    ```text
+    Initialize a local Git repository and make a commit of the generated codebase. Keep API tokens, private CLI state, and local environment files out of Git.
     ```
- 10. Answer any questions and clarify any features.
- 11. Approve when you are ready and Claude will generate the code for your app.
- 12. Save a checkpoint.
-     ```text
-     Initialize a local Git repository and make a commit of the generated codebase. Keep API tokens, private CLI state, and local environment files out of Git.
-     ```
- 13. Connect to GitHub.
-     ```text
-     Create a repository on my personal GitHub account for this project and push my commits to it.
-     Print out the URL of the GitHub repository when you finish.
-     ```
- 14. Start the Web app.
-     ```bash
-     Start the web app.
-     ```
-     Open `http://localhost:3000` in your browser and visit your app!
- 15. Deploy to Render.
-     ```txt
-     Deploy this Rails app to Render using the Render CLI.
-     The web service should use the free plan and auto deploy on Git commit.
-     The web server should create and use a database from Neon.
-     Once the deploy has finished tell me the URL of the app.
-     ```
-     Once the deploy finishes, you should see a permanent URL to your app running on Render servers.
-     Open it in your browser and click around!
-16. Preview the Android app with Revyl.
+12. Connect to GitHub.
+    ```text
+    Create a repository on my personal GitHub account for this project and push my commits to it.
+    Print out the URL of the GitHub repository when you finish.
+    ```
+13. Start the Web app.
+    ```bash
+    Start the web app.
+    ```
+    Open `http://localhost:3000` in your browser and visit your app!
+14. Deploy to Render.
+    ```txt
+    Deploy this Rails app to Render using the Render CLI.
+    The web service should use the free plan and auto deploy on Git commit.
+    The web server should create and use a database from Neon.
+    Once the deploy has finished tell me the URL of the app.
+    ```
+    Once the deploy finishes, you should see a permanent URL to your app running on Render servers.
+    Open it in your browser and click around!
+15. Preview the Android app with Revyl.
     ```txt
     Preview the Android app with Revyl using the local web app.
     Give me the preview link so I can open it in my browser.
@@ -67,7 +67,7 @@
     ```text
     Stop the Revyl Android preview
     ```
-18. Preview the iOS app with Revyl.
+16. Preview the iOS app with Revyl.
     ```txt
     Preview the iOS app with Revyl using the local web app.
     Give me the preview link so I can open it in my browser.
@@ -76,7 +76,7 @@
     ```text
     Stop the Revyl iOS preview
     ```
-19. Iterate with your agent.
+17. Iterate with your agent.
     ```txt
     Update the background of the home page with a geometric style background pattern.
     Save these changes and update GitHub and the Render app.
