@@ -274,6 +274,12 @@ What First Draft generates today shapes the design zip:
 
 ## Deliberate choices
 
+- The handoff sets `permissions.defaultMode` to `auto` in Ubuntu's
+  `~/.claude/settings.json`. WSL sessions read that file, and auto mode
+  approves routine commands while still asking before risky ones (such as a
+  deploy), so attendees are not asked to approve every step. The Desktop
+  mode picker can still override it per folder.
+
 - `appdev` gets passwordless sudo, so Claude can install packages later
   without a password prompt it cannot answer. The password `appdev` is still
   set for when attendees use a terminal themselves.
