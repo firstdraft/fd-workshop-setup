@@ -88,6 +88,8 @@ Have your workshop handout ready: First Draft asks for the workshop username and
 
 - **The page stopped loading:** type `Restart the web app.`
 - **Claude seems stuck:** press `Esc`, then type `continue`.
+- **Claude asks you to approve something:** it checks before risky steps, such as deploying. Approve it if it is
+  what you asked for.
 - **The same step fails twice:** raise your hand, and leave the error on screen for the instructor.
 
 ## After the workshop

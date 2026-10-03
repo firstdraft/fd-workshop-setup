@@ -24,11 +24,12 @@
 
 set -uo pipefail
 
-ITEMS="app-folder auth-checks login-helper git-identity-helper render-workspace-helper signin-skill firstdraft-skill app-instructions"
+ITEMS="app-folder auth-checks login-helper git-identity-helper render-workspace-helper signin-skill firstdraft-skill app-instructions auto-mode"
 
 WORKSHOP_DIR="$HOME/.workshop"
 SKILLS_DIR="$HOME/.claude/skills"
 CLAUDE_MD="$HOME/.claude/CLAUDE.md"
+CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 # The workshop's block in ~/.claude/CLAUDE.md sits between these lines, so a
 # re-run replaces it and leaves anything else in the file alone.
 BLOCK_START='<!-- workshop-kit: start -->'
@@ -80,6 +81,12 @@ check_app_instructions() {
     echo "$CLAUDE_MD"
 }
 
+check_auto_mode() {
+    python3 -c 'import json, sys; sys.exit(json.load(open(sys.argv[1])).get("permissions", {}).get("defaultMode") != "auto")' \
+        "$CLAUDE_SETTINGS" 2>/dev/null || { echo "defaultMode is not auto in $CLAUDE_SETTINGS"; return 1; }
+    echo "auto"
+}
+
 
 # Copies a file or folder from the kit, removing Windows line endings.
 copy_from_kit() {
@@ -100,6 +107,21 @@ install_app_instructions() {
         echo >> "$CLAUDE_MD"
     fi
     { echo "$BLOCK_START"; sed 's/\r$//' "$source"; echo "$BLOCK_END"; } >> "$CLAUDE_MD"
+}
+
+# Starts every Claude session in Ubuntu in auto mode, which approves routine
+# commands and still asks before risky ones, so attendees are not asked to
+# approve each step. Keeps any other settings already in the file.
+set_auto_mode() {
+    python3 - "$CLAUDE_SETTINGS" <<'PY'
+import json, os, sys
+path = sys.argv[1]
+settings = json.load(open(path)) if os.path.exists(path) and os.path.getsize(path) else {}
+settings.setdefault("permissions", {})["defaultMode"] = "auto"
+with open(path, "w") as file:
+    json.dump(settings, file, indent=2)
+    file.write("\n")
+PY
 }
 
 remove_terminal_flow() {
@@ -132,6 +154,7 @@ apply_all() {
     copy_from_kit "$kit/skills/workshop-signin" "$SKILLS_DIR/workshop-signin"
     ln -sfn "$firstdraft_skill" "$SKILLS_DIR/create-full-stack-app"
     install_app_instructions "$kit/scripts/linux/app-instructions.md"
+    set_auto_mode
 
     remove_terminal_flow
 }
