@@ -94,10 +94,25 @@ What First Draft generated in that rehearsal:
 - On apps compiled before the 2026-10-03 evening release, the first GitHub
   CI run may be red (`npm audit` on the braces advisory). Also harmless for
   the workshop.
-- Revyl's Android device has WebView 152, which works. A second device (the
-  other platform) starts right after stopping the first.
+- Revyl's Android device has WebView 152, which works. After a stop, the
+  device stays listed for about 15 seconds; the helper refuses to start
+  another until it clears, and then the next one starts normally (same or
+  other platform).
 - The Revyl Viewer link opens only in a browser signed in to Revyl with the
-  CLI's account; the sign-in skill now has attendees sign in on revyl.ai too.
+  CLI's account; the sign-in skill has attendees sign in on revyl.ai first,
+  then approve the CLI sign-in in that browser.
+- Revyl's free plan needs no card. Each account gets about 5 hours of iPhone
+  or 6.25 hours of Android a month, and one device per platform at a time.
+  A workshop uses a small part of that.
+- Ask attendees, in the message before the workshop, to sign up for Revyl
+  with GitHub from home and to create their own organization. People in one
+  organization share its one device per platform and its monthly time.
+- If the venue network blocks sign-ups (Revyl's page shows errors or a
+  security check), have the attendee sign up over a phone hotspot.
+- "Concurrency limit reached" from Revyl means the previous device is still
+  shutting down: wait 15-30 seconds, stop it again or from the Revyl
+  dashboard (Sessions), then retry. Newer CLIs add an upgrade hint to that
+  message; attendees ignore it.
 - If compiles start failing with errors, keep it to about 10 attendees
   compiling at once (a load-test finding; the service database was upgraded
   on the evening of 2026-10-03).
@@ -177,7 +192,26 @@ What First Draft generated in that rehearsal:
   `~/.config/firstdraft/credentials.json`. Link capture tested for both modes
   (not yet an approved sign-in). The Install phase now requires First Draft
   CLI 0.8.1 or newer, so a machine set up earlier gets updated.
-- Revyl prints that v0.1.133 is available (pinned: v0.1.109).
+- Revyl CLI pin: v0.1.133, bumped from v0.1.109 on 2026-10-03. It waits up
+  to 35 minutes for a busy device queue (v0.1.109 gave up after 2) and no
+  longer reports success for a stop the server did not confirm. The
+  installer and the helper's flags are unchanged. Laptops set up earlier
+  fail the `revyl` check, so `check-status` sends them to INSTALL_TOOLS,
+  which installs v0.1.133; v0.1.109 still works on a laptop that is not
+  re-run.
+  - `tools.sh install revyl` on Ubuntu 24.04 (container): checksum
+    verified, then the check passed.
+  - Rehearsed on the owner's Mac with the official v0.1.133 macOS binary
+    (checksum verified) and a free Revyl organization, against the
+    rehearsal app's Render URL. Android started in 24 seconds (uploaded
+    build reused) and showed the app; stop; iOS started in 30 seconds and
+    showed the app; stop; then Android, stop, and Android again. No
+    "Concurrency limit reached".
+  - v0.1.133's stop prints `"stopped": false, "stop_requested": true` and
+    exits 0 while the device shuts down; the session left
+    `revyl device list` 13 to 15 seconds later. An Android start 5 seconds
+    after the iOS stop was refused by the helper ("a preview session already
+    exists") until then.
 - The Neon skills installer writes to `./.claude/skills` in the folder it
   runs from, so the script runs it from `~` (user-wide skills). It also
   leaves `~/skills-lock.json` behind.

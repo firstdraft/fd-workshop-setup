@@ -27,10 +27,17 @@ Added by the workshop kit. Where these notes differ from an app's own guides or 
   returns 200. A 403 means the web app was started without `RAILS_DEVELOPMENT_HOSTS`: restart it as above.
 - Commit and push (with `git push -u` if the helper asks for an upstream), then run
   `bin/android preview revyl --server <URL>` (or `bin/ios ...`) and give the user the printed Viewer link.
-- Tell the user the Viewer link opens only in a browser signed in to revyl.ai with the same Revyl account as the CLI
-  (`revyl auth status` shows it). If Revyl asks them to sign in, they sign in with that account.
-- One Revyl device at a time: run `bin/<platform> preview revyl stop` and wait until `revyl device list --json` is
-  empty before starting the other platform. On a concurrency-limit error, wait a minute and retry once.
+- Tell the user to open the Viewer link in the browser already signed in to revyl.ai with the same Revyl account as
+  the CLI (`revyl auth status` shows it). If Revyl asks them to sign in, they sign in with that account.
+- If the user has no Revyl account yet, they sign up at `https://app.revyl.ai/signup` with Continue with GitHub and
+  create their own organization (never join someone else's), then sign the CLI in with `revyl auth login`.
+- One Revyl device at a time, and stop it as soon as the user is done looking: `bin/<platform> preview revyl stop`.
+  Stop output with `"stop_requested": true` and `"stopped": false` is normal: the device takes about 15 seconds to
+  shut down. Wait until `revyl device list --json` prints `[]` before starting another device; the helper refuses
+  while one is listed. An `"error"` key or a non-zero exit means the stop failed: run it again.
+- "Concurrency limit reached" means the previous device is still shutting down. Wait 15-30 seconds, run the stop
+  again (or have the user stop it on the Revyl dashboard under Sessions), then retry. Ignore any upgrade hint: the
+  free plan is enough. Never suggest a paid plan or adding a card.
 - If cloudflared cannot create a tunnel (rate limited: 429 or error 1015), use the app's Render URL as `--server`
   instead, retrying once if it is waking up. The preview then shows the deployed app's data.
 - If Android shows "Update Required", stop the device and tell the user. Never sign in to Google Play.
