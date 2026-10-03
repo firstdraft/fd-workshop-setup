@@ -15,7 +15,7 @@ set -uo pipefail
 RUBY_VERSION=4.0.5
 NODE_VERSION=24.21.0
 POSTGRES_VERSION=18
-REVYL_VERSION=v0.1.109
+REVYL_VERSION=v0.1.133
 FIRSTDRAFT_CLI_MIN_VERSION=0.8.1   # first version with 'firstdraft login'
 
 # Installed in this order; later components depend on earlier ones.

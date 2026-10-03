@@ -144,13 +144,34 @@ after it starts, which is not enough time to create an account. So before
 3. If the check fails, run `login.sh status neon`. `TIMED OUT` means they took
    over a minute: start it again and ask them to approve straight away.
 
-**Right after Revyl's sign-in passes**, sign in on revyl.ai in the browser
-too. Later, Revyl gives them a link to try their app on a phone in the
-browser, and that link only opens when the browser is signed in to Revyl
-with the same account. Run `wslview https://app.revyl.ai`. If it shows
-Revyl's sign-in page, they sign in with the account they just used (the same
-way, for example with GitHub). Ask them to tell you when they see their
-Revyl dashboard.
+**Revyl needs its account ready first, open in their browser.** Revyl's
+sign-in gives up after a few minutes, and later the link to try their app on
+a phone only opens in a browser signed in to Revyl with the same account. So
+before `login.sh start revyl`:
+1. Ask whether they already have a Revyl account (some make one before the
+   workshop).
+   - **No account:** run `wslview https://app.revyl.ai/signup`. They choose
+     **Continue with GitHub**. When Revyl asks them to choose an
+     organization, they **create a new one** of their own. They should not
+     join an existing organization, even a friend's or their company's: they
+     would share its phones and its free monthly time.
+   - **Already have one:** run `wslview https://app.revyl.ai`. If it shows
+     the sign-in page, they sign in the way they signed up (for example with
+     GitHub).
+2. Ask them to tell you when they see their Revyl dashboard. That browser is
+   the one where the phone preview opens later.
+3. Only then run `login.sh start revyl`; they approve in that same browser.
+
+If Revyl's sign-up page shows an error or a security check, have them raise
+their hand: the instructor may move them to a phone hotspot.
+
+Once the check passes, tell them in a few sentences how the phone preview
+works later: the link opens a phone in this browser; one phone runs at a
+time, and they ask Claude to stop it when they are done looking. If Revyl
+says "Concurrency limit reached", the last phone is still shutting down: wait
+15 to 30 seconds, then ask Claude to stop it again (or stop it on the Revyl
+dashboard under Sessions). The free plan is enough, so they ignore any offer
+to upgrade.
 
 ### 5. First Draft (`firstdraft`)
 
