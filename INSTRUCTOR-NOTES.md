@@ -59,6 +59,24 @@ has it picks up a newer version only when `handoff.ps1` runs again.
 fallback. It replaces the old `setup-wsl.cmd` / `setup-wsl.ps1` in this
 folder, which can be deleted.
 
+## The social network design (README Part 3)
+
+What First Draft generates today shapes the design zip:
+
+- **Phone apps need a public list.** iPhone and Android clients show only pages anyone can see. If every list
+  requires sign-in, no phone app is generated and README step 14 has nothing to show. Let visitors read posts
+  without signing in; signing in is for posting.
+- **Signing up on the live app needs email.** Apps with accounts verify email addresses, and the deployed app has
+  no email provider. The live app also starts with no accounts, because sample data and demo logins are
+  development-only. Sign-in features work on the laptop with the demo login.
+- **Some things show up as gaps in the summary, not features:** photo or avatar uploads, like and follower counts,
+  and a required role or status on users. A required role or status removes sign-in entirely, so leave it out of
+  the design. Attendees can add the rest with Claude after Compile.
+- **Restyling the generated app to match the design takes a long time** (about an hour in one colleague trial).
+  README step 15 starts with one screen.
+- The prompt has Claude unzip the design into the project folder from the Windows Downloads folder. Compiling into
+  the current folder keeps the design under `.firstdraft/design/`.
+
 ## Facilitator notes from the 2026-10-03 rehearsal
 
 - The Render app starts empty: the three sample books are development data
