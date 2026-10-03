@@ -23,7 +23,8 @@ check-status -> ENABLE_VIRTUALIZATION -> prepare-bios (BitLocker suspend, reboot
 
 Claude Desktop, WSL session (WSL > Ubuntu-24.04 > /home/appdev/<app>):
 /workshop-signin -> GitHub (+ git name/email from the account, SSH key upload),
-                    Render (+ CLI workspace, Render GitHub app), Neon, Revyl, First Draft (device code)
+                    Render (+ CLI workspace, Render GitHub app), Neon, Revyl (+ browser sign-in),
+                    First Draft (device code)
 new WSL session  -> /create-full-stack-app <app idea>
 ```
 
@@ -38,17 +39,49 @@ Draft plugin enabled, the session may list that skill twice.
 
 The handoff also writes a block of notes for the app sessions into Ubuntu's
 `~/.claude/CLAUDE.md` (from `scripts/linux/app-instructions.md`), because
-every Claude session in Ubuntu loads that file without being asked: native
-preview with Revyl from WSL (GitHub builds the apps, one `cloudflared` quick
-tunnel per attendee, `RAILS_DEVELOPMENT_HOSTS=.trycloudflare.com`, the Render
-URL as the fallback `--server`) and deploys (the app's `DEPLOY.md` "Deploy
-from the command line" section, Neon's direct connection string,
-`bin/rails secret`). A re-run replaces the block between its marker lines and
-leaves the rest of the file alone.
+every Claude session in Ubuntu loads that file without being asked:
+- the web app started as `RAILS_DEVELOPMENT_HOSTS=.trycloudflare.com bin/dev`
+  (in the background, stdin closed), so the preview tunnel can reach it;
+- native preview with Revyl from WSL (GitHub builds the apps, one
+  `cloudflared` quick tunnel per attendee, the Revyl browser sign-in for the
+  Viewer link, the Render URL as the fallback `--server`);
+- a short Render deploy recipe: a Neon PostgreSQL 18 project from `neonctl`
+  and its direct connection string (never a claimable database, never
+  pooled), `bin/rails secret`, `--confirm` on every `render` command, the
+  `render services create` flags and environment variables, and polling
+  `render deploys list` until live.
+
+A re-run replaces the block between its marker lines and leaves the rest of
+the file alone. The check only looks for the block, so a laptop that already
+has it picks up a newer version only when `handoff.ps1` runs again.
 
 `Setup WSL without Claude.cmd` runs the same scripts in a plain window, as a
 fallback. It replaces the old `setup-wsl.cmd` / `setup-wsl.ps1` in this
 folder, which can be deleted.
+
+## Facilitator notes from the 2026-10-03 rehearsal
+
+- The Render app starts empty: the three sample books are development data
+  only.
+- 20 or more Dependabot pull requests appear within minutes of the first
+  push. They are harmless; attendees can ignore them.
+- On apps compiled before the 2026-10-03 evening release, the first GitHub
+  CI run may be red (`npm audit` on the braces advisory). Also harmless for
+  the workshop.
+- Revyl's Android device has WebView 152, which works. A second device (the
+  other platform) starts right after stopping the first.
+- The Revyl Viewer link opens only in a browser signed in to Revyl with the
+  CLI's account; the sign-in skill now has attendees sign in on revyl.ai too.
+- If compiles start failing with errors, keep it to about 10 attendees
+  compiling at once (a load-test finding; the service database was upgraded
+  on the evening of 2026-10-03).
+- If an attendee used a claimable Neon database (`npx get-db`, neon.new), the
+  deploy fails with `function uuidv7() does not exist`, because those are
+  PostgreSQL 17. Recovery: a new PostgreSQL 18 Neon project
+  (`neonctl projects create ... --pg-version 18`), then delete and recreate
+  the Render service, since its environment variables cannot be changed from
+  the CLI.
+- The local CSS rebuild (Tailwind watcher) worked on Linux in Core's gate.
 
 ## Tested so far
 
@@ -167,6 +200,21 @@ folder, which can be deleted.
   username-and-password box appears and never handles the values. Current
   browsers do not show the "First Draft pre-alpha" realm text in that box,
   so the skill also describes it as a "Sign in" box for firstdraft.com.
+- 2026-10-03 rehearsal on a Mac, acting as an attendee's agent (compile,
+  GitHub, Render and Neon, Revyl Android and iOS, one iteration), changed the
+  app-session notes:
+  - `RAILS_DEVELOPMENT_HOSTS` in `.env.development.local` did not reach the
+    host check (dotenv loads after Rails reads it), so the tunnel kept
+    getting 403. Setting it on the `bin/dev` command line worked. A Core fix
+    will make the file work for apps compiled later; the command-line form
+    works either way.
+  - `npx get-db` (Neon's claimable database) is PostgreSQL 17, and the deploy
+    failed with `function uuidv7() does not exist`. It also prints the
+    password and writes `./.env`.
+  - `render services -o json` hung for over 2 minutes without a terminal;
+    `render services list -o json --confirm` returned at once.
+  - The notes' `render services create` flags worked: 3 seconds, then about
+    1.6 minutes for the first Docker build.
 
 ## Test before the workshop (not yet verified)
 
@@ -198,10 +246,13 @@ folder, which can be deleted.
     `render-workspace.sh` sets the only workspace, and installing the Render
     GitHub app from GitHub's page links it to that Render account.
 11. **App-session notes:** a new WSL session in the app folder loads the block
-    in `~/.claude/CLAUDE.md`, and an agent following it previews Android then
-    iOS through one quick tunnel, and deploys with a direct Neon string and
-    `bin/rails secret`. Also that the session keeps `cloudflared` and the web
-    app running in the background.
+    in `~/.claude/CLAUDE.md`, starts the web app as
+    `RAILS_DEVELOPMENT_HOSTS=.trycloudflare.com bin/dev`, previews Android
+    then iOS through one quick tunnel, and deploys with a `neonctl`
+    PostgreSQL 18 project, its direct string and `bin/rails secret`. Also that
+    the session keeps `cloudflared` and the web app running in the
+    background, and that `neonctl projects create` does not stop to ask for
+    a Neon organization on a fresh account.
 
 ## Deliberate choices
 

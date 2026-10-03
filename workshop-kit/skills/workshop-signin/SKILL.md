@@ -143,6 +143,14 @@ after it starts, which is not enough time to create an account. So before
 3. If the check fails, run `login.sh status neon`. `TIMED OUT` means they took
    over a minute: start it again and ask them to approve straight away.
 
+**Right after Revyl's sign-in passes**, sign in on revyl.ai in the browser
+too. Later, Revyl gives them a link to try their app on a phone in the
+browser, and that link only opens when the browser is signed in to Revyl
+with the same account. Run `wslview https://app.revyl.ai`. If it shows
+Revyl's sign-in page, they sign in with the account they just used (the same
+way, for example with GitHub). Ask them to tell you when they see their
+Revyl dashboard.
+
 ### 5. First Draft (`firstdraft`)
 
 First Draft is what they will use to plan and build their app in this
