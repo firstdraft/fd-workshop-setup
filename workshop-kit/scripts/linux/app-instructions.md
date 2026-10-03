@@ -2,6 +2,12 @@
 
 Added by the workshop kit. Where these notes differ from an app's own guides or a Neon skill, follow these notes.
 
+## Files the user downloaded
+- Files the user downloads in Windows are in their Windows Downloads folder:
+  `"$(wslpath "$(wslvar USERPROFILE)")/Downloads"` (`wslvar` comes with `wslu`). Copy or unzip from there.
+- Unzip a design into the project folder before the first Compile. Compiling into the current folder keeps it
+  under `.firstdraft/design/`.
+
 ## Web app
 - Before starting the web app, make sure the css line in `Procfile.dev` is
   `css: npm run build:css -- --watch=always`. With plain `--watch`, Tailwind exits when stdin closes and stops Rails.

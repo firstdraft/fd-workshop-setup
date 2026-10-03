@@ -108,7 +108,8 @@ check. Before each, say in a sentence what the service is for:
 
 - **Render** hosts their app on the internet.
 - **Neon** provides the app's database (a free PostgreSQL database).
-- **Revyl** tests the app automatically.
+- **Revyl** lets them try their iPhone and Android app on a phone shown in
+  their browser.
 
 If they do not have an account, they can create one on the sign-in page
 (signing up with GitHub is the quickest).
@@ -187,7 +188,5 @@ the attendee:
 
 > You're all signed in! To start building, open a **new session** in Claude
 > Desktop: choose **WSL > Ubuntu-24.04** and your app folder again (it is
-> under recent folders). Then type `/create-full-stack-app` followed by a
-> description of your app idea, for example:
->
-> `/create-full-stack-app A place for my book club to pick the next book and vote on meeting dates`
+> under recent folders). Then follow **Part 3** of the workshop
+> instructions.

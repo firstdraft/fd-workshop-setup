@@ -1,83 +1,97 @@
-# README
+# First Draft workshop
 
+Everything happens in Claude Desktop's **Code** tab. You type a request, and Claude does the work. Plan on:
+
+- **Setting up your laptop:** 20 to 60 minutes. It takes longer if your laptop needs to restart.
+- **Signing in to your accounts:** about 15 minutes.
+- **Building, launching and previewing your first app:** about 45 minutes.
+
+## Part 1: Set up your laptop
 
 1. Download this repo as a Zip folder.
 2. Right-click the zip file you downloaded and choose "Extract All...".
-   Extract it to your Documents folder or someplace you can easily find.  
-3. Open Claude Desktop, go to the Code tab, and open the extracted
-   "workshop-kit" folder.
+   Extract it to your Documents folder or someplace you can easily find.
+3. Open Claude Desktop, go to the Code tab, and open the extracted "workshop-kit" folder.
 4. Start the setup. Type:
-   ```txt
+   ```text
    Set up my laptop for the workshop
    ```
-5. Claude will install the required programs for you.
-6. When prompted, choose and enter a name for your project.
-7. Next, Claude will guide you through signing in to the required accounts.
-   If you are on Windows: you will need to open a new session in Claude Desktop. Choose `WSL` &rarr; `Ubuntu-24.04` instead of `Local`.
-   For "Choose folder", select the folder with the name of your project (it's under `home/` &rarr; `appdev/` &rarr; `MY_APP_NAME/`)
-   Type `/workshop-signin` and hit Enter. Claude will open the browser for you at the authorization page for each service
-   and copy any required codes to your clipboard so you can easily paste them.
-   Continue with this until all services have been authorized.
-8. Open a new session in the same folder.
-   Enter a description of your app idea:
-   ```text
-   /create-full-stack-app
+   Claude installs the programs you need. If it asks you to restart, do so, then reopen the same folder in Claude
+   Desktop and type `continue`.
+5. When prompted, choose and enter a name for your project.
 
-   Build a Reading List.
-   Each book has a required title and author, an optional note, and a finished checkbox that starts unchecked.
-   Let anyone list, view, add, edit, and delete books.
-   Include three sample books.
-   Generate both iPhone and Android clients.
-   This is a public demonstration with disposable data and no accounts.
-   Use First Draft's service, put the compiled app in this local folder, and run it locally.
-   Show me the Plan, warnings, and support gaps before compiling.
-   Do not publish to GitHub or deploy.
+## Part 2: Sign in to your accounts
+
+Have your workshop handout ready: First Draft asks for the workshop username and password from it.
+
+6. Open a new session in Claude Desktop. Choose `WSL` &rarr; `Ubuntu-24.04` instead of `Local`.
+   For "Choose folder", select the folder with the name of your project (`home` &rarr; `appdev` &rarr;
+   `YOUR_PROJECT`).
+7. Type `/workshop-signin` and press Enter. Claude opens each sign-in page in your browser and copies any code you
+   need to your clipboard. Approve each one and tell Claude when you are done, until every account is signed in.
+
+## Part 3: Build your first app
+
+8. Download the social network design: **DESIGN_ZIP_LINK**. Leave the zip file in your Downloads folder.
+9. Open a new session (`WSL` &rarr; `Ubuntu-24.04`, your project folder) and type:
+   ```text
+   /create-full-stack-app Build the social network in the design I just downloaded (the zip file in my Windows Downloads folder). Unzip it into this folder and read it first, then ask me only what the design doesn't settle. Include iPhone and Android apps.
    ```
-9. Answer any questions and clarify any features.
-10. Approve when you are ready and Claude will generate the code for your app.
-11. Save a checkpoint.
+10. Answer Claude's questions, and change anything you like: it's your app. Claude then shows you a summary of the
+    plan, including anything First Draft can't build yet. When it looks right, approve it. Building takes about a
+    minute.
+11. Start the web app:
     ```text
-    Initialize a local Git repository and make a commit of the generated codebase. Keep API tokens, private CLI state, and local environment files out of Git.
-    ```
-12. Connect to GitHub.
-    ```text
-    Create a repository on my personal GitHub account for this project and push my commits to it.
-    Print out the URL of the GitHub repository when you finish.
-    ```
-13. Start the Web app.
-    ```bash
     Start the web app.
     ```
-    Open `http://localhost:3000` in your browser and visit your app!
-14. Deploy to Render.
-    ```txt
-    Deploy this Rails app to Render using the Render CLI.
-    The web service should use the free plan and auto deploy on Git commit.
-    The web server should create and use a database from Neon.
-    Once the deploy has finished tell me the URL of the app.
-    ```
-    Once the deploy finishes, you should see a permanent URL to your app running on Render servers.
-    Open it in your browser and click around!
-15. Preview the Android app with Revyl.
-    ```txt
-    Preview the Android app with Revyl using the local web app.
-    Give me the preview link so I can open it in my browser.
-    ```
-    When you are done:
+    Open `http://localhost:3000` in your browser. If your app has sign-in, use the demo login Claude shows you.
+12. Save your work to GitHub:
     ```text
-    Stop the Revyl Android preview
+    Commit the app and push it to a new private repository on my GitHub account. Give me the link.
     ```
-16. Preview the iOS app with Revyl.
-    ```txt
-    Preview the iOS app with Revyl using the local web app.
-    Give me the preview link so I can open it in my browser.
-    ```
-    When you are done:
+    Pushing also starts GitHub building your iPhone and Android apps. That takes about five minutes, so carry on.
+13. Put your app on the internet:
     ```text
-    Stop the Revyl iOS preview
+    Deploy this app to Render's free plan with a Neon database. Give me the link when it's live.
     ```
-17. Iterate with your agent.
-    ```txt
-    Update the background of the home page with a geometric style background pattern.
-    Save these changes and update GitHub and the Render app.
+    The first deploy takes a few minutes. Your live app starts with no data: the sample data is only on your laptop.
+    Signing up on the live app needs email, which is set up later, so try sign-in features on your laptop.
+14. Try your app on a phone, in your browser:
+    ```text
+    Show me the Android app in Revyl.
     ```
+    Then:
+    ```text
+    Now show me the iPhone app.
+    ```
+    The link opens a phone in your browser. If Revyl asks you to sign in, use the same account as before.
+15. Make it yours. For example:
+    ```text
+    Make the home page match the design's colors and fonts, then commit and push.
+    ```
+    Start with one screen: a whole redesign can take a long time. Your laptop's app updates right away, and Render
+    updates the live app a minute or two after you push.
+
+## Part 4: Start over with your own idea
+
+16. Ask Claude for a new project folder:
+    ```text
+    Make a new project folder called MY_IDEA next to this one.
+    ```
+17. Open a new session (`WSL` &rarr; `Ubuntu-24.04`, the new folder) and describe your idea:
+    ```text
+    /create-full-stack-app A place for my book club to pick the next book and vote on meeting dates.
+    ```
+    Your sign-ins carry over, so you can go straight to building.
+
+## If something goes wrong
+
+- **The page stopped loading:** type `Restart the web app.`
+- **Claude seems stuck:** press `Esc`, then type `continue`.
+- **The same step fails twice:** raise your hand, and leave the error on screen for the instructor.
+
+## After the workshop
+
+- To come back to a project, open a session with `WSL` &rarr; `Ubuntu-24.04` and choose its folder.
+- Render's free plan sleeps when nobody visits, so the first visit afterwards takes about a minute.
+- To remove an app from the internet, ask Claude: `Delete this app's Render service and its Neon project.`
