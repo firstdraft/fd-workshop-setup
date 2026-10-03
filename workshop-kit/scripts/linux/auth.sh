@@ -13,7 +13,7 @@ set -uo pipefail
 # No 'claude' check: the workshop runs in Claude Desktop, which handles its own
 # sign-in. (The Claude Code CLI is installed too, as a fallback; 'claude auth
 # status' shows whether it is signed in.)
-SERVICES="github git-identity github-ssh-key render neon revyl firstdraft"
+SERVICES="github git-identity github-ssh-key render render-workspace neon revyl firstdraft"
 
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$HOME/.revyl/bin:$PATH"
 # Checks must never open a browser to start a sign-in.
@@ -52,6 +52,13 @@ check_git_identity() {
 check_render() {
     render whoami --output text >/dev/null 2>&1 || { echo "not signed in"; return 1; }
     echo "signed in"
+}
+
+check_render_workspace() {
+    # 'render login' does not choose a workspace; render-workspace.sh does.
+    local current
+    current=$(render workspace current --output text </dev/null 2>/dev/null) || { echo "no workspace set"; return 1; }
+    echo "${current#Active Workspace: }"
 }
 
 check_neon() {

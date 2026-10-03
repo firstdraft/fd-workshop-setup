@@ -48,9 +48,11 @@ case "$service" in
         # after 60 seconds, which cannot be changed.
         command=(neonctl auth); opens_browser_itself=1; expires_after=60 ;;
     revyl)  command=(revyl auth login) ;;
-    # The browser sends the approval back to a local address in Ubuntu.
+    # The browser sends the approval back to a local address in Ubuntu, which
+    # WSL does not forward on some laptops, so the skill tries this second.
     firstdraft) command=(firstdraft login) ;;
-    # Fallback if that does not reach Ubuntu: approve with a code instead.
+    # Approve with a code instead (the skill's first choice): nothing has to
+    # reach Ubuntu from the browser.
     firstdraft-device) command=(firstdraft login --device) ;;
     *)
         echo "usage: login.sh start|stop|status github|github-refresh|render|neon|revyl|firstdraft|firstdraft-device"

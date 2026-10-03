@@ -52,7 +52,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/<name>.ps1
 | `install-tools.ps1` | Installs the development tools inside Ubuntu (10-30 min; run in the background) | No |
 | `configure.ps1` | Sets git defaults, creates an SSH key, trusts github.com | No |
 | `verify.ps1` | Final check, prints `RESULT: READY` / `NOT READY` | No |
-| `handoff.ps1` | Creates the app folder, installs the sign-in and First Draft skills in Ubuntu | No |
+| `handoff.ps1` | Creates the app folder, installs the sign-in and First Draft skills and the app-session notes in Ubuntu | No |
 
 **Admin prompt:** when a script needs administrator rights it prints
 `WAITING FOR PERMISSION`. Before running it, tell the attendee: *"A Windows
@@ -128,8 +128,8 @@ they sign in to GitHub.
    Suggest `firstdraft-workshop`; any name of lowercase letters, numbers and
    dashes works (turn "My Cool App" into `my-cool-app` and confirm it).
 3. Run `handoff.ps1 -AppName "<name>"`. It creates `/home/appdev/<name>` in
-   Ubuntu and installs the sign-in and First Draft skills there. Exit code 41
-   means the name is not valid.
+   Ubuntu and installs the sign-in and First Draft skills and the notes for
+   the app sessions there. Exit code 41 means the name is not valid.
 4. Go to DONE.
 
 **DONE**: everything on this side is finished. The rest of the workshop
@@ -171,6 +171,9 @@ start (for example "the device is managed"), get the instructor.
   development tools and their versions.
 - `skills/workshop-signin/`: the sign-in skill for the WSL session, copied to
   `~/.claude/skills` in Ubuntu by `handoff.ps1`. Not used by you.
+- `scripts/linux/app-instructions.md`: notes for the app sessions in Ubuntu
+  (native preview, deploys), added to `~/.claude/CLAUDE.md` there by
+  `handoff.ps1`. Not used by you.
 - `docs/BIOS-GUIDE.md`: how to turn on virtualization, by laptop brand.
 - `logs/`: output of the admin steps and each `verify.ps1` run.
 - `state/`: `status.json` from the last check, and a restart marker.
