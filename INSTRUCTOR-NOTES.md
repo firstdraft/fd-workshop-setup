@@ -59,9 +59,17 @@ has it picks up a newer version only when `handoff.ps1` runs again.
 fallback. It replaces the old `setup-wsl.cmd` / `setup-wsl.ps1` in this
 folder, which can be deleted.
 
-## The social network design (README Part 3)
+## The family social network (README Part 3)
 
-What First Draft generates today shapes the design zip:
+The prompt is "Help me build a social network for just my family. It should work and look like Instagram so that
+it's familiar." A rehearsal on 2026-10-03, against the Compiler then in Production, took about 8 minutes from prompt
+to approved summary (allow 10 to 12 with real typing) and 31 seconds to compile. It produced a private app where
+sign-in, the feed, posting, likes, comments, follows and profiles worked. "Make it look like Instagram" took about 3
+minutes, and each of the three customization ideas in README step 15 took 1.5 to 2 minutes as a Rails edit. Fixes
+in flight on the evening of 2026-10-03 (phone apps with sign-in, photos, counts, sign-up without email
+verification, guests redirected to sign-in) change some of the points below once they are deployed.
+
+What First Draft generated in that rehearsal:
 
 - **Phone apps need a public list.** iPhone and Android clients show only pages anyone can see. If every list
   requires sign-in, no phone app is generated and README step 14 has nothing to show. Let visitors read posts

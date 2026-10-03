@@ -32,14 +32,13 @@ Have your workshop handout ready: First Draft asks for the workshop username and
 
 ## Part 3: Build your first app
 
-8. Download the social network design: **DESIGN_ZIP_LINK**. Leave the zip file in your Downloads folder.
-9. Open a new session (`WSL` &rarr; `Ubuntu-24.04`, your project folder) and type:
+8. Open a new session (`WSL` &rarr; `Ubuntu-24.04`, your project folder) and type:
    ```text
-   /create-full-stack-app Build the social network in the design I just downloaded (the zip file in my Windows Downloads folder). Unzip it into this folder and read it first, then ask me only what the design doesn't settle. Include iPhone and Android apps.
+   /create-full-stack-app Help me build a social network for just my family. It should work and look like Instagram so that it's familiar.
    ```
-10. Answer Claude's questions, and change anything you like: it's your app. Claude then shows you a summary of the
-    plan, including anything First Draft can't build yet. When it looks right, approve it. Building takes about a
-    minute.
+9. Claude asks a few questions about your app, one at a time. Answer them in your own words, or say "you pick".
+10. Claude shows you a summary of the plan, including anything First Draft can't build yet. Change anything you
+    like: it's your app. When it looks right, approve it. Building takes about a minute.
 11. Start the web app:
     ```text
     Start the web app.
@@ -65,12 +64,17 @@ Have your workshop handout ready: First Draft asks for the workshop username and
     Now show me the iPhone app.
     ```
     The link opens a phone in your browser. If Revyl asks you to sign in, use the same account as before.
-15. Make it yours. For example:
+15. Make it yours. Ask for one change at a time, then try it on your laptop. Some ideas:
     ```text
-    Make the home page match the design's colors and fonts, then commit and push.
+    Limit posts to 280 characters.
     ```
-    Start with one screen: a whole redesign can take a long time. Your laptop's app updates right away, and Render
-    updates the live app a minute or two after you push.
+    ```text
+    Limit how many people someone can follow to 50.
+    ```
+    ```text
+    Only allow sign-ups from @YOURFAMILY.com email addresses.
+    ```
+    When you like a change, say `Commit and push.` Render updates the live app a minute or two later.
 
 ## Part 4: Start over with your own idea
 

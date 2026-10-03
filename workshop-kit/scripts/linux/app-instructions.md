@@ -16,6 +16,9 @@ Added by the workshop kit. Where these notes differ from an app's own guides or 
   The variable lets the preview tunnel reach the app. Set it only on the command line: in `.env.development.local`
   it is read too late in apps compiled so far. If the web app is already running, stop it and start it this way, once.
 
+- Do not run `bin/ci` while the web app is running: its setup step reinstalls JavaScript packages and stops the
+  JavaScript watcher. Stop the web app, run `bin/ci`, then start the web app again as above.
+
 ## iPhone and Android preview
 - Preview both with Revyl. GitHub builds the app from the pushed commit: do not install Xcode, a JDK, the Android
   SDK or an Emulator, and skip the guides' Emulator, Codespace and Mac steps.
