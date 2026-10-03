@@ -6,12 +6,15 @@
 # piped in by handoff.ps1. It:
 #   - creates the app folder ~/<app name>
 #   - installs the sign-in checks to ~/.workshop/auth.sh, the sign-in helper
-#     to ~/.workshop/login.sh, and ~/.workshop/git-identity.sh (sets git's
-#     name and email from the GitHub account)
+#     to ~/.workshop/login.sh, ~/.workshop/git-identity.sh (sets git's
+#     name and email from the GitHub account) and
+#     ~/.workshop/render-workspace.sh (sets the Render CLI's workspace)
 #   - installs the sign-in skill to ~/.claude/skills/workshop-signin (it only
 #     loads when the attendee types /workshop-signin)
-#   - links the First Draft skill from the npm package into ~/.claude/skills
-#     (WSL sessions do not support plugins, but do read user skills)
+#   - links the First Draft skill from the npm package into ~/.claude/skills,
+#     so the WSL session has it without installing the plugin
+#   - adds the workshop's notes for app sessions (native preview, deploys) to
+#     ~/.claude/CLAUDE.md, which every Claude session in Ubuntu loads
 #   - removes what an earlier version of the kit installed for the terminal
 #     flow (the 'workshop' launcher, its plugin and its ~/.bashrc line)
 #
@@ -21,10 +24,15 @@
 
 set -uo pipefail
 
-ITEMS="app-folder auth-checks login-helper git-identity-helper signin-skill firstdraft-skill"
+ITEMS="app-folder auth-checks login-helper git-identity-helper render-workspace-helper signin-skill firstdraft-skill app-instructions"
 
 WORKSHOP_DIR="$HOME/.workshop"
 SKILLS_DIR="$HOME/.claude/skills"
+CLAUDE_MD="$HOME/.claude/CLAUDE.md"
+# The workshop's block in ~/.claude/CLAUDE.md sits between these lines, so a
+# re-run replaces it and leaves anything else in the file alone.
+BLOCK_START='<!-- workshop-kit: start -->'
+BLOCK_END='<!-- workshop-kit: end -->'
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
 cd "$HOME"
 
@@ -51,6 +59,11 @@ check_git_identity_helper() {
     echo "$WORKSHOP_DIR/git-identity.sh"
 }
 
+check_render_workspace_helper() {
+    [ -f "$WORKSHOP_DIR/render-workspace.sh" ] || { echo "not installed"; return 1; }
+    echo "$WORKSHOP_DIR/render-workspace.sh"
+}
+
 check_signin_skill() {
     [ -f "$SKILLS_DIR/workshop-signin/SKILL.md" ] || { echo "not installed"; return 1; }
     echo "/workshop-signin"
@@ -62,6 +75,11 @@ check_firstdraft_skill() {
     echo "create-full-stack-app"
 }
 
+check_app_instructions() {
+    grep -qxF "$BLOCK_START" "$CLAUDE_MD" 2>/dev/null || { echo "not in $CLAUDE_MD"; return 1; }
+    echo "$CLAUDE_MD"
+}
+
 
 # Copies a file or folder from the kit, removing Windows line endings.
 copy_from_kit() {
@@ -69,6 +87,19 @@ copy_from_kit() {
     rm -rf "$target"
     cp -r "$source" "$target"
     find "$target" -type f \( -name '*.sh' -o -name '*.md' -o -name '*.json' \) -exec sed -i 's/\r$//' {} +
+}
+
+# Writes the kit's notes for app sessions into ~/.claude/CLAUDE.md, replacing
+# the block an earlier run added.
+install_app_instructions() {
+    local source=$1
+    touch "$CLAUDE_MD"
+    sed -i "/^$BLOCK_START\$/,/^$BLOCK_END\$/d" "$CLAUDE_MD"
+    # Start on a new line if the file does not end with one.
+    if [ -s "$CLAUDE_MD" ] && [ -n "$(tail -c 1 "$CLAUDE_MD")" ]; then
+        echo >> "$CLAUDE_MD"
+    fi
+    { echo "$BLOCK_START"; sed 's/\r$//' "$source"; echo "$BLOCK_END"; } >> "$CLAUDE_MD"
 }
 
 remove_terminal_flow() {
@@ -97,8 +128,10 @@ apply_all() {
     copy_from_kit "$kit/scripts/linux/auth.sh" "$WORKSHOP_DIR/auth.sh"
     copy_from_kit "$kit/scripts/linux/login.sh" "$WORKSHOP_DIR/login.sh"
     copy_from_kit "$kit/scripts/linux/git-identity.sh" "$WORKSHOP_DIR/git-identity.sh"
+    copy_from_kit "$kit/scripts/linux/render-workspace.sh" "$WORKSHOP_DIR/render-workspace.sh"
     copy_from_kit "$kit/skills/workshop-signin" "$SKILLS_DIR/workshop-signin"
     ln -sfn "$firstdraft_skill" "$SKILLS_DIR/create-full-stack-app"
+    install_app_instructions "$kit/scripts/linux/app-instructions.md"
 
     remove_terminal_flow
 }

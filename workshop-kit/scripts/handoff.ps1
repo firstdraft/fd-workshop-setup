@@ -1,7 +1,8 @@
 # handoff.ps1
 #
 # Last step on the Windows side: creates the app folder in Ubuntu and
-# installs the sign-in skill, its helpers and the First Draft skill there.
+# installs the sign-in skill, its helpers, the First Draft skill and the
+# notes for app sessions (in ~/.claude/CLAUDE.md) there.
 # The rest of the workshop happens in a Claude Desktop session running inside
 # Ubuntu (WSL), which the attendee opens themselves. No administrator prompt.
 # Safe to run again.

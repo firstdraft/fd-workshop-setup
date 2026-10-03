@@ -1,8 +1,8 @@
 ---
 name: workshop-signin
-description: Sign the workshop attendee in to GitHub, Render, Neon, Revyl and First Draft, set their git name and email from their GitHub account, and upload their SSH key.
+description: Sign the workshop attendee in to GitHub, Render, Neon, Revyl and First Draft, set their git name and email from their GitHub account, upload their SSH key, and connect Render to GitHub.
 disable-model-invocation: true
-allowed-tools: Bash(bash ~/.workshop/auth.sh:*), Bash(bash ~/.workshop/login.sh:*), Bash(bash ~/.workshop/git-identity.sh), Bash(gh ssh-key add:*), Bash(wslview:*)
+allowed-tools: Bash(bash ~/.workshop/auth.sh:*), Bash(bash ~/.workshop/login.sh:*), Bash(bash ~/.workshop/git-identity.sh), Bash(bash ~/.workshop/render-workspace.sh:*), Bash(gh ssh-key add:*), Bash(wslview:*)
 ---
 
 # Workshop sign-in
@@ -34,6 +34,7 @@ bash ~/.workshop/login.sh start <service>   # github | github-refresh | render |
                                             # | firstdraft | firstdraft-device
 bash ~/.workshop/login.sh stop <service>
 bash ~/.workshop/login.sh status <service>  # still waiting, ended, or timed out?
+bash ~/.workshop/render-workspace.sh        # after the Render sign-in (step 4)
 wslview <link>                              # open any page in their Windows browser
 ```
 
@@ -112,6 +113,23 @@ check. Before each, say in a sentence what the service is for:
 If they do not have an account, they can create one on the sign-in page
 (signing up with GitHub is the quickest).
 
+**Right after Render's sign-in passes**, before Neon:
+1. **Workspace (`render-workspace`).** Run
+   `bash ~/.workshop/render-workspace.sh`. It keeps a workspace that is
+   already set, or sets the account's only one. If it prints `ASK:`, the
+   account has several: show them the names, ask which one to use, and run it
+   again with that workspace's ID.
+2. **Render on GitHub** (no check). Render needs permission to read the code
+   they will put on GitHub later. Run
+   `wslview https://github.com/apps/render/installations/new`. On that GitHub
+   page they choose their own account, choose **All repositories** (their
+   app's repository does not exist yet), and click **Install**. If GitHub
+   sends them on to Render and asks them to sign in or confirm, they do. Ask
+   them to tell you when they are done. If GitHub shows Render is already
+   installed, there is nothing to do. Since nothing can check this step, do it
+   whenever you did the Render sign-in; otherwise ask whether they already
+   installed Render on GitHub.
+
 **Neon needs its account ready first.** Neon's sign-in gives up 60 seconds
 after it starts, which is not enough time to create an account. So before
 `login.sh start neon`:
@@ -128,14 +146,28 @@ after it starts, which is not enough time to create an account. So before
 ### 5. First Draft (`firstdraft`)
 
 First Draft is what they will use to plan and build their app in this
-workshop. Run `login.sh start firstdraft`; they approve in the browser and
-you check, as above.
+workshop. It is in pre-alpha, so its pages are behind a username and
+password that the attendee has on their workshop handout. Before you start
+the sign-in, tell them what they will see:
 
-After approving, the browser is sent back to a page on `127.0.0.1`. If that
-page cannot be reached ("This site can't be reached"), or the check still
-fails after they approved, use the code-based sign-in instead:
-`login.sh start firstdraft-device`. The link includes the code, so they only
-approve; if the page asks for the code, it is the `CODE:`.
+1. Their browser asks for a username and password: this is the **First Draft
+   pre-alpha** sign-in (the box itself usually just says "Sign in" and
+   firstdraft.com). They type the username and password from their handout
+   themselves. **Never** ask for, type, or repeat them. If they have no
+   handout, or it is refused, get the instructor.
+2. GitHub may ask them to sign in to First Draft: they approve.
+3. First Draft asking them to approve the sign-in for this laptop: they
+   approve, then tell you.
+
+Then run `login.sh start firstdraft-device` and check, as above. The link
+includes the code, so they only approve; if the page asks for the code, it is
+the `CODE:`.
+
+If the check still fails after they approved, run
+`login.sh status firstdraft-device`, then try the browser sign-in instead:
+`login.sh start firstdraft`. After approving, the browser is sent back to a
+page on `127.0.0.1`. If that page cannot be reached ("This site can't be
+reached"), this sign-in does not work on this laptop: get the instructor.
 
 If `login.sh` shows "Unknown command", their First Draft CLI is too old to
 sign in: tell them to raise their hand for the instructor.

@@ -60,7 +60,7 @@
      Open it in your browser and click around!
 16. Preview the Android app with Revyl.
     ```txt
-    Preview the Android app using the local web app.
+    Preview the Android app with Revyl using the local web app.
     Give me the preview link so I can open it in my browser.
     ```
     When you are done:
@@ -69,7 +69,7 @@
     ```
 18. Preview the iOS app with Revyl.
     ```txt
-    Preview the Android app using the local web app.
+    Preview the iOS app with Revyl using the local web app.
     Give me the preview link so I can open it in my browser.
     ```
     When you are done:

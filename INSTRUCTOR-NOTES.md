@@ -22,14 +22,29 @@ check-status -> ENABLE_VIRTUALIZATION -> prepare-bios (BitLocker suspend, reboot
              -> DONE                  -> attendee opens a WSL session
 
 Claude Desktop, WSL session (WSL > Ubuntu-24.04 > /home/appdev/<app>):
-/workshop-signin -> GitHub (+ git name/email from the account, SSH key upload), Render, Neon, Revyl, First Draft
+/workshop-signin -> GitHub (+ git name/email from the account, SSH key upload),
+                    Render (+ CLI workspace, Render GitHub app), Neon, Revyl, First Draft (device code)
 new WSL session  -> /create-full-stack-app <app idea>
 ```
 
-WSL sessions in Claude Desktop use the Desktop app's Claude sign-in, but do
-not support plugins. So the handoff installs both skills as user skills in
-Ubuntu's `~/.claude/skills`: `workshop-signin` (only loads when typed) and a
-link to the First Draft plugin's one skill in its npm package.
+WSL sessions in Claude Desktop use the Desktop app's Claude sign-in. (An
+earlier version of these notes said WSL sessions do not support plugins; the
+owner's testing on 2026-10-03 showed plugins are available when WSL is
+selected.) The handoff still installs both skills as user skills in Ubuntu's
+`~/.claude/skills`, which was tested and needs no plugin install:
+`workshop-signin` (only loads when typed) and a link to the First Draft
+plugin's one skill in its npm package. If an attendee also has the First
+Draft plugin enabled, the session may list that skill twice.
+
+The handoff also writes a block of notes for the app sessions into Ubuntu's
+`~/.claude/CLAUDE.md` (from `scripts/linux/app-instructions.md`), because
+every Claude session in Ubuntu loads that file without being asked: native
+preview with Revyl from WSL (GitHub builds the apps, one `cloudflared` quick
+tunnel per attendee, `RAILS_DEVELOPMENT_HOSTS=.trycloudflare.com`, the Render
+URL as the fallback `--server`) and deploys (the app's `DEPLOY.md` "Deploy
+from the command line" section, Neon's direct connection string,
+`bin/rails secret`). A re-run replaces the block between its marker lines and
+leaves the rest of the file alone.
 
 `Setup WSL without Claude.cmd` runs the same scripts in a plain window, as a
 fallback. It replaces the old `setup-wsl.cmd` / `setup-wsl.ps1` in this
@@ -93,10 +108,12 @@ folder, which can be deleted.
 - After the first sign-in session, `/exit` opened the second session (First
   Draft plugin) as intended.
 - Not yet tested: `github-refresh`.
-- First Draft sign-in (CLI 0.8.1, `firstdraft login`): the helper uses the
+- First Draft sign-in (CLI 0.8.1, `firstdraft login`): the helper supports the
   default mode (the browser sends the approval back to a listener on
-  127.0.0.1 in Ubuntu, as Neon's does), with `firstdraft-device`
-  (`firstdraft login --device`) as the fallback. The CLI has no status
+  127.0.0.1 in Ubuntu, as Neon's does) and `firstdraft-device`
+  (`firstdraft login --device`). The skill now starts with the device code
+  and falls back to the default mode, because WSL2's 127.0.0.1 forwarding
+  fails on some machines. The CLI has no status
   command, so the check looks for `https://firstdraft.com` in
   `~/.config/firstdraft/credentials.json`. Link capture tested for both modes
   (not yet an approved sign-in). The Install phase now requires First Draft
@@ -135,7 +152,21 @@ folder, which can be deleted.
 - Render cannot be given access to a private repo from either CLI: Render's
   CLI has no such command, and GitHub's API for adding a repo to an app
   installation does not accept `gh`'s sign-in. The attendee uses
-  https://github.com/apps/render/installations/new instead.
+  https://github.com/apps/render/installations/new instead. The sign-in skill
+  now opens that page right after the Render sign-in and asks for **All
+  repositories**, since the app's repository is created later.
+- `render login` does not choose a workspace, and most `render` commands then
+  stop with "no workspace set". After the Render sign-in, the skill runs
+  `render-workspace.sh`, which keeps a set workspace, sets the only one, or
+  lists several (`ASK:`) for the attendee to choose; `auth.sh` checks it as
+  `render-workspace`. Tested against a stubbed `render` (one, several, none,
+  already set) and, read-only, against a real signed-in CLI (v2.22.0, which
+  has the same `workspace set|current` and `workspaces -o json` as v2.28.0).
+- First Draft's sign-in pages are behind the pre-alpha username and password
+  (HTTP basic auth). Attendees get them on a handout; the skill tells them a
+  username-and-password box appears and never handles the values. Current
+  browsers do not show the "First Draft pre-alpha" realm text in that box,
+  so the skill also describes it as a "Sign in" box for firstdraft.com.
 
 ## Test before the workshop (not yet verified)
 
@@ -160,6 +191,17 @@ folder, which can be deleted.
 8. **The rewritten handoff on a fresh account:** that the WSL session picks up
    both skills, and that the skill's `allowed-tools` lets the helper scripts
    run without permission prompts (the rule syntax is a best guess).
+9. **First Draft device sign-in with the handout credential:** the basic-auth
+   box appears once, then GitHub, then the device approval, and the check
+   passes.
+10. **Render workspace and GitHub app on a fresh Render account:**
+    `render-workspace.sh` sets the only workspace, and installing the Render
+    GitHub app from GitHub's page links it to that Render account.
+11. **App-session notes:** a new WSL session in the app folder loads the block
+    in `~/.claude/CLAUDE.md`, and an agent following it previews Android then
+    iOS through one quick tunnel, and deploys with a direct Neon string and
+    `bin/rails secret`. Also that the session keeps `cloudflared` and the web
+    app running in the background.
 
 ## Deliberate choices
 
