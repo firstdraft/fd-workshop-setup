@@ -65,21 +65,26 @@ The prompt is "Help me build a social network for just my family. It should work
 it's familiar." A rehearsal on 2026-10-03, against the Compiler then in Production, took about 8 minutes from prompt
 to approved summary (allow 10 to 12 with real typing) and 31 seconds to compile. It produced a private app where
 sign-in, the feed, posting, likes, comments, follows and profiles worked. "Make it look like Instagram" took about 3
-minutes, and each of the three customization ideas in README step 15 took 1.5 to 2 minutes as a Rails edit. Fixes
-in flight on the evening of 2026-10-03 (phone apps with sign-in, photos, counts, sign-up without email
-verification, guests redirected to sign-in) change some of the points below once they are deployed.
+minutes, and each of the three customization ideas in README step 15 took 1.5 to 2 minutes as a Rails edit.
+
+Deployed on 2026-10-04 (Production bac4f3ff, plugin 0.8.3): sign-up without email verification, required user
+fields on the sign-up form instead of dropping sign-in, and the redesigned interview (it asks the attendee's level
+once, checks early what First Draft will and won't build, and asked 4 to 5 questions in three rehearsals). Still in
+flight and not deployed at that point: phone apps with sign-in, photos, counts, guests redirected to sign-in, and
+one-tap like/follow buttons.
 
 What First Draft generated in that rehearsal:
 
 - **Phone apps need a public list.** iPhone and Android clients show only pages anyone can see. If every list
   requires sign-in, no phone app is generated and README step 14 has nothing to show. Let visitors read posts
   without signing in; signing in is for posting.
-- **Signing up on the live app needs email.** Apps with accounts verify email addresses, and the deployed app has
-  no email provider. The live app also starts with no accounts, because sample data and demo logins are
-  development-only. Sign-in features work on the laptop with the demo login.
-- **Some things show up as gaps in the summary, not features:** photo or avatar uploads, like and follower counts,
-  and a required role or status on users. A required role or status removes sign-in entirely, so leave it out of
-  the design. Attendees can add the rest with Claude after Compile.
+- **Sign-up works on the live app** (since 2026-10-04): new accounts are signed in right away, with no email
+  confirmation. The live app starts with no accounts, because sample data and demo logins are development-only, so
+  attendees sign up there. Password-reset emails are not sent until the app has an email provider (`DEPLOY.md`
+  "Account email").
+- **Some things show up as gaps in the summary, not features:** photo or avatar uploads and like and follower
+  counts, until those changes deploy. A required role or status on users no longer removes sign-in: since
+  2026-10-04 it becomes a sign-up field or takes its default. Attendees can add the rest with Claude after Compile.
 - **Restyling the generated app to match the design takes a long time** (about an hour in one colleague trial).
   README step 15 starts with one screen.
 - The prompt has Claude unzip the design into the project folder from the Windows Downloads folder. Compiling into

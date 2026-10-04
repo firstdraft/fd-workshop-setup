@@ -54,7 +54,8 @@ Have your workshop handout ready: First Draft asks for the workshop username and
     Deploy this app to Render's free plan with a Neon database. Give me the link when it's live.
     ```
     The first deploy takes a few minutes. Your live app starts with no data: the sample data is only on your laptop.
-    Signing up on the live app needs email, which is set up later, so try sign-in features on your laptop.
+    Sign up on the live app to try it: you are signed in right away. "Forgot password" emails are not sent until an
+    email provider is set up.
 14. Try your app on a phone, in your browser:
     ```text
     Show me the Android app in Revyl.
