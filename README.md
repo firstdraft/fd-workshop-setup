@@ -1,4 +1,3 @@
-
 # First Draft workshop
 
 Everything happens in Claude Desktop's **Code** tab. You type a request, and Claude does the work.
@@ -18,9 +17,12 @@ Plan on:
 1. Download this repo as a Zip folder.
 
    ![On this repo's page, click the green Code button, then Download ZIP.](images/download-zip.png)
-2. Right-click the zip file you downloaded and choose "Extract All...".
-   Extract it to your Documents folder or someplace you can easily find.
-   **On a Mac:** double-click the zip file instead. It unzips into a folder next to it.
+2. Unzip the file you downloaded.
+
+   **Windows users:** right-click the zip file and choose "Extract All...". Extract it to your Documents folder or
+   someplace you can easily find.
+
+   **Mac users:** double-click the zip file. It unzips into a folder next to it.
 3. Open Claude Desktop, go to the Code tab, and open the extracted "workshop-kit" folder.
 
    ![At the top left of Claude Desktop, click the Code tab, the button marked with angle brackets.](images/open-code-tab.png)
@@ -32,16 +34,22 @@ Plan on:
    ```text
    Set up my laptop for the workshop
    ```
-   Claude installs the programs you need. On Windows, it first turns on WSL (Windows Subsystem for Linux) and
-   installs Ubuntu, a Linux system that runs inside Windows, where your apps and their tools will live. Click **Yes**
-   when Windows asks for permission. If Claude asks you to restart, do so, then reopen the same folder in Claude
-   Desktop and type `continue`.
-   **On a Mac:** Claude opens a Terminal window to install Homebrew. When it asks for your password, type your Mac
+   Claude installs the programs you need.
+
+   **Windows users:** Claude first turns on WSL (Windows Subsystem for Linux) and installs Ubuntu, a Linux system
+   that runs inside Windows, where your apps and their tools will live. Click **Yes** when Windows asks for
+   permission. If Claude asks you to restart, do so, then reopen the same folder in Claude Desktop and type
+   `continue`.
+
+   **Mac users:** Claude opens a Terminal window to install Homebrew. When it asks for your password, type your Mac
    password there and press Return (nothing shows as you type), and press Return when it asks. Claude never asks
    for your password.
-5. When prompted, choose a name for your project. Claude creates your project's folder with that name. On Windows
-   it is inside Linux (`home` &rarr; `appdev`), because apps there run much faster than on the Windows drive.
-   **On a Mac:** Claude first asks where to keep your projects: `appdev` in your home folder, or another folder you
+5. When prompted, choose a name for your project. Claude creates your project's folder with that name.
+
+   **Windows users:** the folder is inside Linux (`home` &rarr; `appdev`), because apps there run much faster than
+   on the Windows drive.
+
+   **Mac users:** Claude first asks where to keep your projects: `appdev` in your home folder, or another folder you
    choose. Never choose Dropbox, iCloud Drive (including Desktop and Documents, if iCloud syncs them), Google Drive
    or another synced folder: syncing damages your app's files, and GitHub is your backup.
 
@@ -49,14 +57,19 @@ Plan on:
 
 When you first try to sign in to First Draft, you'll hit a username/password wall. Ask your instructor for that.
 
-6. Open a new session in Claude Desktop. Choose `WSL` &rarr; `Ubuntu-24.04` instead of `Local`.
-   <img width="1191" height="378" alt="Screenshot 2026-10-05 105139" src="https://github.com/user-attachments/assets/1d0ef4eb-87d9-47a6-a4c3-b4d6361a755d" /> For "Choose folder", select the folder with the name of your project (`home` &rarr; `appdev` &rarr;
-   `YOUR_PROJECT`). <img width="1346" height="975" alt="Screenshot 2026-10-05 105416" src="https://github.com/user-attachments/assets/cf886d2d-bcb0-413b-a827-f3e219c3c638" />
+6. Open a new session in Claude Desktop, in your project's folder.
 
-   **On a Mac:** first quit Claude Desktop (Cmd-Q) and open it again. Then keep `Local`, and choose the folder you
+   **Windows users:** choose `WSL` &rarr; `Ubuntu-24.04` instead of `Local`. For "Select folder...", select the
+   folder with the name of your project (`home` &rarr; `appdev` &rarr; `YOUR_PROJECT`).
+
+   ![Below the message box, click Local, then WSL, then Ubuntu-24.04.](images/windows-choose-wsl.png)
+
+   ![Click Select folder..., go to Linux, Ubuntu-24.04, home, appdev, select your project's folder, then click Select Folder.](images/windows-project-folder.png)
+
+   **Mac users:** first quit Claude Desktop (Cmd-Q) and open it again. Then keep `Local`, and choose the folder you
    chose in step 5 (`appdev` in your home folder, unless you picked another), then `YOUR_PROJECT`.
 
-   ![On a Mac, after reopening Claude Desktop, click the folder button below the message box, then Open folder.](images/mac-change-folder.png)
+   ![After reopening Claude Desktop, click the folder button below the message box, then Open folder.](images/mac-change-folder.png)
 
    ![Click your home folder in the sidebar, then the projects folder you chose in step 5, here appdev.](images/mac-home-folder.png)
 
@@ -71,8 +84,13 @@ When you first try to sign in to First Draft, you'll hit a username/password wal
 
 ## Part 3: Build your first app
 
-8. Open a new session in your project folder (on Windows, remember to choose `WSL` &rarr; `Ubuntu-24.04`) and
-   type:
+8. Open a new session in your project folder, as in step 6.
+
+   **Windows users:** remember to choose `WSL` &rarr; `Ubuntu-24.04`.
+
+   **Mac users:** keep `Local`.
+
+   Then type:
    ```text
    /create-full-stack-app Help me build a social network for just my family. It should work and look like Instagram so that it's familiar.
    ```
@@ -130,12 +148,21 @@ When you first try to sign in to First Draft, you'll hit a username/password wal
     ```text
     Make a new project folder called MY_IDEA next to this one.
     ```
-17. Have sketches, notes, design documents or spreadsheets for your idea? Copy them into the new folder. On
-    Windows, File Explorer shows it under **Linux** &rarr; `Ubuntu-24.04` &rarr; `home` &rarr; `appdev` &rarr;
-    `MY_IDEA`; on a Mac, it is `MY_IDEA` in the folder you chose in step 5. If you designed your app in Claude
-    Design, choose **Export** &rarr; **Hand off to Claude Code** there and copy what it gives you.
-18. Open a new session in the new folder (on Windows, remember to choose `WSL` &rarr; `Ubuntu-24.04`) and describe
-    your idea:
+17. Have sketches, notes, design documents or spreadsheets for your idea? Copy them into the new folder. If you
+    designed your app in Claude Design, choose **Export** &rarr; **Hand off to Claude Code** there and copy what it
+    gives you.
+
+    **Windows users:** File Explorer shows the folder under **Linux** &rarr; `Ubuntu-24.04` &rarr; `home` &rarr;
+    `appdev` &rarr; `MY_IDEA`.
+
+    **Mac users:** the folder is `MY_IDEA` in the folder you chose in step 5.
+18. Open a new session in the new folder.
+
+    **Windows users:** remember to choose `WSL` &rarr; `Ubuntu-24.04`.
+
+    **Mac users:** keep `Local`.
+
+    Then describe your idea:
     ```text
     /create-full-stack-app A place for my book club to pick the next book and vote on meeting dates.
     ```
@@ -153,7 +180,8 @@ When you first try to sign in to First Draft, you'll hit a username/password wal
 
 ## After the workshop
 
-- To come back to a project, open a session with `WSL` &rarr; `Ubuntu-24.04` (on a Mac, `Local`) and choose its
-  folder.
+- To come back to a project, open a session and choose its folder.
+  - **Windows users:** choose `WSL` &rarr; `Ubuntu-24.04`.
+  - **Mac users:** keep `Local`.
 - Render's free plan sleeps when nobody visits, so the first visit afterwards takes about a minute.
 - To remove an app from the internet, ask Claude: `Delete this app's Render service and its Neon project.`
