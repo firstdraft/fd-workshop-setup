@@ -92,6 +92,12 @@ and does not include is in [its section there](INSTRUCTOR-NOTES.md#the-family-so
   up from an older zip. Download the zip again, open its `workshop-kit` folder in a Local session, type `continue`
   (it redoes the handoff; give the same app name), then run `/workshop-signin` again in a WSL session (on a Mac, a
   Local session).
+- **An attendee may have old First Draft packages.** In Ubuntu (on a Mac, Terminal), `firstdraft --version` shows the
+  CLI (0.8.2 today) and `npm ls -g @firstdraft.com/claude-code` shows the plugin (0.8.7 today). If either is older,
+  run `npm install --global @firstdraft.com/cli@latest @firstdraft.com/claude-code@latest` there, then start a new
+  session. With a kit zip downloaded on 2026-10-05 or later, typing `continue` in a Local session in its
+  `workshop-kit` folder also works: setup sends old packages back to the install step (on a Mac,
+  `bash scripts/mac/setup.sh install-tools` from that folder does the same). Older zips do not check for updates.
 
 ## On a Mac
 
