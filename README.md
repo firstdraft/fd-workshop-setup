@@ -23,7 +23,7 @@ Plan on:
    someplace you can easily find.
 
    **Mac users:** double-click the zip file. It unzips into a folder next to it.
-3. Open Claude Desktop, go to the Code tab, and open the extracted "workshop-kit" folder.
+3. [Open Claude Desktop](https://claude.com/download), go to the Code tab, and open the extracted "workshop-kit" folder.
 
    ![At the top left of Claude Desktop, click the Code tab, the button marked with angle brackets.](images/open-code-tab.png)
 
