@@ -88,28 +88,30 @@ to approved summary (allow 10 to 12 with real typing) and 31 seconds to compile.
 sign-in, the feed, posting, likes, comments, follows and profiles worked. "Make it look like Instagram" took about 3
 minutes, and each of the three customization ideas in README step 15 took 1.5 to 2 minutes as a Rails edit.
 
-Deployed on 2026-10-04 (Production bac4f3ff, plugin 0.8.3): sign-up without email verification, required user
-fields on the sign-up form instead of dropping sign-in, and the redesigned interview (it asks the attendee's level
-once, checks early what First Draft will and won't build, and asked 4 to 5 questions in three rehearsals). Still in
-flight and not deployed at that point: phone apps with sign-in, photos, counts, guests redirected to sign-in, and
-one-tap like/follow buttons.
+What attendees get (released on the evening of 2026-10-04: Production 6d466ca3, CLI 0.8.2, plugin 0.8.4):
 
-What First Draft generated in that rehearsal:
-
-- **Phone apps need a public list.** iPhone and Android clients show only pages anyone can see. If every list
-  requires sign-in, no phone app is generated and README step 14 has nothing to show. Let visitors read posts
-  without signing in; signing in is for posting.
-- **Sign-up works on the live app** (since 2026-10-04): new accounts are signed in right away, with no email
-  confirmation. The live app starts with no accounts, because sample data and demo logins are development-only, so
-  attendees sign up there. Password-reset emails are not sent until the app has an email provider (`DEPLOY.md`
-  "Account email").
-- **Some things show up as gaps in the summary, not features:** photo or avatar uploads and like and follower
-  counts, until those changes deploy. A required role or status on users no longer removes sign-in: since
-  2026-10-04 it becomes a sign-up field or takes its default. Attendees can add the rest with Claude after Compile.
-- **Restyling the generated app to match the design takes a long time** (about an hour in one colleague trial).
-  README step 15 starts with one screen.
-- The prompt has Claude unzip the design into the project folder from the Windows Downloads folder. Compiling into
-  the current folder keeps the design under `.firstdraft/design/`.
+- **The interview.** Claude briefly looks up how similar apps work, asks the attendee's level once ("make the
+  technical decisions for me, explain them as you go, or ask me"), asks the most important product questions first,
+  and accepts "make the rest of the decisions for me" at any point. A few minutes in, it pushes a rough Plan and says
+  what First Draft will and won't build. Three rehearsals of plugin 0.8.3 asked 4 to 5 questions.
+- **Ideas First Draft fits only partly, or not at all,** such as real-time phone-sensor advice or a first-person
+  shooter. Claude researches feasibility first, says early what First Draft will and won't cover, and then uses
+  First Draft only as far as it helps, or not at all. Attendees with such an idea for Part 4 are not doing anything
+  wrong.
+- **Phone apps for a private app.** The iPhone and Android apps follow the web app's navigation, and people sign in
+  through the app's own sign-in pages inside the phone app; they stay signed in. In a Revyl preview of the laptop's
+  app, the demo login works.
+- **Photos.** Posts and profiles can have photos, stored in the attendee's Cloudinary account (saved during
+  sign-in). Without the key, the first upload raises a clear `CLOUDINARY_URL` error; `FACILITATOR.md` has the fix.
+- **Likes, follows and counts.** Like and Follow are one tap on the post or profile and toggle to Unlike and
+  Unfollow, and posts and profiles can show like and follower counts.
+- **Sign-in.** A guest who opens a members-only page goes to sign-in and comes back afterwards. Sign-up on the live
+  app signs people in right away, with no email confirmation. The live app starts with no accounts, because sample
+  data and demo logins are development-only. Password-reset emails are not sent until the app has an email provider
+  (`DEPLOY.md` "Account email").
+- **A required role or status on users** becomes a sign-up field or takes its default; it no longer removes sign-in.
+- **Making the whole app look like Instagram** took about 3 minutes in the 2026-10-03 rehearsal. Larger redesigns
+  take longer; suggest one screen at a time.
 
 ## Facilitator notes from the 2026-10-03 rehearsal
 
