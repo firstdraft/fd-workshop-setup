@@ -141,7 +141,7 @@ firstdraft plan compile
 ```
 
 `plan init` only creates the new Project's ID; the copied Plan replaces its name. Then the attendee opens a new session
-in `/home/appdev/APP-2` (WSL, Ubuntu-24.04) and continues from README step 11. On a Mac, use the projects folder
+in `/home/appdev/APP-2` (WSL, Ubuntu-24.04) and continues from README step 12. On a Mac, use the projects folder
 (`~/appdev` by default) in place of `~` in the commands, and open a Local session in its `APP-2`.
 
 ### Cancel with the attendee's token
