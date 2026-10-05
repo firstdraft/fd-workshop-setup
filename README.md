@@ -62,15 +62,15 @@ When you first try to sign in to First Draft, you'll hit a username/password wal
 
 6. Open a new session in Claude Desktop, in your project's folder.
 
-   **Windows users:** choose `WSL` &rarr; `Ubuntu-24.04` instead of `Local`. For "Select folder...", select the
-   folder with the name of your project (`home` &rarr; `appdev` &rarr; `YOUR_PROJECT`).
+   **Windows users:** choose `WSL` &rarr; `Ubuntu-24.04` instead of `Local`. Then click "Select folder..." and pick
+   the folder with the name of your project (`home` &rarr; `appdev` &rarr; `YOUR_PROJECT`).
 
    ![Below the message box, click Local, then WSL, then Ubuntu-24.04.](images/windows-choose-wsl.png)
 
    ![Click Select folder..., go to Linux, Ubuntu-24.04, home, appdev, select your project's folder, then click Select Folder.](images/windows-project-folder.png)
 
-   **Mac users:** first quit Claude Desktop (Cmd-Q) and open it again. Then keep `Local`, and choose the folder you
-   chose in step 5 (`appdev` in your home folder, unless you picked another), then `YOUR_PROJECT`.
+   **Mac users:** first quit Claude Desktop (Cmd-Q) and open it again. Then keep `Local`, and open the projects
+   folder from step 5 (`appdev` in your home folder, unless you picked another), then `YOUR_PROJECT`.
 
    ![After reopening Claude Desktop, click the folder button below the message box, then Open folder.](images/mac-change-folder.png)
 
@@ -158,7 +158,7 @@ When you first try to sign in to First Draft, you'll hit a username/password wal
     **Windows users:** File Explorer shows the folder under **Linux** &rarr; `Ubuntu-24.04` &rarr; `home` &rarr;
     `appdev` &rarr; `MY_IDEA`.
 
-    **Mac users:** the folder is `MY_IDEA` in the folder you chose in step 5.
+    **Mac users:** the folder is `MY_IDEA` in the projects folder from step 5.
 18. Open a new session in the new folder.
 
     **Windows users:** remember to choose `WSL` &rarr; `Ubuntu-24.04`.
