@@ -24,7 +24,9 @@ Plan on:
    ```text
    Set up my laptop for the workshop
    ```
-   Claude installs the programs you need. If it asks you to restart, do so, then reopen the same folder in Claude
+   Claude installs the programs you need. On Windows, it first turns on WSL (Windows Subsystem for Linux) and
+   installs Ubuntu, a Linux system that runs inside Windows, where your apps and their tools will live. Click **Yes**
+   when Windows asks for permission. If Claude asks you to restart, do so, then reopen the same folder in Claude
    Desktop and type `continue`.
 5. When prompted, choose and enter a name for your project.
 
@@ -37,10 +39,11 @@ Have your workshop handout ready: First Draft asks for the workshop username and
    `YOUR_PROJECT`).
 7. Type `/workshop-signin` and press Enter. Claude opens each sign-in page in your browser and copies any code you
    need to your clipboard. Approve each one and tell Claude when you are done, until every account is signed in.
-   For Cloudinary, which stores your app's photos, you copy its key from its website in three parts, in the order
-   shown below; Claude saves them without showing them.
+   - **Cloudinary** stores your app's photos and has nothing to approve. After you sign up, Claude opens its
+     **API Keys** page. Copy the three things marked below, one at a time and in order, and tell Claude after each
+     copy. Claude saves each one from your clipboard without showing it.
 
-   ![Cloudinary's API Keys page. Copy 1, the API environment variable, with its copy button; 2, the API Key; 3, the API Secret, after clicking the eye to show it.](images/cloudinary-api-keys.png)
+     ![Cloudinary's API Keys page. Copy 1, the API environment variable, with its copy button; 2, the API Key; 3, the API Secret, after clicking the eye to show it.](images/cloudinary-api-keys.png)
 
 ## Part 3: Build your first app
 
