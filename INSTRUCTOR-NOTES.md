@@ -92,22 +92,29 @@ setup.sh status -> INSTALL_HOMEBREW -> Terminal window: Homebrew's installer (+ 
                 -> INSTALL_TOOLS    -> brew: gh cloudflared postgresql@18 (service) openssl@3 libyaml gmp rust;
                                        then mise, Ruby, Node, the CLIs, Revyl, as on Windows
                 -> CONFIGURE        -> configure.sh (an existing SSH key is kept)
-                -> HANDOFF          -> verify, ask app name, handoff (~/workshop/<app>)
-                -> DONE             -> quit and reopen Claude Desktop, new Local session in ~/workshop/<app>
+                -> HANDOFF          -> verify, ask projects folder (~/appdev) and app name, handoff
+                -> DONE             -> quit and reopen Claude Desktop, new Local session in <folder>/<app>
 ```
 
 This is the attendee's own account, so the Mac handoff keeps its changes
 narrow:
-- App folders go in `~/workshop`, and the app-session notes in
-  `~/workshop/CLAUDE.md`. Claude loads `CLAUDE.md` from every folder above
-  the working folder, so only sessions under `~/workshop` see them.
+- The attendee chooses the projects folder (`~/appdev` by default, like
+  Windows' `/home/appdev`); `setup.sh folder` records it in
+  `~/.workshop/apps-dir`. App folders go in it, and the app-session notes in
+  its `CLAUDE.md`. Claude loads `CLAUDE.md` from every folder above the
+  working folder, so only sessions under it see them. Setup warns about,
+  but accepts once confirmed, a folder in Dropbox, `~/Library/CloudStorage`
+  (Dropbox, Google Drive, OneDrive), iCloud Drive, Desktop or Documents:
+  syncing corrupts git repositories and fights with the many files an app
+  writes, and GitHub is the backup. A Mac set up before this has no record,
+  so the scripts use its app folder's parent (`~/workshop`).
 - The sign-in skill, the First Draft skill link and the Neon skills are
   user skills, as on Windows. Project skills in a parent folder are found
   only up to the repository root, and each app folder becomes a repository.
   The sign-in skill only loads when typed.
 - Git's name and email from the GitHub account go in
   `~/.workshop/gitconfig`, which the global config includes only for
-  repositories under `~/workshop`. Global git defaults (`main`, gh over
+  repositories in the projects folder. Global git defaults (`main`, gh over
   SSH) and the SSH key are set as on Windows; an existing key is kept.
 - Auto mode is set in `~/.claude/settings.json` only when it has no
   `defaultMode`. Project settings cannot start sessions in auto mode, and
@@ -388,6 +395,18 @@ Symptoms and their fixes, including this rehearsal's, are in
     message, which no longer says "Windows". The handoff still strips
     Windows line endings on both platforms. Every `.sh` passes `bash -n`
     under bash 3.2 and 5.2; the `.ps1` files are unchanged.
+- Mac projects folder (2026-10-05, scratch `HOME`, stub CLIs, `/bin/bash`
+  3.2): `setup.sh folder` recorded `~/appdev`, a relative path, an absolute
+  one and one with a space. It asked when given nothing, refused the home
+  folder itself, and warned (exit 42, nothing recorded) for Google Drive
+  and the folder `~/Library/CloudStorage`, `~/Dropbox` (a link into it),
+  iCloud Drive, Desktop, Documents and `~/documents`. After `--synced-ok`,
+  it recorded the folder. `handoff` refused to run before a folder was
+  chosen, then created `<folder>/<app>` and one notes block in
+  `<folder>/CLAUDE.md`. Git's identity applied in the app folder and a
+  sibling folder (README Part 4), not elsewhere. A Mac set up by the
+  earlier kit (`~/workshop/<app>`, no record) kept `~/workshop`. The WSL
+  path's stub run matched `origin/main`. Not run on a real Mac.
 
 ## Test before the workshop (not yet verified)
 
@@ -440,8 +459,8 @@ Symptoms and their fixes, including this rehearsal's, are in
     (password, Return, the Command Line Tools), `install-tools` (on Apple
     Silicon mise downloads a prebuilt Ruby; on Intel it compiles one),
     `brew services` starting PostgreSQL 18, and that after quitting and
-    reopening Claude Desktop a Local session in `~/workshop/<app>` finds
-    Ruby, Node, `psql` and the CLIs, loads `~/workshop/CLAUDE.md`, and lists
+    reopening Claude Desktop a Local session in `~/appdev/<app>` finds
+    Ruby, Node, `psql` and the CLIs, loads `~/appdev/CLAUDE.md`, and lists
     `/workshop-signin`.
 14. **The Mac's Local session in auto mode:** that `defaultMode: auto` in
     `~/.claude/settings.json` starts it in Auto, and that the skill's

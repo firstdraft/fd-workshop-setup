@@ -191,7 +191,8 @@ start (for example "the device is managed"), get the instructor.
 Here the attendee's own macOS account is set up directly: no WSL, no extra
 user. Homebrew installs the same development tools as on Windows, and the
 rest of the workshop happens in a new **Local** Claude Desktop session in
-`~/workshop/<app name>`. Ignore the Windows sections above.
+`<projects folder>/<app name>`. The attendee chooses the projects folder
+(`~/appdev` by default). Ignore the Windows sections above.
 
 ### Rules
 
@@ -225,7 +226,8 @@ bash scripts/mac/setup.sh <step>
 | `install-tools` | Installs the development tools with Homebrew and mise (10-30 min; run in the background) | No |
 | `configure` | Sets git defaults, creates an SSH key, trusts github.com | No |
 | `verify` | Final check, prints `RESULT: READY` / `NOT READY` | No |
-| `handoff <name>` | Creates `~/workshop/<name>`, installs the sign-in and First Draft skills and the app-session notes | No |
+| `folder <path>` | Records the folder for workshop projects and creates it; warns about a cloud-synced folder (exit 42) | No |
+| `handoff <name>` | Creates `<projects folder>/<name>`, installs the sign-in and First Draft skills and the app-session notes | No |
 
 ### What to do for each NEXT STEP
 
@@ -264,14 +266,23 @@ account, for workshop projects only, when they sign in to GitHub.
 **HANDOFF**:
 1. Run `verify`. On `NOT READY`, use the troubleshooting table and do not
    continue.
-2. On `RESULT: READY`, ask what they want to call the app they will build.
-   Suggest `firstdraft-workshop`; any name of lowercase letters, numbers and
-   dashes works (turn "My Cool App" into `my-cool-app` and confirm it).
-3. Run `handoff <name>`. It creates `~/workshop/<name>`, installs the
-   sign-in and First Draft skills, and writes the notes for the app sessions
-   to `~/workshop/CLAUDE.md`, which only sessions in folders under
-   `~/workshop` read. Exit code 41 means the name is not valid.
-4. Go to DONE.
+2. On `RESULT: READY`, ask where they want to keep their workshop
+   projects, suggesting `~/appdev` (an `appdev` folder in their home
+   folder). Include this warning in the question: *"Don't choose a folder
+   inside Dropbox, iCloud (including Desktop and Documents, if iCloud syncs
+   them), Google Drive or OneDrive. Syncing corrupts git repositories and
+   fights with the many files an app writes, and GitHub is your backup
+   anyway."* Then run `folder "<path>"`. If it prints `WARN:` (exit 42), the
+   folder looks synced: repeat the warning once, and only if they still
+   want it, run the command it prints, with `--synced-ok`.
+3. Ask what they want to call the app they will build. Suggest
+   `firstdraft-workshop`; any name of lowercase letters, numbers and dashes
+   works (turn "My Cool App" into `my-cool-app` and confirm it).
+4. Run `handoff <name>`. It creates `<name>` in the projects folder,
+   installs the sign-in and First Draft skills, and writes the notes for the
+   app sessions to `CLAUDE.md` in the projects folder, which only sessions in
+   folders under it read. Exit code 41 means the name is not valid.
+5. Go to DONE.
 
 **DONE**: everything here is finished. Give the attendee all of these steps
 at once, because the first one closes this chat:
@@ -279,9 +290,8 @@ at once, because the first one closes this chat:
    Cmd-Q) and open it again, so its sessions find the new tools.
 2. In the Code tab, start a **new session** and choose **Local** in the
    environment picker.
-3. With the **folder picker**, choose the `workshop` folder in their home
-   folder, then `<name>` (`/Users/<their user>/workshop/<name>`), and click
-   **Trust** when asked.
+3. With the **folder picker**, choose the projects folder they chose, then
+   `<name>` (the path `handoff` printed), and click **Trust** when asked.
 4. Type **/workshop-signin** and press Enter. Claude helps them sign in to
    GitHub, Render, Neon, Cloudinary, Revyl and First Draft. Sign-in pages
    open in their browser by themselves.

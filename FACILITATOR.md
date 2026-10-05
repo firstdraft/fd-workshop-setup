@@ -1,7 +1,8 @@
 # When something goes wrong (facilitator cheat sheet)
 
 Symptom, then the fix. Run commands in the attendee's Ubuntu: ask their Claude session to run them, or open an Ubuntu
-terminal. On a Mac, ask their Claude session or use Terminal; their app folders are in `~/workshop`. Background is in [INSTRUCTOR-NOTES.md](INSTRUCTOR-NOTES.md), and what the family social network app does
+terminal. On a Mac, ask their Claude session or use Terminal; their app folders are in the projects folder they chose
+(`~/appdev` by default; `cat ~/.workshop/apps-dir` shows it). Background is in [INSTRUCTOR-NOTES.md](INSTRUCTOR-NOTES.md), and what the family social network app does
 and does not include is in [its section there](INSTRUCTOR-NOTES.md#the-family-social-network-readme-part-3).
 
 ## Building
@@ -106,6 +107,11 @@ and does not include is in [its section there](INSTRUCTOR-NOTES.md#the-family-so
 - **`git push` asks for a passphrase.** The attendee already had an SSH key with a passphrase, which setup keeps. They
   type the passphrase in Terminal once (`ssh-add --apple-use-keychain ~/.ssh/id_ed25519`).
 - **macOS asks whether Claude may access Downloads, Documents or Desktop.** The kit or a file is there: click Allow.
+- **A Mac project is in a synced folder anyway (Dropbox, iCloud Drive, or Desktop or Documents with iCloud sync),
+  with git errors such as `bad object` or `index.lock`, files ending in ` 2` or `(conflicted copy)`, or a slow web
+  app.** Ask Claude to commit and push what works. Then, in the kit's setup folder, run
+  `bash scripts/mac/setup.sh folder ~/appdev` and `bash scripts/mac/setup.sh handoff <name>`, open a Local session in
+  `~/appdev/<name>`, and ask Claude to clone the app's GitHub repository there.
 
 ## Commands
 
@@ -125,8 +131,8 @@ firstdraft plan compile
 ```
 
 `plan init` only creates the new Project's ID; the copied Plan replaces its name. Then the attendee opens a new session
-in `/home/appdev/APP-2` (WSL, Ubuntu-24.04) and continues from README step 11. On a Mac, use `~/workshop/APP` and
-`~/workshop/APP-2` in the commands, and open a Local session in `~/workshop/APP-2`.
+in `/home/appdev/APP-2` (WSL, Ubuntu-24.04) and continues from README step 11. On a Mac, use the projects folder
+(`~/appdev` by default) in place of `~` in the commands, and open a Local session in its `APP-2`.
 
 ### Cancel with the attendee's token
 

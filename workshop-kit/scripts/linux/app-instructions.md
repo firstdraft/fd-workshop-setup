@@ -6,6 +6,7 @@ Added by the workshop kit. Where these notes differ from an app's own guides or 
 - On Windows, files the user downloads are in their Windows Downloads folder:
   `"$(wslpath "$(wslvar USERPROFILE)")/Downloads"` (`wslvar` comes with `wslu`). On a Mac they are in
   `~/Downloads`, and macOS may ask the user to allow access to it. Copy or unzip from there.
+- A new project folder goes next to the current one, in the same parent folder, where these notes apply.
 - Unzip a design into the project folder before the first Compile. Compiling into the current folder keeps it
   under `.firstdraft/design/`.
 

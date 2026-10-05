@@ -5,7 +5,8 @@
 # Claude Desktop session running inside Ubuntu (WSL) on Windows, or in a
 # Local session on a Mac. Runs inside Ubuntu as appdev, piped in by
 # handoff.ps1, or on a Mac as the attendee, from scripts/mac/setup.sh. It:
-#   - creates the app folder ~/<app name> (~/workshop/<app name> on a Mac)
+#   - creates the app folder ~/<app name> (on a Mac, in the projects folder
+#     the attendee chose, recorded in ~/.workshop/apps-dir; ~/appdev by default)
 #   - installs the platform layer to ~/.workshop/platform.sh, the link
 #     opener to ~/.workshop/open.sh, the sign-in checks to ~/.workshop/auth.sh, the sign-in helper
 #     to ~/.workshop/login.sh, ~/.workshop/git-identity.sh (sets git's
@@ -18,8 +19,8 @@
 #     so the WSL session has it without installing the plugin
 #   - adds the workshop's notes for app sessions (native preview, deploys) to
 #     ~/.claude/CLAUDE.md, which every Claude session in Ubuntu loads. On a
-#     Mac, the attendee's own account, they go in ~/workshop/CLAUDE.md
-#     instead, which Claude loads in every folder under ~/workshop.
+#     Mac, the attendee's own account, they go in CLAUDE.md in the projects
+#     folder instead, which Claude loads in every folder under it.
 #   - starts Claude sessions in auto mode (on a Mac, only if the attendee has
 #     not chosen a default mode)
 #   - removes what an earlier version of the kit installed for the terminal
@@ -38,7 +39,9 @@ SKILLS_DIR="$HOME/.claude/skills"
 CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 if [ "$(uname -s)" = Darwin ]; then
     MAC=1
-    APPS_DIR="$HOME/workshop"
+    # The folder setup.sh recorded; else the parent of an app folder that an
+    # earlier kit made in ~/workshop; else the default.
+    APPS_DIR=$(cat "$WORKSHOP_DIR/apps-dir" 2>/dev/null || dirname "$(cat "$WORKSHOP_DIR/app-dir" 2>/dev/null || echo "$HOME/appdev/-")")
     CLAUDE_MD="$APPS_DIR/CLAUDE.md"
 else
     MAC=""

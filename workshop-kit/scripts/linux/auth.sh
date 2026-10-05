@@ -46,8 +46,8 @@ check_git_identity() {
     expected=$(gh api user --jq '"\(.id)+\(.login)@users.noreply.github.com"' 2>/dev/null) \
         || { echo "needs GitHub sign-in first"; return 1; }
     if [ "$WORKSHOP_PLATFORM" = mac ] \
-        && [ "$(git config --global --get 'includeIf.gitdir:~/workshop/.path')" != '~/.workshop/gitconfig' ]; then
-        echo "not applied to ~/workshop"; return 1
+        && [ "$(git config --global --get "$GIT_INCLUDE")" != '~/.workshop/gitconfig' ]; then
+        echo "not applied to $APPS_DIR"; return 1
     fi
     name=$(git config "${GIT_IDENTITY[@]}" user.name) || { echo "git name not set"; return 1; }
     email=$(git config "${GIT_IDENTITY[@]}" user.email) || { echo "git email not set"; return 1; }
