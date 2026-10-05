@@ -95,8 +95,9 @@ bash ~/.workshop/git-identity.sh
 It uses the account's name (or username) and its private GitHub no-reply
 address, so their commits are linked to their GitHub profile without
 showing their real email. Tell them, in a sentence, the name and address it
-set. On a Mac it applies only to projects in their `workshop` folder, so
-any git name and email they already use elsewhere stay as they are.
+set. On a Mac it applies only to projects in the projects folder they
+chose, so any git name and email they already use elsewhere stay as they
+are.
 
 ### 3. SSH key (`github-ssh-key`)
 

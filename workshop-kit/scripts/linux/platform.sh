@@ -13,9 +13,12 @@ if [ "$(uname -s)" = Darwin ]; then
     WORKSHOP_PLATFORM=mac
     CLIPBOARD="the clipboard (pbpaste failed)"
     # This is the attendee's own Mac account, so their global git name and
-    # email stay theirs; repositories under ~/workshop include this file
-    # instead (git-identity.sh).
+    # email stay theirs; repositories in the projects folder they chose
+    # (setup.sh folder) include this file instead (git-identity.sh).
     GIT_IDENTITY=(--file "$HOME/.workshop/gitconfig")
+    # As in handoff.sh: the recorded folder, else the app folder's parent.
+    APPS_DIR=$(cat "$HOME/.workshop/apps-dir" 2>/dev/null || dirname "$(cat "$HOME/.workshop/app-dir" 2>/dev/null || echo "$HOME/appdev/-")")
+    GIT_INCLUDE="includeIf.gitdir:$APPS_DIR/.path"
     # Homebrew's tools, for a session that started before Homebrew was
     # installed (a new session reads them from the shell's startup files).
     export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"

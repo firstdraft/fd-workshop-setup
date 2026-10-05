@@ -13,13 +13,19 @@
 #   bash scripts/mac/setup.sh install-tools      the rest of tools.sh, one component at a time
 #   bash scripts/mac/setup.sh configure          git defaults, SSH key, GitHub's host key
 #   bash scripts/mac/setup.sh verify             final check: RESULT: READY / NOT READY
-#   bash scripts/mac/setup.sh handoff <name>     ~/workshop/<name>, the sign-in skill, the notes
+#   bash scripts/mac/setup.sh folder <path> [--synced-ok]
+#                                                the folder for workshop projects (~/appdev
+#                                                by default); warns about a cloud-synced one
+#   bash scripts/mac/setup.sh handoff <name>     <folder>/<name>, the sign-in skill, the notes
 
 set -uo pipefail
 
 KIT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 LINUX="$KIT_DIR/scripts/linux"
 LOG_DIR="$KIT_DIR/logs"
+# The projects folder the attendee chose; handoff.sh, git-identity.sh and
+# auth.sh read it too.
+APPS_DIR_FILE="$HOME/.workshop/apps-dir"
 MINIMUM_FREE_GB=10   # the same as the Windows kit
 mkdir -p "$LOG_DIR"
 
@@ -180,8 +186,68 @@ verify() {
     [ "$failures" -eq 0 ]
 }
 
+# Prints a path as an absolute path, with ~ expanded, a path without a
+# leading / taken as inside the home folder, and links in the part that
+# exists resolved (~/Dropbox is often a link into ~/Library/CloudStorage).
+absolute_path() {
+    local path=$1 rest=""
+    case "$path" in
+        "~") path=$HOME ;;
+        "~/"*) path="$HOME/${path#\~/}" ;;
+        /*) ;;
+        *) path="$HOME/$path" ;;
+    esac
+    while [ "${path%/}" != "$path" ] && [ "$path" != / ]; do path=${path%/}; done
+    while [ ! -d "$path" ]; do
+        rest="/$(basename "$path")$rest"
+        path=$(dirname "$path")
+    done
+    printf '%s%s\n' "$(cd "$path" && pwd -P)" "$rest"
+}
+
+# Prints which synced service holds a folder, if any: cloud sync corrupts git
+# repositories and fights with the many files an app writes.
+synced_service() {
+    local folder home
+    folder=$(printf '%s/' "$1" | tr '[:upper:]' '[:lower:]')
+    home=$(printf '%s' "$(cd "$HOME" && pwd -P)" | tr '[:upper:]' '[:lower:]')
+    case "$folder" in
+        "$home/library/cloudstorage/"*) echo "a cloud storage folder (Dropbox, Google Drive or OneDrive)" ;;
+        "$home/dropbox/"*) echo "Dropbox" ;;
+        "$home/library/mobile documents/"*) echo "iCloud Drive" ;;
+        "$home/desktop/"* | "$home/documents/"*) echo "Desktop or Documents, which iCloud often syncs" ;;
+    esac
+}
+
+folder() {
+    local chosen=${1:-} confirmed=${2:-} path service
+    echo "=== Folder for workshop projects ==="
+    if [ -z "$chosen" ]; then
+        echo "ASK: where the attendee wants to keep their workshop projects (default: ~/appdev)."
+        return 40
+    fi
+    path=$(absolute_path "$chosen")
+    if [ "$path" = "$(cd "$HOME" && pwd -P)" ]; then
+        # The notes would then apply to every Claude project in the home folder.
+        echo "[FAIL] the home folder itself cannot hold the workshop's notes. Suggest a folder in it, such as ~/appdev."
+        return 41
+    fi
+    service=$(synced_service "$path")
+    if [ -n "$service" ] && [ "$confirmed" != --synced-ok ]; then
+        echo "WARN: $path is in $service. Syncing can corrupt git repositories and fights with the many files an app writes; GitHub is the backup anyway. Repeat this warning once and suggest ~/appdev. Only if the attendee still wants this folder, run: bash scripts/mac/setup.sh folder \"$path\" --synced-ok"
+        return 42
+    fi
+    mkdir -p "$path" "$(dirname "$APPS_DIR_FILE")" || { echo "[FAIL] could not create $path"; return 1; }
+    printf '%s\n' "$path" > "$APPS_DIR_FILE"
+    if [ -n "$service" ]; then
+        echo "[PASS] projects folder: $path (in $service, as the attendee confirmed)"
+    else
+        echo "[PASS] projects folder: $path"
+    fi
+}
+
 handoff() {
-    local name
+    local name apps_dir
     name=${1:-}
     name=${name#"${name%%[![:space:]]*}"}
     name=${name%"${name##*[![:space:]]}"}
@@ -194,11 +260,15 @@ handoff() {
         echo "[FAIL] '$name' is not a valid app name. Use lowercase letters, numbers and dashes, starting with a letter (e.g. my-first-app)."
         return 41
     fi
+    apps_dir=$(cat "$APPS_DIR_FILE" 2>/dev/null) || {
+        echo "ASK: choose the folder for workshop projects first: bash scripts/mac/setup.sh folder <path>"
+        return 43
+    }
     WORKSHOP_APP_NAME=$name WORKSHOP_KIT_DIR=$KIT_DIR bash "$LINUX/handoff.sh" apply \
         || { echo ""; echo "STOPPED: the handoff is not complete (see [FAIL] above)."; return 1; }
     echo ""
-    echo "DONE: ~/workshop/$name is ready. The attendee now quits and reopens Claude Desktop, then opens a Local session:"
-    echo "  New session > Local > folder $HOME/workshop/$name > Trust > type /workshop-signin"
+    echo "DONE: $apps_dir/$name is ready. The attendee now quits and reopens Claude Desktop, then opens a Local session:"
+    echo "  New session > Local > folder $apps_dir/$name > Trust > type /workshop-signin"
 }
 
 case "${1:-}" in
@@ -207,9 +277,10 @@ case "${1:-}" in
     install-tools) install_tools ;;
     configure) configure ;;
     verify) verify ;;
+    folder) folder "${2:-}" "${3:-}" ;;
     handoff) handoff "${2:-}" ;;
     *)
-        echo "usage: setup.sh status | install-homebrew | install-tools | configure | verify | handoff <app name>"
+        echo "usage: setup.sh status | install-homebrew | install-tools | configure | verify | folder <path> [--synced-ok] | handoff <app name>"
         exit 2
         ;;
 esac

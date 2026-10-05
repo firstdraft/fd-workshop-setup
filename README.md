@@ -32,7 +32,11 @@ Plan on:
    **On a Mac:** Claude opens a Terminal window to install Homebrew. When it asks for your password, type your Mac
    password there and press Return (nothing shows as you type), and press Return when it asks. Claude never asks
    for your password.
-5. When prompted, choose and enter a name for your project.
+5. When prompted, choose a name for your project. Claude creates your project's folder with that name. On Windows
+   it is inside Linux (`home` &rarr; `appdev`), because apps there run much faster than on the Windows drive.
+   **On a Mac:** Claude first asks where to keep your projects: `appdev` in your home folder, or another folder you
+   choose. Never choose Dropbox, iCloud Drive (including Desktop and Documents, if iCloud syncs them), Google Drive
+   or another synced folder: syncing damages your app's files, and GitHub is your backup.
 
 ## Part 2: Sign in to your accounts
 
@@ -41,8 +45,8 @@ When you first try to sign in to First Draft, you'll hit a username/password wal
 6. Open a new session in Claude Desktop. Choose `WSL` &rarr; `Ubuntu-24.04` instead of `Local`.
    For "Choose folder", select the folder with the name of your project (`home` &rarr; `appdev` &rarr;
    `YOUR_PROJECT`).
-   **On a Mac:** first quit Claude Desktop (Cmd-Q) and open it again. Then keep `Local`, and choose the `workshop`
-   folder in your home folder, then `YOUR_PROJECT`.
+   **On a Mac:** first quit Claude Desktop (Cmd-Q) and open it again. Then keep `Local`, and choose the folder you
+   chose in step 5 (`appdev` in your home folder, unless you picked another), then `YOUR_PROJECT`.
 7. Type `/workshop-signin` and press Enter. Claude opens each sign-in page in your browser and copies any code you
    need to your clipboard. Approve each one and tell Claude when you are done, until every account is signed in.
    - **Cloudinary** stores your app's photos and has nothing to approve. After you sign up, Claude opens its
@@ -114,7 +118,7 @@ When you first try to sign in to First Draft, you'll hit a username/password wal
     ```
 17. Have sketches, notes, design documents or spreadsheets for your idea? Copy them into the new folder. On
     Windows, File Explorer shows it under **Linux** &rarr; `Ubuntu-24.04` &rarr; `home` &rarr; `appdev` &rarr;
-    `MY_IDEA`; on a Mac, it is `workshop` &rarr; `MY_IDEA` in your home folder. If you designed your app in Claude
+    `MY_IDEA`; on a Mac, it is `MY_IDEA` in the folder you chose in step 5. If you designed your app in Claude
     Design, choose **Export** &rarr; **Hand off to Claude Code** there and copy what it gives you.
 18. Open a new session in the new folder (on Windows, remember to choose `WSL` &rarr; `Ubuntu-24.04`) and describe
     your idea:
