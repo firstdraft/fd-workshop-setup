@@ -73,9 +73,6 @@ Have your workshop handout ready: First Draft asks for the workshop username and
     app, sign in with the same demo login as on your laptop.
 15. Make it yours. Ask for one change at a time, then try it on your laptop. Some ideas:
     ```text
-    Limit posts to 280 characters.
-    ```
-    ```text
     Limit how many people someone can follow to 50.
     ```
     ```text
