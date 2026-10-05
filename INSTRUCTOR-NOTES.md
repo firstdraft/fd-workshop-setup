@@ -86,7 +86,7 @@ The prompt is "Help me build a social network for just my family. It should work
 it's familiar." A rehearsal on 2026-10-03, against the Compiler then in Production, took about 8 minutes from prompt
 to approved summary (allow 10 to 12 with real typing) and 31 seconds to compile. It produced a private app where
 sign-in, the feed, posting, likes, comments, follows and profiles worked. "Make it look like Instagram" took about 3
-minutes, and each of the three customization ideas in README step 15 took 1.5 to 2 minutes as a Rails edit.
+minutes, and each customization idea it tried took 1.5 to 2 minutes as a Rails edit.
 
 What attendees get (released on the evening of 2026-10-04: Production 6d466ca3, CLI 0.8.2, plugin 0.8.4):
 
