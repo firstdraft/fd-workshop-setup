@@ -15,6 +15,8 @@ Plan on:
 ## Part 1: Set up your laptop
 
 1. Download this repo as a Zip folder.
+
+   ![On this repo's page, click the green Code button, then Download ZIP.](images/download-zip.png)
 2. Right-click the zip file you downloaded and choose "Extract All...".
    Extract it to your Documents folder or someplace you can easily find.
 3. Open Claude Desktop, go to the Code tab, and open the extracted "workshop-kit" folder.
@@ -35,8 +37,10 @@ Have your workshop handout ready: First Draft asks for the workshop username and
    `YOUR_PROJECT`).
 7. Type `/workshop-signin` and press Enter. Claude opens each sign-in page in your browser and copies any code you
    need to your clipboard. Approve each one and tell Claude when you are done, until every account is signed in.
-   For Cloudinary, which stores your app's photos, you copy its key from its website in three parts; Claude saves
-   them without showing them.
+   For Cloudinary, which stores your app's photos, you copy its key from its website in three parts, in the order
+   shown below; Claude saves them without showing them.
+
+   ![Cloudinary's API Keys page. Copy 1, the API environment variable, with its copy button; 2, the API Key; 3, the API Secret, after clicking the eye to show it.](images/cloudinary-api-keys.png)
 
 ## Part 3: Build your first app
 
@@ -68,6 +72,8 @@ Have your workshop handout ready: First Draft asks for the workshop username and
     The first deploy takes a few minutes. Your live app starts with no data: the sample data is only on your laptop.
     Sign up on the live app to try it: you are signed in right away. "Forgot password" emails are not sent until an
     email provider is set up.
+
+    ![In Render, click the workspace name at the top left, then New Workspace. Choose the free Hobby plan and name it after your app.](images/render-new-workspace.png)
 14. Try your app on a phone, in your browser:
     ```text
     Show me the Android app in Revyl.
