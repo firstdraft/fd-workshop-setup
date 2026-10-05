@@ -12,6 +12,8 @@
 #                                    | firstdraft | firstdraft-device
 #   bash login.sh stop <service>     cancel a sign-in that is still waiting
 #   bash login.sh status <service>   is it still waiting, or did it finish / time out?
+#   bash login.sh wait <service>     after the approval: give the sign-in up to 30
+#                                    seconds to save, then run its auth.sh check
 #
 # Starting again cancels the previous attempt for that service, because its
 # link no longer works once a new one is created.
@@ -55,7 +57,7 @@ case "$service" in
     # reach Ubuntu from the browser.
     firstdraft-device) command=(firstdraft login --device) ;;
     *)
-        echo "usage: login.sh start|stop|status github|github-refresh|render|neon|revyl|firstdraft|firstdraft-device"
+        echo "usage: login.sh start|stop|status|wait github|github-refresh|render|neon|revyl|firstdraft|firstdraft-device"
         exit 2 ;;
 esac
 
@@ -64,6 +66,14 @@ pid_file="$LOG_DIR/$service.pid"
 # The auth.sh check for this service: github-refresh -> github, firstdraft-device -> firstdraft.
 check_service=${service%-refresh}
 check_service=${check_service%-device}
+
+# Is the sign-in still running? An exited sign-in that nothing has reaped yet
+# is a zombie, which kill -0 still reports as alive. WSL's init has left
+# exited processes as zombies before (microsoft/WSL#4138).
+running() {
+    [ -n "${1:-}" ] && kill -0 "$1" 2>/dev/null \
+        && ! grep -qs '^State:[[:space:]]*Z' "/proc/$1/status"
+}
 
 stop_previous() {
     local pid
@@ -80,7 +90,7 @@ if [ "$action" = stop ]; then
 fi
 if [ "$action" = status ]; then
     pid=$(cat "$pid_file" 2>/dev/null)
-    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+    if running "$pid"; then
         echo "WAITING: the $service sign-in is still waiting for approval in the browser"
     elif grep -qi 'timed out' "$log" 2>/dev/null; then
         echo "TIMED OUT: the $service sign-in gave up before it was approved; start it again"
@@ -91,7 +101,21 @@ if [ "$action" = status ]; then
     fi
     exit 0
 fi
-[ "$action" = start ] || { echo "usage: login.sh start|stop|status <service>"; exit 2; }
+if [ "$action" = wait ]; then
+    # A device sign-in saves its login on the CLI's next poll, a few seconds
+    # after the approval, and then exits. Checking right away fails, and
+    # starting again would cancel the sign-in that was about to succeed.
+    pid=$(cat "$pid_file" 2>/dev/null)
+    for _ in $(seq 1 60); do
+        running "$pid" || break
+        sleep 0.5
+    done
+    if running "$pid"; then
+        echo "WAITING: the $service sign-in has not received the approval yet"
+    fi
+    exec bash "$(dirname "${BASH_SOURCE[0]}")/auth.sh" check "$check_service"
+fi
+[ "$action" = start ] || { echo "usage: login.sh start|stop|status|wait <service>"; exit 2; }
 
 stop_previous
 : > "$log"
@@ -117,14 +141,14 @@ find_link() {
 # (for example "already signed in", or an error).
 for _ in $(seq 1 60); do
     [ -n "$(find_link)" ] && break
-    kill -0 "$pid" 2>/dev/null || break
+    running "$pid" || break
     sleep 0.5
 done
 sleep 1   # let a one-time code printed just after the link arrive too
 
 clean=$(sed 's/\x1b\[[0-9;]*[A-Za-z]//g' "$log")
 
-if ! kill -0 "$pid" 2>/dev/null; then
+if ! running "$pid"; then
     rm -f "$pid_file"
     echo "FINISHED: the sign-in command exited without waiting for the browser. Its output:"
     printf '%s\n' "$clean" | tail -n 15
@@ -170,7 +194,7 @@ if [ -n "$url" ]; then
     fi
     echo "WAITING: the sign-in is running in the background until it is approved in the browser."
     [ -n "$expires_after" ] && echo "EXPIRES: this sign-in gives up ${expires_after} seconds after it started; the attendee must approve right away."
-    echo "After the attendee approves it, run: bash ~/.workshop/auth.sh check $check_service"
+    echo "After the attendee approves it, run: bash ~/.workshop/login.sh wait $service"
     exit 0
 fi
 
