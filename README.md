@@ -29,6 +29,9 @@ Plan on:
 
    ![Below the message box, click No folder, then Open folder.](images/open-folder-menu.png)
 
+   The folder picker below is from a Mac. **Windows users:** yours looks similar. Find the folder you extracted in
+   step 2, select `workshop-kit` inside it, and click **Select Folder**.
+
    ![In the folder you extracted, select workshop-kit, then click Open.](images/choose-workshop-kit.png)
 4. Start the setup. Type:
    ```text
