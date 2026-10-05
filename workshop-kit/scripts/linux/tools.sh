@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # tools.sh
 #
-# Install phase: the workshop's development tools. Runs inside Ubuntu as
-# appdev, piped in by install-tools.ps1 (and by check-status.ps1 to check).
-# Every component can be checked and installed separately, and installing
-# is safe to repeat.
+# Install phase: the workshop's development tools. On a Windows laptop it
+# runs inside Ubuntu as appdev, piped in by install-tools.ps1 (and by
+# check-status.ps1 to check). On a Mac it runs as the attendee, from
+# scripts/mac/setup.sh, under macOS's bash 3.2, and uses Homebrew instead
+# of apt. Every component can be checked and installed separately, and
+# installing is safe to repeat.
 #
 #   bash tools.sh check all           one line per component; exit code = number missing
 #   bash tools.sh check <component>
@@ -18,15 +20,43 @@ POSTGRES_VERSION=18
 REVYL_VERSION=v0.1.133
 FIRSTDRAFT_CLI_MIN_VERSION=0.8.1   # first version with 'firstdraft login'
 
-# Installed in this order; later components depend on earlier ones.
-COMPONENTS="apt-repos apt-packages postgres mise ruby node claude npm-packages render neon-skills revyl"
-
-APT_PACKAGES="build-essential rustc libssl-dev libyaml-dev zlib1g-dev libgmp-dev libffi-dev
-    unzip curl git ca-certificates gnupg wslu gh cloudflared postgresql-$POSTGRES_VERSION libpq-dev"
 NPM_PACKAGES="@firstdraft.com/cli @firstdraft.com/claude-code neonctl"
 
-# Commands run by Claude do not read ~/.bashrc or ~/.profile, so set PATH here.
-export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$HOME/.revyl/bin:$PATH"
+# Installed in this order; later components depend on earlier ones.
+if [ "$(uname -s)" = Darwin ]; then
+    MAC=1
+    COMPONENTS="xcode-clt homebrew brew-packages postgres mise ruby node claude npm-packages render neon-skills revyl"
+    # The apt list's tools and build libraries; macOS and Apple's Command
+    # Line Tools provide the compilers, zlib, libffi, curl, git and unzip.
+    BREW_PACKAGES="gh cloudflared postgresql@$POSTGRES_VERSION openssl@3 libyaml gmp rust"
+    # hw.optional.arm64 is 1 on Apple Silicon even under Rosetta.
+    if [ "$(sysctl -n hw.optional.arm64 2>/dev/null)" = 1 ]; then BREW_PREFIX=/opt/homebrew; else BREW_PREFIX=/usr/local; fi
+    BREW="$BREW_PREFIX/bin/brew"
+    POSTGRES_BIN="$BREW_PREFIX/opt/postgresql@$POSTGRES_VERSION/bin"
+    # zsh is macOS's login shell. Claude Desktop reads PATH from it, and
+    # login and interactive shells read different files, so PATH lines go
+    # in both.
+    SHELL_NAME=zsh
+    RC_FILE="$HOME/.zshrc"
+    RC_NAME="~/.zshrc"
+    PROFILE_FILES=("$HOME/.zprofile" "$HOME/.zshrc")
+    PROFILE_NAMES="~/.zprofile and ~/.zshrc"
+    export HOMEBREW_NO_ENV_HINTS=1
+    # Commands run by Claude may not have read the startup files yet, so set PATH here.
+    export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$HOME/.revyl/bin:$POSTGRES_BIN:$BREW_PREFIX/bin:$PATH"
+else
+    MAC=""
+    COMPONENTS="apt-repos apt-packages postgres mise ruby node claude npm-packages render neon-skills revyl"
+    APT_PACKAGES="build-essential rustc libssl-dev libyaml-dev zlib1g-dev libgmp-dev libffi-dev
+    unzip curl git ca-certificates gnupg wslu gh cloudflared postgresql-$POSTGRES_VERSION libpq-dev"
+    SHELL_NAME=bash
+    RC_FILE="$HOME/.bashrc"
+    RC_NAME="~/.bashrc"
+    PROFILE_FILES=("$HOME/.profile")
+    PROFILE_NAMES="~/.profile"
+    # Commands run by Claude do not read ~/.bashrc or ~/.profile, so set PATH here.
+    export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$HOME/.revyl/bin:$PATH"
+fi
 export MISE_YES=1
 cd "$HOME"
 
@@ -41,6 +71,18 @@ add_line() {
     if ! grep -qxF "$line" "$file" 2>/dev/null; then
         printf '\n# Added by workshop setup\n%s\n' "$line" >> "$file"
     fi
+}
+
+# Adds a PATH line to the login shell's startup files (PROFILE_FILES).
+add_to_profiles() {
+    local file
+    for file in "${PROFILE_FILES[@]}"; do add_line "$file" "$1"; done
+}
+
+# Do all of the login shell's startup files mention this text?
+profiles_have() {
+    local file
+    for file in "${PROFILE_FILES[@]}"; do grep -qF "$1" "$file" 2>/dev/null || return 1; done
 }
 
 
@@ -96,10 +138,110 @@ install_apt_packages() {
 }
 
 
-# --- postgres: server running, appdev can connect ---------------------------
+# --- xcode-clt, homebrew (Mac): Apple's compilers and git, and Homebrew ------
+
+check_xcode_clt() {
+    # Checked in this order because the /usr/bin tools ask to install the
+    # Command Line Tools (a dialog) when they are missing.
+    xcode-select -p >/dev/null 2>&1 || { echo "not installed"; return 1; }
+    xcrun clang --version >/dev/null 2>&1 || { echo "installed but clang does not run (has the Xcode license been accepted?)"; return 1; }
+    echo "$(xcode-select -p)"
+}
+
+check_homebrew() {
+    [ -x "$BREW" ] || { echo "not installed"; return 1; }
+    profiles_have 'brew shellenv' || { echo "not on PATH in $PROFILE_NAMES"; return 1; }
+    echo "$("$BREW" --version 2>/dev/null | head -n 1)"
+}
+
+# Homebrew's installer needs the attendee's Mac password, typed into a
+# terminal, so it runs in a Terminal window that the attendee watches. It
+# also installs the Command Line Tools when they are missing. This waits up
+# to 30 minutes for the window to finish.
+install_in_terminal() {
+    local script="$HOME/.workshop/install-homebrew.command" result="$HOME/.workshop/logs/homebrew.result"
+    local log="$HOME/.workshop/logs/homebrew.log"
+    mkdir -p "$HOME/.workshop/logs"
+    rm -f "$result"
+    # Written here rather than shipped in the zip: Gatekeeper blocks a
+    # downloaded .command file, but not one created on this Mac.
+    cat > "$script" <<EOF
+#!/bin/bash
+clear
+echo "Installing Homebrew and Apple's Command Line Tools for the workshop."
+echo
+echo "- When it asks for your Password, type your Mac password and press Return."
+echo "  Nothing shows while you type. That is normal."
+echo "- When it says 'Press RETURN', press Return."
+echo "- Leave this window open until it says you can close it."
+echo
+installer=\$(mktemp)
+if curl -fsSL -o "\$installer" https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh; then
+    /bin/bash "\$installer" 2>&1 | tee "$log"
+    status=\${PIPESTATUS[0]}
+else
+    echo "Could not download Homebrew's installer. Check the Wi-Fi." | tee "$log"
+    status=1
+fi
+rm -f "\$installer"
+echo "\$status" > "$result"
+echo
+if [ "\$status" -eq 0 ]; then
+    echo "Done. You can close this window and go back to Claude."
+else
+    echo "Homebrew was not installed. Go back to Claude."
+fi
+echo "(Skip any 'Next steps' commands above: Claude does them.)"
+EOF
+    chmod 755 "$script"
+    open -a Terminal "$script"
+    echo "OPENED: a Terminal window with Homebrew's installer. Waiting for it (up to 30 minutes)..."
+    for _ in $(seq 1 360); do
+        [ -f "$result" ] && break
+        sleep 5
+    done
+    [ -f "$result" ] || { echo "Homebrew's installer has not finished after 30 minutes"; return 1; }
+    if [ "$(cat "$result")" != 0 ]; then
+        echo "Homebrew's installer stopped (exit code $(cat "$result")). Its last lines:"
+        tail -n 15 "$log" 2>/dev/null
+        return 1
+    fi
+}
+
+install_xcode_clt() {
+    install_in_terminal
+}
+
+install_homebrew() {
+    if [ ! -x "$BREW" ] || ! check_xcode_clt >/dev/null; then
+        install_in_terminal
+    fi
+    add_to_profiles "eval \"\$($BREW shellenv)\""
+}
+
+
+# --- brew-packages (Mac): gh, cloudflared, PostgreSQL, build libraries -------
+
+check_brew_packages() {
+    local missing="" package
+    for package in $BREW_PACKAGES; do
+        "$BREW" list --formula --versions "$package" >/dev/null 2>&1 || missing="$missing $package"
+    done
+    [ -z "$missing" ] && echo "all installed" && return 0
+    echo "missing:$missing"; return 1
+}
+
+install_brew_packages() {
+    # shellcheck disable=SC2086
+    "$BREW" install $BREW_PACKAGES
+}
+
+
+# --- postgres: server running, the user can connect ---------------------------
 
 check_postgres() {
     local version
+    [ -n "$MAC" ] && { check_postgres_mac; return; }
     systemctl is-active --quiet postgresql || { echo "service not running"; return 1; }
     version=$(psql -d postgres -tAc 'show server_version' 2>&1) || { echo "appdev cannot connect: $version"; return 1; }
     case "$version" in
@@ -110,7 +252,38 @@ check_postgres() {
     echo "PostgreSQL $version running; user appdev can connect"
 }
 
+# Homebrew's PostgreSQL runs as the attendee, whose role and database it
+# creates under their macOS user name.
+check_postgres_mac() {
+    local version
+    "$BREW" services info "postgresql@$POSTGRES_VERSION" --json 2>/dev/null | grep -q '"running": *true' \
+        || { echo "service not running"; return 1; }
+    profiles_have "postgresql@$POSTGRES_VERSION/bin" || { echo "not on PATH in $PROFILE_NAMES"; return 1; }
+    version=$(psql -d postgres -tAc 'show server_version' 2>&1) || { echo "$USER cannot connect: $version"; return 1; }
+    case "$version" in
+        "$POSTGRES_VERSION".*) ;;
+        *) echo "server is version $version, expected $POSTGRES_VERSION"; return 1 ;;
+    esac
+    psql -d "$USER" -tAc 'select 1' >/dev/null 2>&1 || { echo "database '$USER' missing"; return 1; }
+    echo "PostgreSQL $version running; user $USER can connect"
+}
+
+install_postgres_mac() {
+    # The formula is keg-only (a versioned formula), so its psql and
+    # pg_config are not linked into Homebrew's bin folder.
+    add_to_profiles "export PATH=\"$POSTGRES_BIN:\$PATH\""
+    "$BREW" services start "postgresql@$POSTGRES_VERSION"
+    for _ in $(seq 1 30); do
+        pg_isready -q -d postgres && break
+        sleep 1
+    done
+    if ! psql -d postgres -tAc "select 1 from pg_database where datname = '$USER'" | grep -q 1; then
+        createdb "$USER"
+    fi
+}
+
 install_postgres() {
+    [ -n "$MAC" ] && { install_postgres_mac; return; }
     sudo systemctl enable --now postgresql
     if ! (cd /tmp && sudo -u postgres psql -tAc "select 1 from pg_roles where rolname = 'appdev'" | grep -q 1); then
         (cd /tmp && sudo -u postgres createuser --superuser appdev)
@@ -125,17 +298,23 @@ install_postgres() {
 
 check_mise() {
     [ -x "$HOME/.local/bin/mise" ] || { echo "not installed"; return 1; }
-    grep -qF 'mise activate bash' "$HOME/.bashrc" || { echo "not activated in ~/.bashrc"; return 1; }
-    grep -qF 'mise/shims' "$HOME/.profile" || { echo "shims not on PATH in ~/.profile"; return 1; }
+    grep -qF "mise activate $SHELL_NAME" "$RC_FILE" || { echo "not activated in $RC_NAME"; return 1; }
+    profiles_have 'mise/shims' || { echo "shims not on PATH in $PROFILE_NAMES"; return 1; }
+    if [ -n "$MAC" ]; then
+        profiles_have '.local/bin' || { echo "~/.local/bin not on PATH in $PROFILE_NAMES"; return 1; }
+    fi
     echo "$(mise --version 2>/dev/null | head -n 1)"
 }
 
 install_mise() {
     [ -x "$HOME/.local/bin/mise" ] || curl -fsSL https://mise.run | sh
+    # Ubuntu's ~/.profile already puts ~/.local/bin (mise, claude, render)
+    # on PATH; macOS's does not.
+    [ -z "$MAC" ] || add_to_profiles 'export PATH="$HOME/.local/bin:$PATH"'
     # Interactive terminals get full activation; other shells (including
     # commands Claude runs) find Ruby and Node through the shims folder.
-    add_line "$HOME/.bashrc" 'eval "$(~/.local/bin/mise activate bash)"'
-    add_line "$HOME/.profile" 'export PATH="$HOME/.local/share/mise/shims:$PATH"'
+    add_line "$RC_FILE" "eval \"\$(~/.local/bin/mise activate $SHELL_NAME)\""
+    add_to_profiles 'export PATH="$HOME/.local/share/mise/shims:$PATH"'
 }
 
 
@@ -227,7 +406,7 @@ install_neon_skills() {
 check_revyl() {
     local version
     command -v revyl >/dev/null || { echo "not installed"; return 1; }
-    grep -qF '.revyl/bin' "$HOME/.profile" || { echo "not on PATH in ~/.profile"; return 1; }
+    profiles_have '.revyl/bin' || { echo "not on PATH in $PROFILE_NAMES"; return 1; }
     version=$(revyl --version 2>/dev/null | head -n 1)
     case "$version" in
         *"${REVYL_VERSION#v}"*) echo "$version" ;;
@@ -237,8 +416,9 @@ check_revyl() {
 
 install_revyl() {
     curl -fsSL "https://raw.githubusercontent.com/RevylAI/revyl-cli/$REVYL_VERSION/scripts/install.sh" | REVYL_VERSION=$REVYL_VERSION sh
-    # The installer only adds itself to ~/.bashrc; login shells need it too.
-    add_line "$HOME/.profile" 'export PATH="$HOME/.revyl/bin:$PATH"'
+    # The installer only adds itself to ~/.bashrc (~/.zshrc on a Mac); login
+    # shells need it too.
+    add_to_profiles 'export PATH="$HOME/.revyl/bin:$PATH"'
 }
 
 

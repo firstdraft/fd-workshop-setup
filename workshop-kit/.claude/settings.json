@@ -3,6 +3,7 @@
     "allow": [
       "PowerShell(powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/*)",
       "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/*)",
+      "Bash(bash scripts/mac/setup.sh:*)",
       "PowerShell(Get-CimInstance Win32_ComputerSystem*)",
       "Read(./**)"
     ],

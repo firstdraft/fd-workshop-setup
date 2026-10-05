@@ -2,7 +2,8 @@
 # configure.sh
 #
 # Configure phase: git defaults, an SSH key, and GitHub's host key. Runs
-# inside Ubuntu as appdev, piped in by configure.ps1. The git name and email,
+# inside Ubuntu as appdev, piped in by configure.ps1, or on a Mac as the
+# attendee, from scripts/mac/setup.sh. The git name and email,
 # and uploading the SSH key, need the attendee's GitHub account, so they
 # happen after the GitHub sign-in (workshop-signin skill, git-identity.sh).
 #
@@ -20,6 +21,9 @@ GITHUB_ED25519_FINGERPRINT="SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU"
 SSH_KEY="$HOME/.ssh/id_ed25519"
 KNOWN_HOSTS="$HOME/.ssh/known_hosts"
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"
+# On a Mac, gh comes from Homebrew, which the setup session may not have on
+# PATH yet.
+[ "$(uname -s)" != Darwin ] || export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
 cd "$HOME"
 
 

@@ -1,5 +1,5 @@
-WORKSHOP LAPTOP SETUP (Windows)
-===============================
+WORKSHOP LAPTOP SETUP (Windows or Mac)
+======================================
 
 1. Right-click the zip file you downloaded and choose "Extract All...".
    Extract it to your Documents folder.
@@ -19,3 +19,15 @@ Before you start:
 - Save and close other work.
 
 If Claude is not working, double-click "Setup WSL without Claude.cmd" instead.
+
+ON A MAC
+========
+
+1. Double-click the zip file you downloaded. It unzips into a folder.
+
+2. and 3. are the same as above. There are no restarts.
+
+Claude opens a Terminal window to install Homebrew. When it asks for
+your password, type your Mac password there and press Return. Nothing
+shows while you type. Claude never asks for your password.
+"Setup WSL without Claude.cmd" is for Windows only.

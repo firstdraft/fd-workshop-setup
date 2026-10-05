@@ -19,6 +19,8 @@
 
 set -uo pipefail
 
+. "$(dirname "${BASH_SOURCE[0]}")/platform.sh"
+
 WORKSHOP_DIR="$HOME/.workshop"
 ENV_FILE="$WORKSHOP_DIR/cloudinary.env"
 PENDING_FILE="$WORKSHOP_DIR/cloudinary.pending"
@@ -33,7 +35,7 @@ AGAIN='then run: bash ~/.workshop/cloudinary.sh save'
 valid_piece() {
     local min=$1 piece=$2
     [[ $piece =~ ^[A-Za-z0-9._-]+$ && $piece =~ [A-Za-z0-9] && ${#piece} -ge $min ]] || return 1
-    case "${piece,,}" in
+    case "$(printf '%s' "$piece" | tr '[:upper:]' '[:lower:]')" in
         api_key | api_secret | my_key | my_secret | your_api_key | your_api_secret | cloud_name | my_cloud_name | your_cloud_name)
             return 1 ;;
     esac
@@ -51,13 +53,11 @@ split_url() {
 }
 
 
-# Prints the Windows clipboard's text without carriage returns, a byte-order
-# mark or surrounding spaces. Callers capture it; it must never reach the
-# terminal.
+# Prints the clipboard's text without carriage returns, a byte-order mark or
+# surrounding spaces. Callers capture it; it must never reach the terminal.
 read_clipboard() {
-    local powershell text
-    powershell=$(command -v powershell.exe || echo /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe)
-    text=$("$powershell" -NoProfile -NonInteractive -Command Get-Clipboard </dev/null 2>/dev/null) || return 1
+    local text
+    text=$(paste_text) || return 1
     text=${text//$'\r'/}
     text=${text#$'\xef\xbb\xbf'}
     text=${text#"${text%%[![:space:]]*}"}
@@ -73,11 +73,9 @@ unquote() {
     esac
 }
 
-# Empties the Windows clipboard, so the secret is not pasted somewhere later.
+# Empties the clipboard, so the secret is not pasted somewhere later.
 clear_clipboard() {
-    local clip
-    clip=$(command -v clip.exe || echo /mnt/c/Windows/System32/clip.exe)
-    printf '' | "$clip" 2>/dev/null
+    copy_text ''
 }
 
 # Writes a file only this user can read, replacing any earlier one in one step.
@@ -133,11 +131,12 @@ finish() {
 }
 
 save() {
-    local text pending=() cloud key url_key url_secret url_cloud format_cloud=""
-    text=$(read_clipboard) || { echo "INVALID: could not read the Windows clipboard (powershell.exe Get-Clipboard failed)."; return 1; }
-    [ -f "$PENDING_FILE" ] && mapfile -t pending < "$PENDING_FILE"
-    cloud=${pending[0]:-}
-    key=${pending[1]:-}
+    local text cloud="" key="" url_key url_secret url_cloud format_cloud=""
+    text=$(read_clipboard) || { echo "INVALID: could not read $CLIPBOARD."; return 1; }
+    # The pending file holds the cloud name, then the API Key, one per line.
+    if [ -f "$PENDING_FILE" ]; then
+        { IFS= read -r cloud; IFS= read -r key; } < "$PENDING_FILE"
+    fi
 
     case "$text" in
         "") echo "INVALID: the clipboard is empty. Ask the attendee to click the copy button again, $AGAIN"; return 1 ;;

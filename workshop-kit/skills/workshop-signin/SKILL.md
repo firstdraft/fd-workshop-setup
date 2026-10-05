@@ -2,15 +2,16 @@
 name: workshop-signin
 description: Sign the workshop attendee in to GitHub, Render, Neon, Revyl and First Draft, save their Cloudinary key, set their git name and email from their GitHub account, upload their SSH key, and connect Render to GitHub.
 disable-model-invocation: true
-allowed-tools: Bash(bash ~/.workshop/auth.sh:*), Bash(bash ~/.workshop/login.sh:*), Bash(bash ~/.workshop/git-identity.sh), Bash(bash ~/.workshop/render-workspace.sh:*), Bash(bash ~/.workshop/cloudinary.sh:*), Bash(gh ssh-key add:*), Bash(wslview:*)
+allowed-tools: Bash(bash ~/.workshop/auth.sh:*), Bash(bash ~/.workshop/login.sh:*), Bash(bash ~/.workshop/git-identity.sh), Bash(bash ~/.workshop/render-workspace.sh:*), Bash(bash ~/.workshop/cloudinary.sh:*), Bash(gh ssh-key add:*), Bash(bash ~/.workshop/open.sh:*)
 ---
 
 # Workshop sign-in
 
 You are helping a workshop attendee sign in to the tools they will use, in a
-Claude Desktop session running inside Ubuntu (WSL). Most attendees are not
-technical: one step at a time, plain words, and say what they will see before
-they see it. They are already signed in to Claude.
+Claude Desktop session: inside Ubuntu (WSL) on a Windows laptop, or a Local
+session on a Mac. The helpers work the same way on both. Most attendees are
+not technical: one step at a time, plain words, and say what they will see
+before they see it. They are already signed in to Claude.
 
 ## Rules
 
@@ -39,14 +40,14 @@ bash ~/.workshop/login.sh status <service>  # still waiting, ended, or timed out
 bash ~/.workshop/login.sh wait <service>    # after the approval: let it save, then check
 bash ~/.workshop/render-workspace.sh        # after the Render sign-in (step 4)
 bash ~/.workshop/cloudinary.sh save         # after each Cloudinary copy (step 4)
-wslview <link>                              # open any page in their Windows browser
+bash ~/.workshop/open.sh <link>             # open any page in their browser
 ```
 
 `login.sh start` starts the sign-in in the background and returns within
 about 30 seconds. It prints one of:
 
 - `URL:` (and sometimes `CODE:`), then `OPENED` and `COPIED`, then `WAITING`.
-  The sign-in page is already open in their Windows browser, and the link (or
+  The sign-in page is already open in their browser, and the link (or
   the code, for GitHub) is on their clipboard. Tell them so, and also show the
   link as a clickable Markdown link, `[Open the sign-in page](<URL>)`, in case
   the page did not open. If there is a code, show it in **bold**. Ask them to
@@ -94,7 +95,8 @@ bash ~/.workshop/git-identity.sh
 It uses the account's name (or username) and its private GitHub no-reply
 address, so their commits are linked to their GitHub profile without
 showing their real email. Tell them, in a sentence, the name and address it
-set.
+set. On a Mac it applies only to projects in their `workshop` folder, so
+any git name and email they already use elsewhere stay as they are.
 
 ### 3. SSH key (`github-ssh-key`)
 
@@ -138,22 +140,22 @@ If they do not have an account, they can create one on the sign-in page
    their apps now.
 2. **Render on GitHub** (no check). Render needs permission to read the code
    they will put on GitHub later. Run
-   `wslview https://github.com/apps/render/installations/new`. On that GitHub
-   page they choose their own account, choose **All repositories** (their
-   app's repository does not exist yet), and click **Install**. If GitHub
-   sends them on to Render and asks them to sign in or confirm, they do. Ask
-   them to tell you when they are done. If GitHub shows Render is already
-   installed, there is nothing to do. Since nothing can check this step, do it
-   whenever you did the Render sign-in; otherwise ask whether they already
-   installed Render on GitHub.
+   `bash ~/.workshop/open.sh https://github.com/apps/render/installations/new`.
+   On that GitHub page they choose their own account, choose **All
+   repositories** (their app's repository does not exist yet), and click
+   **Install**. If GitHub sends them on to Render and asks them to sign in or
+   confirm, they do. Ask them to tell you when they are done. If GitHub shows
+   Render is already installed, there is nothing to do. Since nothing can
+   check this step, do it whenever you did the Render sign-in; otherwise ask
+   whether they already installed Render on GitHub.
 
 **Neon needs its account ready first.** Neon's sign-in gives up 60 seconds
 after it starts, which is not enough time to create an account. So before
 `login.sh start neon`:
-1. Run `wslview https://console.neon.tech/signup` and ask them to sign up (or
-   sign in, if they already have an account), using **Continue with
-   GitHub**, which is quickest. They should finish any welcome screens until
-   they see the Neon console, then tell you.
+1. Run `bash ~/.workshop/open.sh https://console.neon.tech/signup` and ask
+   them to sign up (or sign in, if they already have an account), using
+   **Continue with GitHub**, which is quickest. They should finish any
+   welcome screens until they see the Neon console, then tell you.
 2. Only then run `login.sh start neon`. The sign-in page opens by itself
    (Neon opens it, so there is only one tab); they click to approve straight
    away.
@@ -165,13 +167,14 @@ after it starts, which is not enough time to create an account. So before
 which the attendee copies from Cloudinary's website in up to three pieces.
 After each copy, `cloudinary.sh save` saves it from their clipboard without
 showing it. Never ask them to paste anything into this chat.
-1. Run `wslview https://cloudinary.com/users/register_free`. They choose
-   **Sign up with GitHub** (or Google), which is quickest, or sign in if they
-   already have an account. They answer or skip any welcome questions until
-   they see the Cloudinary console, then tell you.
-2. Run `wslview https://console.cloudinary.com/app/settings/api-keys` (the
-   **API Keys** page, also under Settings). Ask them to click the copy button
-   next to **API environment variable** and tell you.
+1. Run `bash ~/.workshop/open.sh https://cloudinary.com/users/register_free`.
+   They choose **Sign up with GitHub** (or Google), which is quickest, or
+   sign in if they already have an account. They answer or skip any welcome
+   questions until they see the Cloudinary console, then tell you.
+2. Run
+   `bash ~/.workshop/open.sh https://console.cloudinary.com/app/settings/api-keys`
+   (the **API Keys** page, also under Settings). Ask them to click the copy
+   button next to **API environment variable** and tell you.
 3. Run `bash ~/.workshop/cloudinary.sh save` and follow what it prints:
    - `NEXT:` it needs the next piece: the **API Key**, then the **API
      Secret**. Pass on what it says, wait until they have copied it, and run
@@ -187,14 +190,14 @@ a phone only opens in a browser signed in to Revyl with the same account. So
 before `login.sh start revyl`:
 1. Ask whether they already have a Revyl account (some make one before the
    workshop).
-   - **No account:** run `wslview https://app.revyl.ai/signup`. They choose
-     **Continue with GitHub**. When Revyl asks them to choose an
+   - **No account:** run `bash ~/.workshop/open.sh https://app.revyl.ai/signup`.
+     They choose **Continue with GitHub**. When Revyl asks them to choose an
      organization, they **create a new one** of their own. They should not
      join an existing organization, even a friend's or their company's: they
      would share its phones and its free monthly time.
-   - **Already have one:** run `wslview https://app.revyl.ai`. If it shows
-     the sign-in page, they sign in the way they signed up (for example with
-     GitHub).
+   - **Already have one:** run `bash ~/.workshop/open.sh https://app.revyl.ai`.
+     If it shows the sign-in page, they sign in the way they signed up (for
+     example with GitHub).
 2. Ask them to tell you when they see their Revyl dashboard. That browser is
    the one where the phone preview opens later.
 3. Only then run `login.sh start revyl`; they approve in that same browser.
@@ -250,3 +253,5 @@ the attendee:
 > Desktop: choose **WSL > Ubuntu-24.04** and your app folder again (it is
 > under recent folders). Then follow **Part 3** of the workshop
 > instructions.
+
+On a Mac, say **Local** instead of **WSL > Ubuntu-24.04**.

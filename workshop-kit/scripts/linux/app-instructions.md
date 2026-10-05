@@ -1,10 +1,11 @@
-# Workshop apps on this laptop (Ubuntu in WSL)
+# Workshop apps on this laptop (Ubuntu in WSL on Windows, or a Mac)
 
 Added by the workshop kit. Where these notes differ from an app's own guides or a Neon skill, follow these notes.
 
 ## Files the user downloaded
-- Files the user downloads in Windows are in their Windows Downloads folder:
-  `"$(wslpath "$(wslvar USERPROFILE)")/Downloads"` (`wslvar` comes with `wslu`). Copy or unzip from there.
+- On Windows, files the user downloads are in their Windows Downloads folder:
+  `"$(wslpath "$(wslvar USERPROFILE)")/Downloads"` (`wslvar` comes with `wslu`). On a Mac they are in
+  `~/Downloads`, and macOS may ask the user to allow access to it. Copy or unzip from there.
 - Unzip a design into the project folder before the first Compile. Compiling into the current folder keeps it
   under `.firstdraft/design/`.
 
@@ -55,8 +56,8 @@ Added by the workshop kit. Where these notes differ from an app's own guides or 
 - Follow the "Deploy from the command line" section of the app's `DEPLOY.md`, with these additions:
 - Each app gets its own Render workspace, because Render's 750 free instance hours a month are per workspace and
   running out suspends every free web service in it. The Render CLI cannot create a workspace, so before an app's
-  first deploy, run `wslview https://dashboard.render.com` and have the user create one: the workspace switcher,
-  then **New workspace**, the **Hobby** plan (no monthly fee), named after the app. Then run
+  first deploy, run `bash ~/.workshop/open.sh https://dashboard.render.com` and have the user create one: the
+  workspace switcher, then **New workspace**, the **Hobby** plan (no monthly fee), named after the app. Then run
   `render workspaces -o json --confirm` and `render workspace set <ID> --confirm` with its ID. The sign-in's
   workspace only makes the CLI work. Before later `render` commands for an app, set its workspace again if another
   app's is active.
@@ -76,7 +77,8 @@ Added by the workshop kit. Where these notes differ from an app's own guides or 
   print them. For an app with uploads, skip `DEPLOY.md`'s `read -rs CLOUDINARY_URL`: start the same one command with
   `. ~/.workshop/cloudinary.env &&`, which sets the variable for `--env-var "CLOUDINARY_URL=$CLOUDINARY_URL"`.
 - If Render cannot reach the GitHub repository, the user adds it to Render's GitHub app:
-  `wslview https://github.com/apps/render/installations/new`. A new workspace may need its own GitHub connection: if
-  Render still cannot see the repository, they connect GitHub in that workspace's settings on the Render dashboard.
+  `bash ~/.workshop/open.sh https://github.com/apps/render/installations/new`. A new workspace may need its own
+  GitHub connection: if Render still cannot see the repository, they connect GitHub in that workspace's settings on
+  the Render dashboard.
 - Give the user the live URL when the newest deploy is `live`. The deployed app starts empty: sample records are
   for development only.
