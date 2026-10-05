@@ -38,14 +38,17 @@ Have your workshop handout ready: First Draft asks for the workshop username and
    ```text
    /create-full-stack-app Help me build a social network for just my family. It should work and look like Instagram so that it's familiar.
    ```
-9. Claude asks a few questions about your app, one at a time. Answer them in your own words, or say "you pick".
-10. Claude shows you a summary of the plan, including anything First Draft can't build yet. Change anything you
-    like: it's your app. When it looks right, approve it. Building takes about a minute.
+9. Claude first looks up how similar apps work, then asks a few questions, one at a time. One of them is how
+   involved you want to be in technical decisions. Answer in your own words, or say "you pick". At any point you can
+   say "make the rest of the decisions for me".
+10. A few minutes in, Claude tells you what First Draft will and won't build. Then it shows you a summary of the
+    plan. Change anything you like: it's your app. When it looks right, approve it. Building takes about a minute.
 11. Start the web app:
     ```text
     Start the web app.
     ```
     Open `http://localhost:3000` in your browser. If your app has sign-in, use the demo login Claude shows you.
+    Try posting a photo, liking a post, and following someone.
 12. Save your work to GitHub:
     ```text
     Commit the app and push it to a new private repository on my GitHub account. Give me the link.
@@ -66,7 +69,8 @@ Have your workshop handout ready: First Draft asks for the workshop username and
     ```text
     Now show me the iPhone app.
     ```
-    The link opens a phone in your browser. If Revyl asks you to sign in, use the same account as before.
+    The link opens a phone in your browser. If Revyl asks you to sign in, use the same account as before. Inside your
+    app, sign in with the same demo login as on your laptop.
 15. Make it yours. Ask for one change at a time, then try it on your laptop. Some ideas:
     ```text
     Limit posts to 280 characters.
@@ -95,6 +99,7 @@ Have your workshop handout ready: First Draft asks for the workshop username and
 
 - **The page stopped loading:** type `Restart the web app.`
 - **Claude seems stuck:** press `Esc`, then type `continue`.
+- **Building seems stuck for more than five minutes:** type `Cancel the stuck compile and try again.`
 - **Claude asks you to approve something:** it checks before risky steps, such as deploying. Approve it if it is
   what you asked for.
 - **The same step fails twice:** raise your hand, and leave the error on screen for the instructor.
