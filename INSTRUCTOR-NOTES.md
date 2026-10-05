@@ -374,6 +374,10 @@ Symptoms and their fixes, including this rehearsal's, are in
   deploy), so attendees are not asked to approve every step. The Desktop
   mode picker can still override it per folder.
 
+- Each app deploys to its own Render Hobby workspace, which the attendee
+  creates in the dashboard before its first deploy (the CLI cannot): Render's
+  750 free instance hours a month are per workspace, and running out suspends
+  every free web service in it.
 - `appdev` gets passwordless sudo, so Claude can install packages later
   without a password prompt it cannot answer. The password `appdev` is still
   set for when attendees use a terminal themselves.

@@ -132,7 +132,10 @@ If they do not have an account, they can create one on the sign-in page
    `bash ~/.workshop/render-workspace.sh`. It keeps a workspace that is
    already set, or sets the account's only one. If it prints `ASK:`, the
    account has several: show them the names, ask which one to use, and run it
-   again with that workspace's ID.
+   again with that workspace's ID. Any one will do: it only makes the Render
+   CLI work. Before each app's first deploy, the deploy step has them create
+   that app's own workspace and sets it, so they need not choose one for
+   their apps now.
 2. **Render on GitHub** (no check). Render needs permission to read the code
    they will put on GitHub later. Run
    `wslview https://github.com/apps/render/installations/new`. On that GitHub

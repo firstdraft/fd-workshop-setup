@@ -53,6 +53,13 @@ Added by the workshop kit. Where these notes differ from an app's own guides or 
 
 ## Deploying to Render
 - Follow the "Deploy from the command line" section of the app's `DEPLOY.md`, with these additions:
+- Each app gets its own Render workspace, because Render's 750 free instance hours a month are per workspace and
+  running out suspends every free web service in it. The Render CLI cannot create a workspace, so before an app's
+  first deploy, run `wslview https://dashboard.render.com` and have the user create one: the workspace switcher,
+  then **New workspace**, the **Hobby** plan (no monthly fee), named after the app. Then run
+  `render workspaces -o json --confirm` and `render workspace set <ID> --confirm` with its ID. The sign-in's
+  workspace only makes the CLI work. Before later `render` commands for an app, set its workspace again if another
+  app's is active.
 - Never use `npx get-db`, `neon-new`, neon.new, `neon claim` or any other claimable or no-account database: they run
   PostgreSQL 17, and the deploy fails with `function uuidv7() does not exist`. Use the new Neon project on
   PostgreSQL 18 that `DEPLOY.md` creates, and its direct connection string, not pooled, even where the Neon skills
@@ -61,12 +68,12 @@ Added by the workshop kit. Where these notes differ from an app's own guides or 
   new Neon account has an organization. Run `neonctl orgs list -o json` first and add `--org-id <id>` to
   `DEPLOY.md`'s `projects create` command.
 - Pass `--confirm` to every `render` command, and `-o json` when you read its output; without them it can wait for
-  input forever. List services with `render services list -o json --confirm`. The sign-in set the workspace; if a
-  command says none is set, run `render workspaces -o json --confirm`, then `render workspace set <ID> --confirm`.
+  input forever. List services with `render services list -o json --confirm`.
 - Keep the database URL, `SECRET_KEY_BASE` and `CLOUDINARY_URL` in shell variables, as `DEPLOY.md` does, and never
   print them. For an app with uploads, skip `DEPLOY.md`'s `read -rs CLOUDINARY_URL`: start the same one command with
   `. ~/.workshop/cloudinary.env &&`, which sets the variable for `--env-var "CLOUDINARY_URL=$CLOUDINARY_URL"`.
 - If Render cannot reach the GitHub repository, the user adds it to Render's GitHub app:
-  `wslview https://github.com/apps/render/installations/new`.
+  `wslview https://github.com/apps/render/installations/new`. A new workspace may need its own GitHub connection: if
+  Render still cannot see the repository, they connect GitHub in that workspace's settings on the Render dashboard.
 - Give the user the live URL when the newest deploy is `live`. The deployed app starts empty: sample records are
   for development only.
