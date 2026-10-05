@@ -42,7 +42,7 @@ When you first try to sign in to First Draft, you'll hit a username/password wal
    For "Choose folder", select the folder with the name of your project (`home` &rarr; `appdev` &rarr;
    `YOUR_PROJECT`).
    **On a Mac:** first quit Claude Desktop (Cmd-Q) and open it again. Then keep `Local`, and choose the `workshop`
-   folder in your home folder, then `YOUR_PROJECT`. Use `Local` wherever these steps say `WSL`.
+   folder in your home folder, then `YOUR_PROJECT`.
 7. Type `/workshop-signin` and press Enter. Claude opens each sign-in page in your browser and copies any code you
    need to your clipboard. Approve each one and tell Claude when you are done, until every account is signed in.
    - **Cloudinary** stores your app's photos and has nothing to approve. After you sign up, Claude opens its
@@ -53,7 +53,8 @@ When you first try to sign in to First Draft, you'll hit a username/password wal
 
 ## Part 3: Build your first app
 
-8. Open a new session (`WSL` &rarr; `Ubuntu-24.04`, your project folder) and type:
+8. Open a new session in your project folder (on Windows, remember to choose `WSL` &rarr; `Ubuntu-24.04`) and
+   type:
    ```text
    /create-full-stack-app Help me build a social network for just my family. It should work and look like Instagram so that it's familiar.
    ```
@@ -111,14 +112,12 @@ When you first try to sign in to First Draft, you'll hit a username/password wal
     ```text
     Make a new project folder called MY_IDEA next to this one.
     ```
-17. Have sketches, notes, design documents or spreadsheets for your idea? Put them in your Downloads folder and
-    ask Claude to copy them in:
-    ```text
-    Copy FILE_NAME from my Downloads folder into MY_IDEA.
-    ```
-    If you designed your app in Claude Design, choose **Export** &rarr; **Hand off to Claude Code** there and copy
-    what it gives you.
-18. Open a new session (`WSL` &rarr; `Ubuntu-24.04`, the new folder) and describe your idea:
+17. Have sketches, notes, design documents or spreadsheets for your idea? Copy them into the new folder. On
+    Windows, File Explorer shows it under **Linux** &rarr; `Ubuntu-24.04` &rarr; `home` &rarr; `appdev` &rarr;
+    `MY_IDEA`; on a Mac, it is `workshop` &rarr; `MY_IDEA` in your home folder. If you designed your app in Claude
+    Design, choose **Export** &rarr; **Hand off to Claude Code** there and copy what it gives you.
+18. Open a new session in the new folder (on Windows, remember to choose `WSL` &rarr; `Ubuntu-24.04`) and describe
+    your idea:
     ```text
     /create-full-stack-app A place for my book club to pick the next book and vote on meeting dates.
     ```
