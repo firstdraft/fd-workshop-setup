@@ -1,6 +1,12 @@
 # First Draft workshop
 
-Everything happens in Claude Desktop's **Code** tab. You type a request, and Claude does the work. Plan on:
+Everything happens in Claude Desktop's **Code** tab. You type a request, and Claude does the work.
+
+**Can't install programs on this laptop, or prefer not to let Claude work on your own computer?** Follow the
+[Codespace guide](https://github.com/firstdraft/drawing-board#readme) instead. Everything there runs in your
+browser.
+
+Plan on:
 
 - **Setting up your laptop:** 20 to 60 minutes. It takes longer if your laptop needs to restart.
 - **Signing in to your accounts:** about 20 minutes.
@@ -74,6 +80,9 @@ Have your workshop handout ready: First Draft asks for the workshop username and
     app, sign in with the same demo login as on your laptop.
 15. Make it yours. Ask for one change at a time, then try it on your laptop. Some ideas:
     ```text
+    Style it similar to Instagram.
+    ```
+    ```text
     Limit how many people someone can follow to 50.
     ```
     ```text
@@ -87,11 +96,19 @@ Have your workshop handout ready: First Draft asks for the workshop username and
     ```text
     Make a new project folder called MY_IDEA next to this one.
     ```
-17. Open a new session (`WSL` &rarr; `Ubuntu-24.04`, the new folder) and describe your idea:
+17. Have sketches, notes, design documents or spreadsheets for your idea? Put them in your Downloads folder and
+    ask Claude to copy them in:
+    ```text
+    Copy FILE_NAME from my Downloads folder into MY_IDEA.
+    ```
+    If you designed your app in Claude Design, choose **Export** &rarr; **Hand off to Claude Code** there and copy
+    what it gives you.
+18. Open a new session (`WSL` &rarr; `Ubuntu-24.04`, the new folder) and describe your idea:
     ```text
     /create-full-stack-app A place for my book club to pick the next book and vote on meeting dates.
     ```
-    Your sign-ins carry over, so you can go straight to building.
+    Mention any files you copied in, and paste your Claude Design handoff after your idea. Your sign-ins carry over,
+    so you can go straight to building.
 
 ## If something goes wrong
 
