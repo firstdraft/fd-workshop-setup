@@ -77,13 +77,24 @@ When you first try to sign in to First Draft, you'll hit a username/password wal
    ![Click your home folder in the sidebar, then the projects folder you chose in step 5, here appdev.](images/mac-home-folder.png)
 
    ![Inside appdev, select your project's folder, here firstdraft-workshop, then click Open.](images/mac-project-folder.png)
-7. Type `/workshop-signin` and press Enter. Claude opens each sign-in page in your browser and copies any code you
-   need to your clipboard. Approve each one and tell Claude when you are done, until every account is signed in.
-   - **Cloudinary** stores your app's photos and has nothing to approve. After you sign up, Claude opens its
-     **API Keys** page. Copy the three things marked below, one at a time and in order, and tell Claude after each
-     copy. Claude saves each one from your clipboard without showing it.
+7. Type `/workshop-signin` and press Enter. Claude signs you in to the services your app uses, **one at a time, in
+   the order below**. For each one, Claude opens its page in your browser and copies any code you need to your
+   clipboard. Sign up or approve there, then come back and tell Claude you're done. **Wait for Claude to ask before
+   you start the next one.**
+   - **GitHub** stores your app's code. Claude also sets the name and email on your commits and adds your laptop's
+     key to GitHub, so it can save your work there without a password.
+   - **Render** puts your app on the internet.
+   - **Neon** runs your app's database on the internet.
+   - **Cloudinary** stores the photos people upload to your app. It has nothing to approve: after you sign up,
+     Claude opens its **API Keys** page and asks you to copy the three things marked below, one at a time and in
+     order. Tell Claude after each copy; Claude saves each one from your clipboard without showing it.
 
      ![Cloudinary's API Keys page. Copy 1, the API environment variable, with its copy button; 2, the API Key; 3, the API Secret, after clicking the eye to show it.](images/cloudinary-api-keys.png)
+   - **Revyl** shows your iPhone and Android app on a phone in your browser.
+   - **First Draft** plans and builds your app. This is where the username and password wall appears: ask your
+     instructor.
+
+   When Claude says you're all signed in, go on to Part 3.
 
 ## Part 3: Build your first app
 
