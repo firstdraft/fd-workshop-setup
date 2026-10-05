@@ -142,8 +142,8 @@ attendee opens themselves. Walk them through it, one step at a time:
 3. With the **folder picker**, choose `/home/appdev/<name>` (their app
    folder), and click **Trust** when asked.
 4. Type **/workshop-signin** and press Enter. Claude helps them sign in to
-   GitHub, Render, Neon, Revyl and First Draft. Sign-in pages open in their
-   browser by themselves.
+   GitHub, Render, Neon, Cloudinary, Revyl and First Draft. Sign-in pages
+   open in their browser by themselves.
 5. When that Claude says they are all signed in, they start one more new
    session the same way (WSL > Ubuntu-24.04 > their app folder, now under
    recent folders) and tell Claude what they want to build.

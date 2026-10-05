@@ -13,7 +13,7 @@ set -uo pipefail
 # No 'claude' check: the workshop runs in Claude Desktop, which handles its own
 # sign-in. (The Claude Code CLI is installed too, as a fallback; 'claude auth
 # status' shows whether it is signed in.)
-SERVICES="github git-identity github-ssh-key render render-workspace neon revyl firstdraft"
+SERVICES="github git-identity github-ssh-key render render-workspace neon cloudinary revyl firstdraft"
 
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$HOME/.revyl/bin:$PATH"
 # Checks must never open a browser to start a sign-in.
@@ -67,6 +67,14 @@ check_neon() {
     [ -s "$HOME/.config/neon/credentials.json" ] || { echo "not signed in"; return 1; }
     timeout 20 neonctl me --output json </dev/null >/dev/null 2>&1 || { echo "sign-in expired"; return 1; }
     echo "signed in"
+}
+
+check_cloudinary() {
+    # Cloudinary has no CLI sign-in: the skill saves its key from the
+    # clipboard with cloudinary.sh, and this checks the saved file's shape
+    # without printing it.
+    [ -f "$HOME/.workshop/cloudinary.sh" ] || { echo "helper not installed (run the handoff again)"; return 1; }
+    bash "$HOME/.workshop/cloudinary.sh" check
 }
 
 check_revyl() {

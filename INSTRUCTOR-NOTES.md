@@ -23,7 +23,8 @@ check-status -> ENABLE_VIRTUALIZATION -> prepare-bios (BitLocker suspend, reboot
 
 Claude Desktop, WSL session (WSL > Ubuntu-24.04 > /home/appdev/<app>):
 /workshop-signin -> GitHub (+ git name/email from the account, SSH key upload),
-                    Render (+ CLI workspace, Render GitHub app), Neon, Revyl (+ browser sign-in),
+                    Render (+ CLI workspace, Render GitHub app), Neon,
+                    Cloudinary (key saved from the clipboard), Revyl (+ browser sign-in),
                     First Draft (device code)
 new WSL session  -> /create-full-stack-app <app idea>
 ```
@@ -49,11 +50,28 @@ every Claude session in Ubuntu loads that file without being asked:
   and its direct connection string (never a claimable database, never
   pooled), `bin/rails secret`, `--confirm` on every `render` command, the
   `render services create` flags and environment variables, and polling
-  `render deploys list` until live.
+  `render deploys list` until live;
+- photo and file uploads: `cloudinary.sh install .` puts the saved
+  Cloudinary key in the app's `.env.development.local`, and the deploy
+  sources the saved file into `render services create`.
 
 A re-run replaces the block between its marker lines and leaves the rest of
 the file alone. The check only looks for the block, so a laptop that already
 has it picks up a newer version only when `handoff.ps1` runs again.
+
+Cloudinary (photo and file uploads, read from `CLOUDINARY_URL`) has no CLI
+sign-in, and its console shows the API environment variable only as a
+format with `<your_api_key>` and `<your_api_secret>` placeholders. So the
+sign-in skill has the attendee copy that format (for the cloud name), then
+the API Key, then the API Secret, and runs `~/.workshop/cloudinary.sh save`
+after each copy. The helper reads the Windows clipboard with
+`powershell.exe Get-Clipboard`, asks Cloudinary's Admin API `ping` whether
+it accepts the key (only a 401 rejects it; no answer still saves), writes
+`~/.workshop/cloudinary.env` with mode 600, empties the clipboard, and
+prints only `SAVED`, `NEXT` or `INVALID`, never the value.
+`cloudinary.sh install` writes only into apps that use Cloudinary
+(`config/initializers/cloudinary.rb`; `bin/lint-env` rejects the key in
+other apps) and only where Git ignores `.env.development.local`.
 
 `Setup WSL without Claude.cmd` runs the same scripts in a plain window, as a
 fallback. It replaces the old `setup-wsl.cmd` / `setup-wsl.ps1` in this
@@ -280,6 +298,22 @@ What First Draft generated in that rehearsal:
     `render services list -o json --confirm` returned at once.
   - The notes' `render services create` flags worked: 3 seconds, then about
     1.6 minutes for the first Docker build.
+- `cloudinary.sh` on Ubuntu 24.04 (container, 2026-10-04), with stubs for
+  `powershell.exe` (the clipboard, with Windows line endings), `clip.exe`
+  and, except for two real calls, Cloudinary's `ping`. `save` stored a
+  whole value in one copy, and the console's format, API Key and API Secret
+  in three copies, as one `CLOUDINARY_URL` line (mode 600), then emptied the
+  clipboard. It printed `INVALID` and saved nothing for an empty clipboard,
+  several lines, Cloudinary's docs examples, a hidden secret (dots or stars,
+  even when `ping` could not be reached), shell metacharacters, a piece
+  copied at the wrong step, and a key Cloudinary rejected (the real `ping`
+  answered 401 for a fake key). No output contained any part of the value,
+  even with a verbose `~/.curlrc` (`curl -q` ignores it), and the secret
+  reached `curl` only on stdin. `install` replaced earlier `CLOUDINARY_URL`
+  lines and kept the rest of `.env.development.local`, skipped an app
+  without uploads, and refused a folder where Git does not ignore that file.
+  `handoff.sh apply` (stubbed `npm`) installed the helper, and sourcing the
+  saved file filled `--env-var "CLOUDINARY_URL=$CLOUDINARY_URL"`.
 
 ## Test before the workshop (not yet verified)
 
@@ -318,6 +352,15 @@ What First Draft generated in that rehearsal:
     the session keeps `cloudflared` and the web app running in the
     background, and that `neonctl projects create` does not stop to ask for
     a Neon organization on a fresh account.
+12. **Cloudinary on a fresh account, from a Claude Desktop WSL session:**
+    Sign up with GitHub works; the API Keys page's copy buttons (API
+    environment variable, API Key, then API Secret after the eye button and
+    any confirmation) put the expected text on the clipboard;
+    `cloudinary.sh save` reads it through the real `powershell.exe
+    Get-Clipboard`, gets 200 from `ping`, and empties the clipboard with
+    `clip.exe`. Then an app compiled with photo uploads stores a photo in
+    development after `cloudinary.sh install .`, and on Render after a deploy
+    that sources the saved file.
 
 ## Deliberate choices
 

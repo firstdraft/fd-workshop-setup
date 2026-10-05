@@ -7,8 +7,9 @@
 #   - creates the app folder ~/<app name>
 #   - installs the sign-in checks to ~/.workshop/auth.sh, the sign-in helper
 #     to ~/.workshop/login.sh, ~/.workshop/git-identity.sh (sets git's
-#     name and email from the GitHub account) and
-#     ~/.workshop/render-workspace.sh (sets the Render CLI's workspace)
+#     name and email from the GitHub account),
+#     ~/.workshop/render-workspace.sh (sets the Render CLI's workspace) and
+#     ~/.workshop/cloudinary.sh (saves the Cloudinary key, puts it in apps)
 #   - installs the sign-in skill to ~/.claude/skills/workshop-signin (it only
 #     loads when the attendee types /workshop-signin)
 #   - links the First Draft skill from the npm package into ~/.claude/skills,
@@ -24,7 +25,7 @@
 
 set -uo pipefail
 
-ITEMS="app-folder auth-checks login-helper git-identity-helper render-workspace-helper signin-skill firstdraft-skill app-instructions auto-mode"
+ITEMS="app-folder auth-checks login-helper git-identity-helper render-workspace-helper cloudinary-helper signin-skill firstdraft-skill app-instructions auto-mode"
 
 WORKSHOP_DIR="$HOME/.workshop"
 SKILLS_DIR="$HOME/.claude/skills"
@@ -63,6 +64,11 @@ check_git_identity_helper() {
 check_render_workspace_helper() {
     [ -f "$WORKSHOP_DIR/render-workspace.sh" ] || { echo "not installed"; return 1; }
     echo "$WORKSHOP_DIR/render-workspace.sh"
+}
+
+check_cloudinary_helper() {
+    [ -f "$WORKSHOP_DIR/cloudinary.sh" ] || { echo "not installed"; return 1; }
+    echo "$WORKSHOP_DIR/cloudinary.sh"
 }
 
 check_signin_skill() {
@@ -151,6 +157,7 @@ apply_all() {
     copy_from_kit "$kit/scripts/linux/login.sh" "$WORKSHOP_DIR/login.sh"
     copy_from_kit "$kit/scripts/linux/git-identity.sh" "$WORKSHOP_DIR/git-identity.sh"
     copy_from_kit "$kit/scripts/linux/render-workspace.sh" "$WORKSHOP_DIR/render-workspace.sh"
+    copy_from_kit "$kit/scripts/linux/cloudinary.sh" "$WORKSHOP_DIR/cloudinary.sh"
     copy_from_kit "$kit/skills/workshop-signin" "$SKILLS_DIR/workshop-signin"
     ln -sfn "$firstdraft_skill" "$SKILLS_DIR/create-full-stack-app"
     install_app_instructions "$kit/scripts/linux/app-instructions.md"

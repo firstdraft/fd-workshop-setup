@@ -16,6 +16,16 @@ Added by the workshop kit. Where these notes differ from an app's own guides or 
 - Do not run `bin/ci` while the web app is running: its setup step reinstalls JavaScript packages and stops the
   JavaScript watcher. Stop the web app, run `bin/ci`, then start the web app again as above.
 
+## Photo and file uploads (Cloudinary)
+- An app with uploads (`config/initializers/cloudinary.rb` exists) needs `CLOUDINARY_URL`. The sign-in saved the
+  user's key in `~/.workshop/cloudinary.env`. Never print it, show a file that holds it, or ask the user for it.
+- Before starting such an app's web app, run `bash ~/.workshop/cloudinary.sh install .`. It writes the key into
+  `.env.development.local` without printing it; restart the web app if it was already running. If it prints
+  `MISSING`, the user runs `/workshop-signin` in a new session (it redoes only what is missing), then run it again.
+- An upload failing with `KeyError: key not found: "CLOUDINARY_URL"` means the key is missing: locally, run the
+  install above; on Render, the service was created without it, so delete it and create it again with the recipe,
+  reusing the same Neon project.
+
 ## iPhone and Android preview
 - Preview both with Revyl. GitHub builds the app from the pushed commit: do not install Xcode, a JDK, the Android
   SDK or an Emulator, and skip the guides' Emulator, Codespace and Mac steps.
@@ -48,7 +58,9 @@ Added by the workshop kit. Where these notes differ from an app's own guides or 
 - Pass `--confirm` to every `render` command, and `-o json` when you read its output; without them it can wait for
   input forever. List services with `render services list -o json --confirm`. The sign-in set the workspace; if a
   command says none is set, run `render workspaces -o json --confirm`, then `render workspace set <ID> --confirm`.
-- Keep the database URL and `SECRET_KEY_BASE` in shell variables, as `DEPLOY.md` does, and never print them.
+- Keep the database URL, `SECRET_KEY_BASE` and `CLOUDINARY_URL` in shell variables, as `DEPLOY.md` does, and never
+  print them. For an app with uploads, skip `DEPLOY.md`'s `read -rs CLOUDINARY_URL`: start the same one command with
+  `. ~/.workshop/cloudinary.env &&`, which sets the variable for `--env-var "CLOUDINARY_URL=$CLOUDINARY_URL"`.
 - If Render cannot reach the GitHub repository, the user adds it to Render's GitHub app:
   `wslview https://github.com/apps/render/installations/new`.
 - Give the user the live URL when the newest deploy is `live`. The deployed app starts empty: sample records are
