@@ -45,8 +45,9 @@ Plan on:
    `continue`.
 
    **Mac users:** Claude opens a Terminal window to install Homebrew. When it asks for your password, type your Mac
-   password there and press Return (nothing shows as you type), and press Return when it asks. Claude never asks
-   for your password.
+   login password there and press Return. **Nothing appears while you type: no dots, no stars, and the cursor
+   doesn't move. That's normal; type it anyway.** If it says "Sorry, try again", type it again. Press Return when it
+   says "Press RETURN". Claude never asks for your password.
 5. When prompted, choose a name for your project. Claude creates your project's folder with that name.
 
    **Windows users:** the folder is inside Linux (`home` &rarr; `appdev`), because apps there run much faster than

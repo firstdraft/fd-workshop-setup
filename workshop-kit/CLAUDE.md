@@ -240,8 +240,9 @@ Homebrew's installer needs. Get the instructor.
 
 **INSTALL_HOMEBREW**: before running it, tell the attendee: *"A Terminal
 window will open with Homebrew's installer. Homebrew installs developer
-tools on Macs. When it asks for your Password, type your Mac login password
-and press Return; nothing shows while you type, which is normal. When it
+tools on Macs. When it asks for your password, type your Mac login password
+and press Return. Nothing appears while you type, not even dots, which is
+normal: type it anyway. If it says Sorry, try again, type it again. When it
 says Press RETURN, press Return. If your Mac does not have Apple's Command
 Line Tools yet, it downloads them too, which can take 5 to 15 minutes.
 Leave the window open until it says you can close it."* Then run
