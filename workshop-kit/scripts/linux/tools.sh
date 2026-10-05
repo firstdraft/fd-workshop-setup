@@ -368,7 +368,33 @@ check_npm_packages() {
     if [ "$(printf '%s\n%s\n' "$FIRSTDRAFT_CLI_MIN_VERSION" "$version" | sort -V | head -n 1)" != "$FIRSTDRAFT_CLI_MIN_VERSION" ]; then
         echo "First Draft CLI '$version' is older than $FIRSTDRAFT_CLI_MIN_VERSION"; return 1
     fi
-    echo "$NPM_PACKAGES (First Draft CLI $version)"
+
+    # install_npm_packages installs @latest, but a laptop set up earlier
+    # keeps what it got then, so compare with npm. An unreachable registry
+    # only warns: setup must not depend on it. The result stays on one
+    # line because callers parse each check's [PASS]/[FAIL] line.
+    local root label installed latest stale="" unchecked=""
+    root=$(npm root --global 2>/dev/null)
+    for package in @firstdraft.com/cli @firstdraft.com/claude-code; do
+        case "$package" in
+            @firstdraft.com/cli) label="First Draft CLI" ;;
+            *) label="First Draft plugin" ;;
+        esac
+        installed=$(node -p 'require(process.argv[1]).version' "$root/$package/package.json" 2>/dev/null)
+        latest=$(npm view "$package" version --fetch-retries=0 --fetch-timeout=10000 2>/dev/null)
+        if [ -z "$installed" ] || [ -z "$latest" ]; then
+            unchecked="$unchecked $package"
+        elif [ "$installed" != "$latest" ] &&
+             [ "$(printf '%s\n%s\n' "$installed" "$latest" | sort -V | head -n 1)" = "$installed" ]; then
+            stale="$stale; $label $installed is older than $latest"
+        fi
+    done
+    [ -z "$stale" ] || { echo "${stale#; }"; return 1; }
+    if [ -n "$unchecked" ]; then
+        echo "$NPM_PACKAGES (First Draft CLI $version; WARNING: could not compare with npm's latest:$unchecked)"
+    else
+        echo "$NPM_PACKAGES (First Draft CLI $version, up to date)"
+    fi
 }
 
 install_npm_packages() {
