@@ -1,3 +1,4 @@
+
 # First Draft workshop
 
 Everything happens in Claude Desktop's **Code** tab. You type a request, and Claude does the work.
@@ -43,8 +44,9 @@ Plan on:
 When you first try to sign in to First Draft, you'll hit a username/password wall. Ask your instructor for that.
 
 6. Open a new session in Claude Desktop. Choose `WSL` &rarr; `Ubuntu-24.04` instead of `Local`.
-   For "Choose folder", select the folder with the name of your project (`home` &rarr; `appdev` &rarr;
-   `YOUR_PROJECT`).
+   <img width="1191" height="378" alt="Screenshot 2026-10-05 105139" src="https://github.com/user-attachments/assets/1d0ef4eb-87d9-47a6-a4c3-b4d6361a755d" /> For "Choose folder", select the folder with the name of your project (`home` &rarr; `appdev` &rarr;
+   `YOUR_PROJECT`). <img width="1346" height="975" alt="Screenshot 2026-10-05 105416" src="https://github.com/user-attachments/assets/cf886d2d-bcb0-413b-a827-f3e219c3c638" />
+
    **On a Mac:** first quit Claude Desktop (Cmd-Q) and open it again. Then keep `Local`, and choose the folder you
    chose in step 5 (`appdev` in your home folder, unless you picked another), then `YOUR_PROJECT`.
 7. Type `/workshop-signin` and press Enter. Claude opens each sign-in page in your browser and copies any code you
