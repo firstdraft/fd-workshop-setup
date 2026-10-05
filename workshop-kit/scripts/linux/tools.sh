@@ -170,8 +170,16 @@ install_in_terminal() {
 clear
 echo "Installing Homebrew and Apple's Command Line Tools for the workshop."
 echo
-echo "- When it asks for your Password, type your Mac password and press Return."
-echo "  Nothing shows while you type. That is normal."
+echo "=================================================================="
+echo " Type your Mac login password below, then press Return."
+echo " NOTHING APPEARS AS YOU TYPE: no dots, no stars. That is normal."
+echo " If it says 'Sorry, try again', type it again."
+echo "=================================================================="
+echo
+# Asking here, with our own prompt, means Homebrew's installer reuses
+# the approval instead of showing a bare 'Password:' line.
+sudo -v -p "Mac password (invisible while you type): " || true
+echo
 echo "- When it says 'Press RETURN', press Return."
 echo "- Leave this window open until it says you can close it."
 echo

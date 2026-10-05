@@ -108,6 +108,9 @@ and does not include is in [its section there](INSTRUCTOR-NOTES.md#the-family-so
   waiting step and run `bash scripts/mac/setup.sh status` again; it reopens the window.
 - **`[FAIL] xcode-clt: installed but clang does not run`.** Xcode is installed but its license was never accepted. In
   Terminal, the attendee runs `sudo xcodebuild -license accept` and types their password, then types `continue`.
+- **A Mac attendee is stuck at the Terminal's password prompt.** Typing a password in Terminal shows nothing at
+  all, not even dots, so attendees think it's broken. Have them type their Mac login password anyway and press
+  Return; after "Sorry, try again", they retype it. Their account must be an administrator.
 - **`[FAIL] postgres: server is version 1X, expected 18`.** Another PostgreSQL (Postgres.app, or another Homebrew
   version) holds port 5432. Stop it (quit Postgres.app, or `brew services stop postgresql@1X`), then `continue`.
 - **A new session cannot find `ruby`, `node`, `psql` or `render`, or finds older ones.** Claude Desktop was not
