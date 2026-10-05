@@ -58,9 +58,9 @@ When you first try to sign in to First Draft, you'll hit a username/password wal
 
    ![On a Mac, after reopening Claude Desktop, click the folder button below the message box, then Open folder.](images/mac-change-folder.png)
 
-   ![Click your home folder in the sidebar, then the projects folder you chose in step 5.](images/mac-home-folder.png)
+   ![Click your home folder in the sidebar, then the projects folder you chose in step 5, here appdev.](images/mac-home-folder.png)
 
-   ![Inside the projects folder, select your project's folder, then click Open.](images/mac-project-folder.png)
+   ![Inside appdev, select your project's folder, here firstdraft-workshop, then click Open.](images/mac-project-folder.png)
 7. Type `/workshop-signin` and press Enter. Claude opens each sign-in page in your browser and copies any code you
    need to your clipboard. Approve each one and tell Claude when you are done, until every account is signed in.
    - **Cloudinary** stores your app's photos and has nothing to approve. After you sign up, Claude opens its
