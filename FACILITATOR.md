@@ -1,7 +1,7 @@
 # When something goes wrong (facilitator cheat sheet)
 
 Symptom, then the fix. Run commands in the attendee's Ubuntu: ask their Claude session to run them, or open an Ubuntu
-terminal. Background is in [INSTRUCTOR-NOTES.md](INSTRUCTOR-NOTES.md), and what the family social network app does
+terminal. On a Mac, ask their Claude session or use Terminal; their app folders are in `~/workshop`. Background is in [INSTRUCTOR-NOTES.md](INSTRUCTOR-NOTES.md), and what the family social network app does
 and does not include is in [its section there](INSTRUCTOR-NOTES.md#the-family-social-network-readme-part-3).
 
 ## Building
@@ -85,7 +85,27 @@ and does not include is in [its section there](INSTRUCTOR-NOTES.md#the-family-so
   the attendee use a phone hotspot.
 - **The sign-in skill has no Cloudinary step, or shows `[FAIL] cloudinary: helper not installed`.** The laptop was set
   up from an older zip. Download the zip again, open its `workshop-kit` folder in a Local session, type `continue`
-  (it redoes the handoff; give the same app name), then run `/workshop-signin` again in a WSL session.
+  (it redoes the handoff; give the same app name), then run `/workshop-signin` again in a WSL session (on a Mac, a
+  Local session).
+
+## On a Mac
+
+- **The setup's Terminal window says `Need sudo access` or `not in the sudoers file`.** The attendee's macOS account is
+  not an administrator. Someone with an administrator account must install Homebrew, or the attendee uses the
+  Codespace guide.
+- **The attendee closed the Terminal window before it said "You can close this window".** Ask Claude to stop the
+  waiting step and run `bash scripts/mac/setup.sh status` again; it reopens the window.
+- **`[FAIL] xcode-clt: installed but clang does not run`.** Xcode is installed but its license was never accepted. In
+  Terminal, the attendee runs `sudo xcodebuild -license accept` and types their password, then types `continue`.
+- **`[FAIL] postgres: server is version 1X, expected 18`.** Another PostgreSQL (Postgres.app, or another Homebrew
+  version) holds port 5432. Stop it (quit Postgres.app, or `brew services stop postgresql@1X`), then `continue`.
+- **A new session cannot find `ruby`, `node`, `psql` or `render`, or finds older ones.** Claude Desktop was not
+  restarted after setup: quit it with Cmd-Q and reopen it. If another version manager (asdf, rbenv, nvm) is listed
+  after the workshop lines in `~/.zshrc`, its versions win; ask Claude to move the `# Added by workshop setup` lines
+  to the end of `~/.zshrc` and `~/.zprofile`.
+- **`git push` asks for a passphrase.** The attendee already had an SSH key with a passphrase, which setup keeps. They
+  type the passphrase in Terminal once (`ssh-add --apple-use-keychain ~/.ssh/id_ed25519`).
+- **macOS asks whether Claude may access Downloads, Documents or Desktop.** The kit or a file is there: click Allow.
 
 ## Commands
 
@@ -105,7 +125,8 @@ firstdraft plan compile
 ```
 
 `plan init` only creates the new Project's ID; the copied Plan replaces its name. Then the attendee opens a new session
-in `/home/appdev/APP-2` (WSL, Ubuntu-24.04) and continues from README step 11.
+in `/home/appdev/APP-2` (WSL, Ubuntu-24.04) and continues from README step 11. On a Mac, use `~/workshop/APP` and
+`~/workshop/APP-2` in the commands, and open a Local session in `~/workshop/APP-2`.
 
 ### Cancel with the attendee's token
 

@@ -10,6 +10,8 @@
 
 set -uo pipefail
 
+. "$(dirname "${BASH_SOURCE[0]}")/platform.sh"
+
 # No 'claude' check: the workshop runs in Claude Desktop, which handles its own
 # sign-in. (The Claude Code CLI is installed too, as a fallback; 'claude auth
 # status' shows whether it is signed in.)
@@ -43,8 +45,12 @@ check_git_identity() {
     local name email expected
     expected=$(gh api user --jq '"\(.id)+\(.login)@users.noreply.github.com"' 2>/dev/null) \
         || { echo "needs GitHub sign-in first"; return 1; }
-    name=$(git config --global user.name) || { echo "git name not set"; return 1; }
-    email=$(git config --global user.email) || { echo "git email not set"; return 1; }
+    if [ "$WORKSHOP_PLATFORM" = mac ] \
+        && [ "$(git config --global --get 'includeIf.gitdir:~/workshop/.path')" != '~/.workshop/gitconfig' ]; then
+        echo "not applied to ~/workshop"; return 1
+    fi
+    name=$(git config "${GIT_IDENTITY[@]}" user.name) || { echo "git name not set"; return 1; }
+    email=$(git config "${GIT_IDENTITY[@]}" user.email) || { echo "git email not set"; return 1; }
     [ "$email" = "$expected" ] || { echo "git email is '$email', not the account's no-reply address"; return 1; }
     echo "$name <$email>"
 }
@@ -65,7 +71,7 @@ check_neon() {
     # 'neonctl me' starts a browser sign-in when signed out, so only ask it
     # when saved credentials exist, and never let it wait.
     [ -s "$HOME/.config/neon/credentials.json" ] || { echo "not signed in"; return 1; }
-    timeout 20 neonctl me --output json </dev/null >/dev/null 2>&1 || { echo "sign-in expired"; return 1; }
+    run_with_timeout 20 neonctl me --output json </dev/null >/dev/null 2>&1 || { echo "sign-in expired"; return 1; }
     echo "signed in"
 }
 

@@ -76,6 +76,47 @@ prints only `SAVED`, `NEXT` or `INVALID`, never the value.
 (`config/initializers/cloudinary.rb`; `bin/lint-env` rejects the key in
 other apps) and only where Git ignores `.env.development.local`.
 
+### On a Mac
+
+`CLAUDE.md`'s "On a Mac" section runs `scripts/mac/setup.sh`, which follows
+the same check-and-next-step loop with the same `scripts/linux/*.sh`
+phases. They branch on `uname -s` and install with Homebrew. The helpers
+source `platform.sh` for what differs (`open`/`pbcopy`/`pbpaste` instead of
+`wslview`/`clip.exe`/`powershell.exe`, Perl instead of `setsid` and
+`timeout`), and every `.sh` runs under macOS's bash 3.2.
+
+```
+Claude Desktop, Local session (this folder):
+setup.sh status -> INSTALL_HOMEBREW -> Terminal window: Homebrew's installer (+ Command Line Tools);
+                                       the attendee types their Mac password there
+                -> INSTALL_TOOLS    -> brew: gh cloudflared postgresql@18 (service) openssl@3 libyaml gmp rust;
+                                       then mise, Ruby, Node, the CLIs, Revyl, as on Windows
+                -> CONFIGURE        -> configure.sh (an existing SSH key is kept)
+                -> HANDOFF          -> verify, ask app name, handoff (~/workshop/<app>)
+                -> DONE             -> quit and reopen Claude Desktop, new Local session in ~/workshop/<app>
+```
+
+This is the attendee's own account, so the Mac handoff keeps its changes
+narrow:
+- App folders go in `~/workshop`, and the app-session notes in
+  `~/workshop/CLAUDE.md`. Claude loads `CLAUDE.md` from every folder above
+  the working folder, so only sessions under `~/workshop` see them.
+- The sign-in skill, the First Draft skill link and the Neon skills are
+  user skills, as on Windows. Project skills in a parent folder are found
+  only up to the repository root, and each app folder becomes a repository.
+  The sign-in skill only loads when typed.
+- Git's name and email from the GitHub account go in
+  `~/.workshop/gitconfig`, which the global config includes only for
+  repositories under `~/workshop`. Global git defaults (`main`, gh over
+  SSH) and the SSH key are set as on Windows; an existing key is kept.
+- Auto mode is set in `~/.claude/settings.json` only when it has no
+  `defaultMode`. Project settings cannot start sessions in auto mode, and
+  the docs say auto is the built-in default only for terminal and VS Code
+  sessions, not Desktop.
+- The PATH lines go in both `~/.zprofile` and `~/.zshrc`. Claude Desktop
+  reads PATH from the shell's startup files when it starts, so the attendee
+  quits and reopens it after setup.
+
 `Setup WSL without Claude.cmd` runs the same scripts in a plain window, as a
 fallback. It replaces the old `setup-wsl.cmd` / `setup-wsl.ps1` in this
 folder, which can be deleted.
@@ -317,6 +358,36 @@ Symptoms and their fixes, including this rehearsal's, are in
   returned `[FAIL]` at once. With a PID 1 that never reaps
   (`sleep infinity`), the old `status` called a finished sign-in `WAITING`;
   the new one says `ENDED`. Not yet tried on a laptop.
+- Mac setup (2026-10-05, on the owner's Mac, which already had the tools,
+  with nothing installed or changed there). **Nobody has run it on a fresh
+  Mac**: not Homebrew's installer in the Terminal window, the Command Line
+  Tools, any `tools.sh install` step on a Mac, PostgreSQL as a Homebrew
+  service, or a Local session using the result.
+  - Read-only against the owner's Mac: `setup.sh status` reported each
+    component and `INSTALL_TOOLS` (mise was not installed); `verify` and the
+    configure and handoff checks ran without changing anything.
+  - With a scratch `HOME` and stub CLIs (`render`, `gh`, `neonctl`, `npm`,
+    `open`, `pbcopy`, `pbpaste`, `curl`), under `/bin/bash` 3.2: the
+    handoff (twice) created `~/workshop/fam`, one notes block in
+    `~/workshop/CLAUDE.md`, auto mode, and kept a `defaultMode` already
+    chosen. `login.sh` opened and copied the Render link and the GitHub
+    code, `stop` ended the whole sign-in process group, and `wait` passed
+    after the approval. `git-identity.sh` set the name and email for
+    `~/workshop` repositories only. `cloudinary.sh` saved a key from three
+    copies through the clipboard stubs and emptied the clipboard. The neon
+    check's timeout ended a hanging `neonctl me` after 20 seconds. No
+    output or log held the stubs' secrets.
+  - `tools.sh install homebrew` with Homebrew present only added the
+    `brew shellenv` line, once. The Terminal flow, with `open` stubbed,
+    wrote an executable `.command` without a quarantine attribute that
+    parses under bash 3.2, then passed or failed on the result it waited
+    for.
+  - The Windows path: in a Debian container with stubs for `wslview`,
+    `clip.exe` and `powershell.exe`, the same run against `origin/main`
+    and this change differed only in the two new helpers and the browser
+    message, which no longer says "Windows". The handoff still strips
+    Windows line endings on both platforms. Every `.sh` passes `bash -n`
+    under bash 3.2 and 5.2; the `.ps1` files are unchanged.
 
 ## Test before the workshop (not yet verified)
 
@@ -365,6 +436,18 @@ Symptoms and their fixes, including this rehearsal's, are in
     `clip.exe`. Then an app compiled with photo uploads stores a photo in
     development after `cloudinary.sh install .`, and on Render after a deploy
     that sources the saved file.
+13. **A fresh Mac, end to end:** Homebrew's installer in the Terminal window
+    (password, Return, the Command Line Tools), `install-tools` (on Apple
+    Silicon mise downloads a prebuilt Ruby; on Intel it compiles one),
+    `brew services` starting PostgreSQL 18, and that after quitting and
+    reopening Claude Desktop a Local session in `~/workshop/<app>` finds
+    Ruby, Node, `psql` and the CLIs, loads `~/workshop/CLAUDE.md`, and lists
+    `/workshop-signin`.
+14. **The Mac's Local session in auto mode:** that `defaultMode: auto` in
+    `~/.claude/settings.json` starts it in Auto, and that the skill's
+    `allowed-tools` lets the helpers run without prompts.
+15. **A Mac with existing tools:** another PostgreSQL on port 5432, asdf or
+    rbenv ahead of mise on PATH, or a passphrase on an existing SSH key.
 
 ## Deliberate choices
 

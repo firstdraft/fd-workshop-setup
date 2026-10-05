@@ -1,4 +1,7 @@
-# Workshop laptop setup (Windows + WSL)
+# Workshop laptop setup (Windows + WSL, or a Mac)
+
+**On a Mac** (macOS, `darwin`), skip to [On a Mac](#on-a-mac) and follow
+only that section. Everything before it is for Windows.
 
 You are helping a workshop attendee get their Windows laptop ready: WSL 2 with
 Ubuntu 24.04, a Linux user named `appdev`, and the workshop's development
@@ -27,8 +30,10 @@ that need the attendee (permission prompts, restarts, BIOS).
    Linux password `appdev` is set by the scripts; you do not need to type it.
 6. **Before any restart**, get a clear "yes" from the attendee, tell them to
    save their work, and give them the resume instructions (see RESTART below).
-7. **Windows only.** If `$env:OS` is not `Windows_NT` (the attendee has a Mac
-   or Linux laptop), tell them this kit is for Windows and to ask the instructor.
+7. **Windows or Mac.** On a Mac, follow [On a Mac](#on-a-mac) instead. If
+   `$env:OS` is not `Windows_NT` and the laptop is not a Mac (a Linux
+   laptop), tell them this kit is for Windows and Mac laptops and to ask the
+   instructor.
 8. Speak simply: one step at a time, no jargon, and say what they will see
    before they see it.
 
@@ -178,3 +183,120 @@ start (for example "the device is managed"), get the instructor.
 - `logs/`: output of the admin steps and each `verify.ps1` run.
 - `state/`: `status.json` from the last check, and a restart marker.
 - `Setup WSL without Claude.cmd`: double-click fallback that runs the same steps.
+- `scripts/mac/setup.sh`: the Mac setup (see below). It runs the same
+  `scripts/linux/*.sh` phases, which use Homebrew on a Mac.
+
+## On a Mac
+
+Here the attendee's own macOS account is set up directly: no WSL, no extra
+user. Homebrew installs the same development tools as on Windows, and the
+rest of the workshop happens in a new **Local** Claude Desktop session in
+`~/workshop/<app name>`. Ignore the Windows sections above.
+
+### Rules
+
+1. **Always start by running `bash scripts/mac/setup.sh status`**, including
+   when the attendee says "continue". Do the one step it prints as
+   `NEXT STEP`, then run `status` again. Repeat until the next step is
+   `DONE`.
+2. **Use the script; do not improvise.** Do not run your own `brew`, `sudo`,
+   `xcode-select`, `chsh` or installer commands, and do not edit their
+   shell startup files. If a step fails and the troubleshooting table below
+   does not cover it, stop and get the instructor. Show them the error text.
+3. **If the same NEXT STEP comes back after you already did it once, stop**
+   and get the instructor. Do not loop.
+4. **Never** uninstall anything, or delete or reset data.
+5. **Passwords:** never ask for, type, or repeat the attendee's Mac
+   password. Homebrew's installer asks for it in a Terminal window, and the
+   attendee types it there themselves.
+6. Speak simply: one step at a time, no jargon, and say what they will see
+   before they see it.
+
+Run every step from this folder, with a **10-minute timeout** (600000 ms):
+
+```
+bash scripts/mac/setup.sh <step>
+```
+
+| Step | What it does | Mac password? |
+|---|---|---|
+| `status` | Read-only. Prints every check and the `NEXT STEP` | No |
+| `install-homebrew` | Opens a Terminal window with Homebrew's installer, which also installs Apple's Command Line Tools if they are missing, and waits for it (up to 30 min; run in the background) | Yes, typed into Terminal |
+| `install-tools` | Installs the development tools with Homebrew and mise (10-30 min; run in the background) | No |
+| `configure` | Sets git defaults, creates an SSH key, trusts github.com | No |
+| `verify` | Final check, prints `RESULT: READY` / `NOT READY` | No |
+| `handoff <name>` | Creates `~/workshop/<name>`, installs the sign-in and First Draft skills and the app-session notes | No |
+
+### What to do for each NEXT STEP
+
+**STOP_LOW_DISK**: the Mac needs 10 GB free. Help them free space: they
+empty the Trash themselves, and System Settings > General > Storage shows
+what is large. Do not delete files yourself.
+
+**STOP_NOT_ADMIN**: their Mac account is not an administrator, which
+Homebrew's installer needs. Get the instructor.
+
+**INSTALL_HOMEBREW**: before running it, tell the attendee: *"A Terminal
+window will open with Homebrew's installer. Homebrew installs developer
+tools on Macs. When it asks for your Password, type your Mac login password
+and press Return; nothing shows while you type, which is normal. When it
+says Press RETURN, press Return. If your Mac does not have Apple's Command
+Line Tools yet, it downloads them too, which can take 5 to 15 minutes.
+Leave the window open until it says you can close it."* Then run
+`install-homebrew` **in the background** and wait for it. If it prints the
+installer's last lines with an error, use the troubleshooting table. If the
+attendee closed the window before it finished, stop the background command
+and run `status` again.
+
+**INSTALL_TOOLS**: tell the attendee this takes 10-30 minutes and that the
+Mac must stay plugged in, awake, and on Wi-Fi (no lid closing). Run
+`install-tools` **in the background** and wait for it; it prints a line per
+component. macOS may show a "Background Items Added" notice for PostgreSQL,
+which is expected. If it prints `STOPPED`, run it once more (network
+failures are common); if the same component fails again, show the attendee
+the error lines and get the instructor.
+
+**CONFIGURE**: run `configure` (no questions). It sets git defaults, creates
+an SSH key if they do not have one (an existing key is kept) and trusts
+github.com. Their git name and email are set later from their GitHub
+account, for workshop projects only, when they sign in to GitHub.
+
+**HANDOFF**:
+1. Run `verify`. On `NOT READY`, use the troubleshooting table and do not
+   continue.
+2. On `RESULT: READY`, ask what they want to call the app they will build.
+   Suggest `firstdraft-workshop`; any name of lowercase letters, numbers and
+   dashes works (turn "My Cool App" into `my-cool-app` and confirm it).
+3. Run `handoff <name>`. It creates `~/workshop/<name>`, installs the
+   sign-in and First Draft skills, and writes the notes for the app sessions
+   to `~/workshop/CLAUDE.md`, which only sessions in folders under
+   `~/workshop` read. Exit code 41 means the name is not valid.
+4. Go to DONE.
+
+**DONE**: everything here is finished. Give the attendee all of these steps
+at once, because the first one closes this chat:
+1. Quit Claude Desktop completely (the **Claude** menu > **Quit Claude**, or
+   Cmd-Q) and open it again, so its sessions find the new tools.
+2. In the Code tab, start a **new session** and choose **Local** in the
+   environment picker.
+3. With the **folder picker**, choose the `workshop` folder in their home
+   folder, then `<name>` (`/Users/<their user>/workshop/<name>`), and click
+   **Trust** when asked.
+4. Type **/workshop-signin** and press Enter. Claude helps them sign in to
+   GitHub, Render, Neon, Cloudinary, Revyl and First Draft. Sign-in pages
+   open in their browser by themselves.
+5. When that Claude says they are all signed in, they start one more new
+   session the same way (Local, their app folder, now under recent folders)
+   and tell Claude what they want to build.
+
+### Troubleshooting on a Mac
+
+| Symptom | Meaning | What to do |
+|---|---|---|
+| `Need sudo access`, `not in the sudoers file` or `Insufficient permissions` in Homebrew's output | Not an administrator | Get the instructor |
+| `Failed during: git fetch`, `curl: (6)`, `Could not download`, timeouts | Network problem | Check Wi-Fi, turn off VPN, run the step again |
+| `[FAIL] xcode-clt: installed but clang does not run` | Xcode is installed but its license was never accepted | Get the instructor |
+| `[FAIL] postgres: server is version ...` | Another PostgreSQL (Postgres.app, or another Homebrew version) is already running on this Mac | Get the instructor |
+| `[FAIL] Login shell is ...` | The account uses a shell other than zsh | Get the instructor |
+| macOS asks whether Claude may access the Downloads or Documents folder | The kit is in that folder | The attendee clicks **Allow** |
+| `HTTPS download failed` in verify | Proxy or SSL inspection (often company laptops) | Get the instructor |

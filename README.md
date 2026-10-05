@@ -19,6 +19,7 @@ Plan on:
    ![On this repo's page, click the green Code button, then Download ZIP.](images/download-zip.png)
 2. Right-click the zip file you downloaded and choose "Extract All...".
    Extract it to your Documents folder or someplace you can easily find.
+   **On a Mac:** double-click the zip file instead. It unzips into a folder next to it.
 3. Open Claude Desktop, go to the Code tab, and open the extracted "workshop-kit" folder.
 4. Start the setup. Type:
    ```text
@@ -28,6 +29,9 @@ Plan on:
    installs Ubuntu, a Linux system that runs inside Windows, where your apps and their tools will live. Click **Yes**
    when Windows asks for permission. If Claude asks you to restart, do so, then reopen the same folder in Claude
    Desktop and type `continue`.
+   **On a Mac:** Claude opens a Terminal window to install Homebrew. When it asks for your password, type your Mac
+   password there and press Return (nothing shows as you type), and press Return when it asks. Claude never asks
+   for your password.
 5. When prompted, choose and enter a name for your project.
 
 ## Part 2: Sign in to your accounts
@@ -37,6 +41,8 @@ Have your workshop handout ready: First Draft asks for the workshop username and
 6. Open a new session in Claude Desktop. Choose `WSL` &rarr; `Ubuntu-24.04` instead of `Local`.
    For "Choose folder", select the folder with the name of your project (`home` &rarr; `appdev` &rarr;
    `YOUR_PROJECT`).
+   **On a Mac:** first quit Claude Desktop (Cmd-Q) and open it again. Then keep `Local`, and choose the `workshop`
+   folder in your home folder, then `YOUR_PROJECT`. Use `Local` wherever these steps say `WSL`.
 7. Type `/workshop-signin` and press Enter. Claude opens each sign-in page in your browser and copies any code you
    need to your clipboard. Approve each one and tell Claude when you are done, until every account is signed in.
    - **Cloudinary** stores your app's photos and has nothing to approve. After you sign up, Claude opens its
@@ -130,6 +136,7 @@ Have your workshop handout ready: First Draft asks for the workshop username and
 
 ## After the workshop
 
-- To come back to a project, open a session with `WSL` &rarr; `Ubuntu-24.04` and choose its folder.
+- To come back to a project, open a session with `WSL` &rarr; `Ubuntu-24.04` (on a Mac, `Local`) and choose its
+  folder.
 - Render's free plan sleeps when nobody visits, so the first visit afterwards takes about a minute.
 - To remove an app from the internet, ask Claude: `Delete this app's Render service and its Neon project.`

@@ -4,8 +4,8 @@
 # Starts a sign-in that waits for the browser, without blocking Claude:
 # the sign-in keeps running in the background, and this script prints its
 # link (and one-time code, if any) as soon as it appears, then returns.
-# It also opens the link in the default Windows browser and copies it (or
-# the code, if the page asks for one) to the Windows clipboard.
+# It also opens the link in the default browser and copies it (or the code,
+# if the page asks for one) to the clipboard (see platform.sh).
 # Installed to ~/.workshop/login.sh by handoff.sh; used by the sign-in skill.
 #
 #   bash login.sh start <service>    github | github-refresh | render | neon | revyl
@@ -21,11 +21,17 @@
 
 set -uo pipefail
 
+. "$(dirname "${BASH_SOURCE[0]}")/platform.sh"
+
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$HOME/.revyl/bin:$PATH"
 # Stop the CLIs from opening a browser themselves (most ignore this setting
 # anyway, and the ones that do would open a second tab): this script opens
 # the link instead, the same way for every service.
 export BROWSER=/bin/false
+
+# Terminal color codes are removed from the CLIs' output. A literal escape
+# character, because older macOS sed does not read \x1b.
+ESC=$(printf '\033')
 
 LOG_DIR="$HOME/.workshop/logs"
 mkdir -p "$LOG_DIR"
@@ -50,11 +56,11 @@ case "$service" in
         # after 60 seconds, which cannot be changed.
         command=(neonctl auth); opens_browser_itself=1; expires_after=60 ;;
     revyl)  command=(revyl auth login) ;;
-    # The browser sends the approval back to a local address in Ubuntu, which
-    # WSL does not forward on some laptops, so the skill tries this second.
+    # The browser sends the approval back to a local address, which WSL does
+    # not forward from Windows on some laptops, so the skill tries this second.
     firstdraft) command=(firstdraft login) ;;
     # Approve with a code instead (the skill's first choice): nothing has to
-    # reach Ubuntu from the browser.
+    # reach this laptop's local address from the browser.
     firstdraft-device) command=(firstdraft login --device) ;;
     *)
         echo "usage: login.sh start|stop|status|wait github|github-refresh|render|neon|revyl|firstdraft|firstdraft-device"
@@ -69,7 +75,8 @@ check_service=${check_service%-device}
 
 # Is the sign-in still running? An exited sign-in that nothing has reaped yet
 # is a zombie, which kill -0 still reports as alive. WSL's init has left
-# exited processes as zombies before (microsoft/WSL#4138).
+# exited processes as zombies before (microsoft/WSL#4138). macOS has no
+# /proc, so there the grep finds nothing; launchd reaps orphans anyway.
 running() {
     [ -n "${1:-}" ] && kill -0 "$1" 2>/dev/null \
         && ! grep -qs '^State:[[:space:]]*Z' "/proc/$1/status"
@@ -78,7 +85,7 @@ running() {
 stop_previous() {
     local pid
     pid=$(cat "$pid_file" 2>/dev/null) || return 0
-    # The sign-in runs in its own process group (setsid), so stop the whole group.
+    # The sign-in runs in its own process group (DETACH), so stop the whole group.
     kill -- "-$pid" 2>/dev/null || kill "$pid" 2>/dev/null
     rm -f "$pid_file"
 }
@@ -96,7 +103,7 @@ if [ "$action" = status ]; then
         echo "TIMED OUT: the $service sign-in gave up before it was approved; start it again"
     else
         echo "ENDED: the $service sign-in is no longer running. Its last output:"
-        sed 's/\x1b\[[0-9;]*[A-Za-z]//g' "$log" 2>/dev/null | tail -n 5
+        sed "s/$ESC\\[[0-9;]*[A-Za-z]//g" "$log" 2>/dev/null | tail -n 5
         echo "Run: bash ~/.workshop/auth.sh check $check_service"
     fi
     exit 0
@@ -119,7 +126,7 @@ fi
 
 stop_previous
 : > "$log"
-setsid nohup "${command[@]}" </dev/null >"$log" 2>&1 &
+"${DETACH[@]}" nohup "${command[@]}" </dev/null >"$log" 2>&1 &
 pid=$!
 echo "$pid" > "$pid_file"
 
@@ -131,7 +138,7 @@ echo "$pid" > "$pid_file"
 #     first; Revyl's banner links to its docs, which are skipped anyway).
 find_link() {
     local links
-    links=$(sed 's/\x1b\[[0-9;]*[A-Za-z]//g' "$log" | grep -oE 'https://[^ "<>]+' \
+    links=$(sed "s/$ESC\\[[0-9;]*[A-Za-z]//g" "$log" | grep -oE 'https://[^ "<>]+' \
         | sed 's/[.,;:)]*$//' | grep -vE '://docs\.')
     printf '%s\n' "$links" | grep -E '[?&](user_)?code=' | head -n 1 | grep . \
         || printf '%s\n' "$links" | awk '{ print length, $0 }' | sort -rn | head -n 1 | cut -d' ' -f2-
@@ -146,7 +153,7 @@ for _ in $(seq 1 60); do
 done
 sleep 1   # let a one-time code printed just after the link arrive too
 
-clean=$(sed 's/\x1b\[[0-9;]*[A-Za-z]//g' "$log")
+clean=$(sed "s/$ESC\\[[0-9;]*[A-Za-z]//g" "$log")
 
 if ! running "$pid"; then
     rm -f "$pid_file"
@@ -155,20 +162,6 @@ if ! running "$pid"; then
     echo "Run: bash ~/.workshop/auth.sh check $check_service"
     exit 0
 fi
-
-# Opens a link in the default Windows browser: wslview asks Windows to open
-# it, with Windows PowerShell's Start-Process as a fallback.
-open_in_windows() {
-    wslview "$1" >/dev/null 2>&1 && return 0
-    powershell.exe -NoProfile -NonInteractive -Command "Start-Process '$1'" >/dev/null 2>&1
-}
-
-# Puts text on the Windows clipboard.
-copy_to_windows() {
-    local clip
-    clip=$(command -v clip.exe || echo /mnt/c/Windows/System32/clip.exe)
-    printf '%s' "$1" | "$clip" 2>/dev/null
-}
 
 url=$(find_link)
 # One-time codes: GitHub prints ABCD-1234, Render prints ABCD-EFGH-IJKL-MNOP.
@@ -179,17 +172,17 @@ if [ -n "$url" ]; then
     if [ "${WORKSHOP_NO_OPEN:-}" != 1 ]; then
         if [ -n "$opens_browser_itself" ]; then
             # Opening it here too would give the attendee two tabs.
-            echo "OPENED: $service opened the sign-in page in the default Windows browser itself"
+            echo "OPENED: $service opened the sign-in page in the default browser itself"
         else
-            open_in_windows "$url" && echo "OPENED: the sign-in page in the default Windows browser" \
+            open_link "$url" && echo "OPENED: the sign-in page in the default browser" \
                 || echo "NOT OPENED: could not open the browser; the attendee must open the link"
         fi
         # Copy what the attendee needs to paste: the code if the link does not
         # already contain it (GitHub), otherwise the link.
         if [ -n "$code" ] && [[ "$url" != *"$code"* ]]; then
-            copy_to_windows "$code" && echo "COPIED: the code, ready to paste into the page"
+            copy_text "$code" && echo "COPIED: the code, ready to paste into the page"
         else
-            copy_to_windows "$url" && echo "COPIED: the link, ready to paste into a browser"
+            copy_text "$url" && echo "COPIED: the link, ready to paste into a browser"
         fi
     fi
     echo "WAITING: the sign-in is running in the background until it is approved in the browser."
