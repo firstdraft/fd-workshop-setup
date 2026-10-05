@@ -3,7 +3,7 @@
 Everything happens in Claude Desktop's **Code** tab. You type a request, and Claude does the work. Plan on:
 
 - **Setting up your laptop:** 20 to 60 minutes. It takes longer if your laptop needs to restart.
-- **Signing in to your accounts:** about 15 minutes.
+- **Signing in to your accounts:** about 20 minutes.
 - **Building, launching and previewing your first app:** about 45 minutes.
 
 ## Part 1: Set up your laptop
@@ -29,6 +29,8 @@ Have your workshop handout ready: First Draft asks for the workshop username and
    `YOUR_PROJECT`).
 7. Type `/workshop-signin` and press Enter. Claude opens each sign-in page in your browser and copies any code you
    need to your clipboard. Approve each one and tell Claude when you are done, until every account is signed in.
+   For Cloudinary, which stores your app's photos, you copy its key from its website in three parts; Claude saves
+   them without showing them.
 
 ## Part 3: Build your first app
 

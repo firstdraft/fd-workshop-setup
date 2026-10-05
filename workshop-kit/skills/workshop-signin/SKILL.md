@@ -1,8 +1,8 @@
 ---
 name: workshop-signin
-description: Sign the workshop attendee in to GitHub, Render, Neon, Revyl and First Draft, set their git name and email from their GitHub account, upload their SSH key, and connect Render to GitHub.
+description: Sign the workshop attendee in to GitHub, Render, Neon, Revyl and First Draft, save their Cloudinary key, set their git name and email from their GitHub account, upload their SSH key, and connect Render to GitHub.
 disable-model-invocation: true
-allowed-tools: Bash(bash ~/.workshop/auth.sh:*), Bash(bash ~/.workshop/login.sh:*), Bash(bash ~/.workshop/git-identity.sh), Bash(bash ~/.workshop/render-workspace.sh:*), Bash(gh ssh-key add:*), Bash(wslview:*)
+allowed-tools: Bash(bash ~/.workshop/auth.sh:*), Bash(bash ~/.workshop/login.sh:*), Bash(bash ~/.workshop/git-identity.sh), Bash(bash ~/.workshop/render-workspace.sh:*), Bash(bash ~/.workshop/cloudinary.sh:*), Bash(gh ssh-key add:*), Bash(wslview:*)
 ---
 
 # Workshop sign-in
@@ -15,7 +15,9 @@ they see it. They are already signed in to Claude.
 ## Rules
 
 - **Never** ask for, type, or repeat a password, token or API key. Every
-  sign-in happens in the attendee's browser.
+  sign-in happens in the attendee's browser. Never read or print their
+  clipboard or `~/.workshop/cloudinary.env` yourself; `cloudinary.sh`
+  handles the Cloudinary key.
 - **Never** sign out of anything, and never run `gh auth logout`,
   `render logout`, `revyl auth logout` or similar.
 - Set the git name and email **only** with `git-identity.sh` (step 2).
@@ -35,6 +37,7 @@ bash ~/.workshop/login.sh start <service>   # github | github-refresh | render |
 bash ~/.workshop/login.sh stop <service>
 bash ~/.workshop/login.sh status <service>  # still waiting, ended, or timed out?
 bash ~/.workshop/render-workspace.sh        # after the Render sign-in (step 4)
+bash ~/.workshop/cloudinary.sh save         # after each Cloudinary copy (step 4)
 wslview <link>                              # open any page in their Windows browser
 ```
 
@@ -101,13 +104,15 @@ gh ssh-key add ~/.ssh/id_ed25519.pub --title "workshop-$(hostname)"
 
 Then run `auth.sh check github-ssh-key`.
 
-### 4. Render (`render`), Neon (`neon`), Revyl (`revyl`)
+### 4. Render (`render`), Neon (`neon`), Cloudinary (`cloudinary`), Revyl (`revyl`)
 
 One at a time: `login.sh start <service>`, they approve in the browser, you
-check. Before each, say in a sentence what the service is for:
+check (Cloudinary works differently; see below). Before each, say in a
+sentence what the service is for:
 
 - **Render** hosts their app on the internet.
 - **Neon** provides the app's database (a free PostgreSQL database).
+- **Cloudinary** stores the photos and files people upload to their app.
 - **Revyl** lets them try their iPhone and Android app on a phone shown in
   their browser.
 
@@ -143,6 +148,26 @@ after it starts, which is not enough time to create an account. So before
    away.
 3. If the check fails, run `login.sh status neon`. `TIMED OUT` means they took
    over a minute: start it again and ask them to approve straight away.
+
+**Cloudinary has no sign-in command.** Their app needs Cloudinary's key,
+which the attendee copies from Cloudinary's website in up to three pieces.
+After each copy, `cloudinary.sh save` saves it from their clipboard without
+showing it. Never ask them to paste anything into this chat.
+1. Run `wslview https://cloudinary.com/users/register_free`. They choose
+   **Sign up with GitHub** (or Google), which is quickest, or sign in if they
+   already have an account. They answer or skip any welcome questions until
+   they see the Cloudinary console, then tell you.
+2. Run `wslview https://console.cloudinary.com/app/settings/api-keys` (the
+   **API Keys** page, also under Settings). Ask them to click the copy button
+   next to **API environment variable** and tell you.
+3. Run `bash ~/.workshop/cloudinary.sh save` and follow what it prints:
+   - `NEXT:` it needs the next piece: the **API Key**, then the **API
+     Secret**. Pass on what it says, wait until they have copied it, and run
+     `save` again. Before showing the API Secret, Cloudinary may ask them to
+     confirm it is them (their password or a code it emails them); they do
+     that themselves.
+   - `INVALID:` pass on what it says, and run `save` again after they copy.
+   - `SAVED:` run `auth.sh check cloudinary`.
 
 **Revyl needs its account ready first, open in their browser.** Revyl's
 sign-in gives up after a few minutes, and later the link to try their app on
