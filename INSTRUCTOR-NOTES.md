@@ -308,6 +308,15 @@ Symptoms and their fixes, including this rehearsal's, are in
   commands, with a stubbed `firstdraft`, compiled the Plan of an app never
   compiled and of one compiled before (from `.firstdraft/design/.firstdraft`)
   under a new Project ID.
+- `login.sh wait` (Ubuntu 24.04 container, 2026-10-04), with stubbed `render`
+  and `firstdraft` that save a fake login a few seconds after the approval.
+  Before: checking right after the approval failed, and starting again
+  killed the approved sign-in, so it never saved. Now `wait` passed about 4
+  seconds after the approval; with no approval it gave up after 30 seconds,
+  left the sign-in running, and passed once approved; a sign-in that gave up
+  returned `[FAIL]` at once. With a PID 1 that never reaps
+  (`sleep infinity`), the old `status` called a finished sign-in `WAITING`;
+  the new one says `ENDED`. Not yet tried on a laptop.
 
 ## Test before the workshop (not yet verified)
 

@@ -36,6 +36,7 @@ bash ~/.workshop/login.sh start <service>   # github | github-refresh | render |
                                             # | firstdraft | firstdraft-device
 bash ~/.workshop/login.sh stop <service>
 bash ~/.workshop/login.sh status <service>  # still waiting, ended, or timed out?
+bash ~/.workshop/login.sh wait <service>    # after the approval: let it save, then check
 bash ~/.workshop/render-workspace.sh        # after the Render sign-in (step 4)
 bash ~/.workshop/cloudinary.sh save         # after each Cloudinary copy (step 4)
 wslview <link>                              # open any page in their Windows browser
@@ -50,7 +51,8 @@ about 30 seconds. It prints one of:
   link as a clickable Markdown link, `[Open the sign-in page](<URL>)`, in case
   the page did not open. If there is a code, show it in **bold**. Ask them to
   approve the sign-in and **tell you when they are done**, then run
-  `auth.sh check <service>`.
+  `login.sh wait <service>`: it gives the sign-in up to 30 seconds to save,
+  then prints its check.
 - `NOT OPENED`: the browser could not be opened; they click the link instead.
 - `EXPIRES`: this sign-in gives up after the stated number of seconds. Ask
   them to approve **right away**.
@@ -58,9 +60,14 @@ about 30 seconds. It prints one of:
   signed in. Run `auth.sh check <service>`.
 - `NO LINK`: show the output and run `login.sh start <service>` once more.
 
-If a check still fails after they approved, run `login.sh status <service>`
-to see why, then `login.sh start <service>` again: each start makes a **new**
-link, and older links stop working, so only ever give them the newest one.
+Never run `auth.sh check` or `login.sh start` right after an approval: the
+sign-in saves a few seconds later, and starting again would cancel it. If
+`login.sh wait` ends in `[FAIL]`, run `login.sh status <service>` to see why.
+`WAITING` means the approval has not reached the sign-in yet: ask whether
+they finished approving, then run `login.sh wait <service>` again. Only after
+`ENDED` or `TIMED OUT`, run `login.sh start <service>` again: each start makes
+a **new** link, and older links stop working, so only ever give them the
+newest one.
 
 ## Steps
 
@@ -100,15 +107,16 @@ gh ssh-key add ~/.ssh/id_ed25519.pub --title "workshop-$(hostname)"
 - "key is already in use": the key is on a different GitHub account. Get the
   instructor.
 - An error mentioning `admin:public_key` or missing scopes: run
-  `login.sh start github-refresh` (same code-and-approve flow), then retry.
+  `login.sh start github-refresh` (same code-and-approve flow, then
+  `login.sh wait github-refresh`), then retry.
 
 Then run `auth.sh check github-ssh-key`.
 
 ### 4. Render (`render`), Neon (`neon`), Cloudinary (`cloudinary`), Revyl (`revyl`)
 
 One at a time: `login.sh start <service>`, they approve in the browser, you
-check (Cloudinary works differently; see below). Before each, say in a
-sentence what the service is for:
+run `login.sh wait <service>` (Cloudinary works differently; see below).
+Before each, say in a sentence what the service is for:
 
 - **Render** hosts their app on the internet.
 - **Neon** provides the app's database (a free PostgreSQL database).
@@ -146,8 +154,9 @@ after it starts, which is not enough time to create an account. So before
 2. Only then run `login.sh start neon`. The sign-in page opens by itself
    (Neon opens it, so there is only one tab); they click to approve straight
    away.
-3. If the check fails, run `login.sh status neon`. `TIMED OUT` means they took
-   over a minute: start it again and ask them to approve straight away.
+3. If `login.sh wait neon` fails, run `login.sh status neon`. `TIMED OUT`
+   means they took over a minute: start it again and ask them to approve
+   straight away.
 
 **Cloudinary has no sign-in command.** Their app needs Cloudinary's key,
 which the attendee copies from Cloudinary's website in up to three pieces.
@@ -214,15 +223,17 @@ the sign-in, tell them what they will see:
 3. First Draft asking them to approve the sign-in for this laptop: they
    approve, then tell you.
 
-Then run `login.sh start firstdraft-device` and check, as above. The link
-includes the code, so they only approve; if the page asks for the code, it is
-the `CODE:`.
+Then run `login.sh start firstdraft-device`, and after they approve,
+`login.sh wait firstdraft-device`. The link includes the code, so they only
+approve; if the page asks for the code, it is the `CODE:`.
 
-If the check still fails after they approved, run
-`login.sh status firstdraft-device`, then try the browser sign-in instead:
-`login.sh start firstdraft`. After approving, the browser is sent back to a
-page on `127.0.0.1`. If that page cannot be reached ("This site can't be
-reached"), this sign-in does not work on this laptop: get the instructor.
+If `login.sh wait firstdraft-device` still fails after they approved, run
+`login.sh status firstdraft-device`. After `WAITING`, follow the steps above.
+After `ENDED` or `TIMED OUT`, try the browser sign-in instead:
+`login.sh start firstdraft`, then `login.sh wait firstdraft` once they
+approve. After approving, the browser is sent back to a page on `127.0.0.1`.
+If that page cannot be reached ("This site can't be reached"), this sign-in
+does not work on this laptop: get the instructor.
 
 If `login.sh` shows "Unknown command", their First Draft CLI is too old to
 sign in: tell them to raise their hand for the instructor.
