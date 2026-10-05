@@ -60,6 +60,9 @@ Added by the workshop kit. Where these notes differ from an app's own guides or 
   `render workspaces -o json --confirm` and `render workspace set <ID> --confirm` with its ID. The sign-in's
   workspace only makes the CLI work. Before later `render` commands for an app, set its workspace again if another
   app's is active.
+- Render allows five Hobby workspaces per account. If the **New workspace** form shows Hobby as "Limit reached" and
+  offers Pro instead, never choose Pro or any paid plan. Deploy into an existing workspace instead, the one with the
+  fewest free web services, and tell the user the app shares that workspace's 750 free hours.
 - Never use `npx get-db`, `neon-new`, neon.new, `neon claim` or any other claimable or no-account database: they run
   PostgreSQL 17, and the deploy fails with `function uuidv7() does not exist`. Use the new Neon project on
   PostgreSQL 18 that `DEPLOY.md` creates, and its direct connection string, not pooled, even where the Neon skills

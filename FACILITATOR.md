@@ -70,6 +70,9 @@ and does not include is in [its section there](INSTRUCTOR-NOTES.md#the-family-so
   month, and Render suspends every free web service in it. One workspace per app avoids this, which is why the deploy
   notes have the attendee create a Hobby workspace named after the app (dashboard workspace switcher, then **New
   workspace**) before its first deploy.
+- **Render's New workspace form shows Hobby as "Limit reached" and preselects Pro ($25/month).** Render allows five
+  Hobby workspaces per account. Do not choose Pro. Close the form and deploy into one of the attendee's existing
+  workspaces, the one with the fewest free web services; the app then shares that workspace's free hours.
 - **Render cannot see the repository after the attendee created the app's workspace.** A new workspace may need its
   own GitHub connection (not yet tested): open https://github.com/apps/render/installations/new, or the workspace's
   GitHub settings on the Render dashboard, and connect it.
