@@ -1,5 +1,8 @@
 # Instructor notes (not part of the zip)
 
+During the workshop, use [FACILITATOR.md](FACILITATOR.md): symptoms and
+their fixes.
+
 Zip the contents of `workshop-kit/`, including the `.claude/` folder, but
 **not** `logs/` or `state/` (they are created on each laptop).
 
@@ -110,13 +113,9 @@ What First Draft generated in that rehearsal:
 
 ## Facilitator notes from the 2026-10-03 rehearsal
 
-- The Render app starts empty: the three sample books are development data
-  only.
-- 20 or more Dependabot pull requests appear within minutes of the first
-  push. They are harmless; attendees can ignore them.
-- On apps compiled before the 2026-10-03 evening release, the first GitHub
-  CI run may be red (`npm audit` on the braces advisory). Also harmless for
-  the workshop.
+Symptoms and their fixes, including this rehearsal's, are in
+[FACILITATOR.md](FACILITATOR.md). Background:
+
 - Revyl's Android device has WebView 152, which works. After a stop, the
   device stays listed for about 15 seconds; the helper refuses to start
   another until it clears, and then the next one starts normally (same or
@@ -130,21 +129,6 @@ What First Draft generated in that rehearsal:
 - Ask attendees, in the message before the workshop, to sign up for Revyl
   with GitHub from home and to create their own organization. People in one
   organization share its one device per platform and its monthly time.
-- If the venue network blocks sign-ups (Revyl's page shows errors or a
-  security check), have the attendee sign up over a phone hotspot.
-- "Concurrency limit reached" from Revyl means the previous device is still
-  shutting down: wait 15-30 seconds, stop it again or from the Revyl
-  dashboard (Sessions), then retry. Newer CLIs add an upgrade hint to that
-  message; attendees ignore it.
-- If compiles start failing with errors, keep it to about 10 attendees
-  compiling at once (a load-test finding; the service database was upgraded
-  on the evening of 2026-10-03).
-- If an attendee used a claimable Neon database (`npx get-db`, neon.new), the
-  deploy fails with `function uuidv7() does not exist`, because those are
-  PostgreSQL 17. Recovery: a new PostgreSQL 18 Neon project
-  (`neonctl projects create ... --pg-version 18`), then delete and recreate
-  the Render service, since its environment variables cannot be changed from
-  the CLI.
 - The local CSS rebuild (Tailwind watcher) worked on Linux in Core's gate.
 
 ## Tested so far
@@ -314,6 +298,14 @@ What First Draft generated in that rehearsal:
   without uploads, and refused a folder where Git does not ignore that file.
   `handoff.sh apply` (stubbed `npm`) installed the helper, and sourcing the
   saved file filled `--env-var "CLOUDINARY_URL=$CLOUDINARY_URL"`.
+- FACILITATOR.md's cancel command (same container): it read the Project ID
+  and token from sample files and sent the token only as the `Authorization`
+  header, to a local server, without printing it, also with a verbose
+  `~/.curlrc`. Production answers that route with
+  `401 authentication_required` for a made-up token. The fresh-Project
+  commands, with a stubbed `firstdraft`, compiled the Plan of an app never
+  compiled and of one compiled before (from `.firstdraft/design/.firstdraft`)
+  under a new Project ID.
 
 ## Test before the workshop (not yet verified)
 
