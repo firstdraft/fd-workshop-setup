@@ -34,6 +34,9 @@ and does not include is in [its section there](INSTRUCTOR-NOTES.md#the-family-so
   ….trycloudflare.com`.** The web app was started without the tunnel's host. Stop it and start it as
   `RAILS_DEVELOPMENT_HOSTS=.trycloudflare.com bin/dev </dev/null >log/bin-dev.log 2>&1` (the attendee can type
   `Restart the web app.`).
+- **`<URL>/up` fails with `Could not resolve host` right after `cloudflared` printed the address.** A new quick tunnel
+  can take up to 2 minutes to resolve. Wait and retry. Starting another tunnel does not help and counts against
+  Cloudflare's limit on new tunnels (429 or error 1015).
 - **Revyl says "Concurrency limit reached", or the helper says a preview session already exists.** The last phone is
   still shutting down. Wait 15 to 30 seconds, run `bin/<platform> preview revyl stop` again (or stop it on the Revyl
   dashboard under Sessions), then retry. Ignore the upgrade hint.
@@ -46,11 +49,20 @@ and does not include is in [its section there](INSTRUCTOR-NOTES.md#the-family-so
   copy button by **API environment variable**, the **API Key**, then the **API Secret** from the same row, shown
   with its eye button first (dots or stars are not the secret).
 
+## Changing the app
+
+- **After a length limit such as README step 15's "Limit posts to 280 characters", `bin/ci` or GitHub CI fails at
+  `Schema: active_record_doctor`: "the length validator on Post.caption enforces a maximum of 280 characters but
+  there's no schema limit".** The column is `text`, which has no limit. Ask Claude to add the attribute it names
+  (`Post.caption` here) to `incorrect_length_validation`'s `ignore_attributes` in `.active_record_doctor.rb`, with a
+  one-line comment, as the app's `AGENTS.md` says.
+
 ## Deploying
 
 - **The first deploy fails with `function uuidv7() does not exist`.** The Neon database is PostgreSQL 17, a claimable
   database from `npx get-db` or neon.new. Create a PostgreSQL 18 project
-  (`neonctl projects create --name <app> --region-id aws-us-east-2 --pg-version 18 -o json`), delete the Render
+  (`neonctl projects create --name <app> --region-id aws-us-east-2 --pg-version 18 --org-id <id> -o json`, with the
+  ID from `neonctl orgs list -o json`), delete the Render
   service (`render services delete <service-id> --confirm`), and deploy again with the new project's direct
   connection string. The Render CLI cannot change a service's environment variables.
 - **The live app is empty.** Expected: sample data and demo logins are development-only. Attendees sign up there.

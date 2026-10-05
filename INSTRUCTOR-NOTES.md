@@ -344,8 +344,9 @@ Symptoms and their fixes, including this rehearsal's, are in
     then iOS through one quick tunnel, and deploys with a `neonctl`
     PostgreSQL 18 project, its direct string and `bin/rails secret`. Also that
     the session keeps `cloudflared` and the web app running in the
-    background, and that `neonctl projects create` does not stop to ask for
-    a Neon organization on a fresh account.
+    background, and passes `--org-id` to `neonctl projects create` (without
+    it, neonctl asks which Neon organization to use, and every new account
+    has one).
 12. **Cloudinary on a fresh account, from a Claude Desktop WSL session:**
     Sign up with GitHub works; the API Keys page's copy buttons (API
     environment variable, API Key, then API Secret after the eye button and

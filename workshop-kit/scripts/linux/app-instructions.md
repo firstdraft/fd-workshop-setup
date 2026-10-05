@@ -31,7 +31,9 @@ Added by the workshop kit. Where these notes differ from an app's own guides or 
   SDK or an Emulator, and skip the guides' Emulator, Codespace and Mac steps.
 - Start one tunnel in the background and keep it all session: `cloudflared tunnel --url http://localhost:3000`.
   Its `https://<name>.trycloudflare.com` URL replaces the guides' Codespace port 3000. Check that `<URL>/up`
-  returns 200. A 403 means the web app was started without `RAILS_DEVELOPMENT_HOSTS`: restart it as above.
+  returns 200. A new address can take up to 2 minutes to resolve: on `Could not resolve host`, retry every 10
+  seconds for up to 2 minutes instead of starting another tunnel. A 403 means the web app was started without
+  `RAILS_DEVELOPMENT_HOSTS`: restart it as above.
 - Commit and push (with `git push -u` if the helper asks for an upstream), then run
   `bin/android preview revyl --server <URL>` (or `bin/ios ...`) and give the user the printed Viewer link.
 - Tell the user to open the Viewer link in the browser already signed in to revyl.ai with the same Revyl account as
@@ -55,6 +57,9 @@ Added by the workshop kit. Where these notes differ from an app's own guides or 
   PostgreSQL 17, and the deploy fails with `function uuidv7() does not exist`. Use the new Neon project on
   PostgreSQL 18 that `DEPLOY.md` creates, and its direct connection string, not pooled, even where the Neon skills
   advise pooled.
+- `neonctl projects create` stops at "What organization would you like to use?" unless it is given one, and every
+  new Neon account has an organization. Run `neonctl orgs list -o json` first and add `--org-id <id>` to
+  `DEPLOY.md`'s `projects create` command.
 - Pass `--confirm` to every `render` command, and `-o json` when you read its output; without them it can wait for
   input forever. List services with `render services list -o json --confirm`. The sign-in set the workspace; if a
   command says none is set, run `render workspaces -o json --confirm`, then `render workspace set <ID> --confirm`.
