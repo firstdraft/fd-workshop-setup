@@ -15,6 +15,9 @@ Added by the workshop kit. Where these notes differ from an app's own guides or 
   `RAILS_DEVELOPMENT_HOSTS=.trycloudflare.com bin/dev </dev/null >log/bin-dev.log 2>&1`.
   The variable lets the preview tunnel reach the app. If the web app is already running without it, stop it and
   start it this way, once.
+- On a Mac, also put `WATCHMAN_SOCK=/dev/null` in front of that command. Homebrew's `watchman`, when installed,
+  stalls the CSS watcher (tailwindlabs/tailwindcss#17246), and the first page then fails with
+  `The asset 'application.css' was not found in the load path`. If it already did, run `npm run build:css` once.
 - Do not run `bin/ci` while the web app is running: its setup step reinstalls JavaScript packages and stops the
   JavaScript watcher. Stop the web app, run `bin/ci`, then start the web app again as above.
 

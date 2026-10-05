@@ -35,6 +35,10 @@ and does not include is in [its section there](INSTRUCTOR-NOTES.md#the-family-so
   ….trycloudflare.com`.** The web app was started without the tunnel's host. Stop it and start it as
   `RAILS_DEVELOPMENT_HOSTS=.trycloudflare.com bin/dev </dev/null >log/bin-dev.log 2>&1` (the attendee can type
   `Restart the web app.`).
+- **On a Mac, the app's first page shows `The asset 'application.css' was not found in the load path`, or style
+  changes stop showing up.** The Mac has Homebrew's `watchman`, which stalls the CSS watcher
+  (tailwindlabs/tailwindcss#17246). In the app folder, run `npm run build:css` once, then reload. If later style
+  changes still don't show, restart the web app with `WATCHMAN_SOCK=/dev/null` in front of its usual start command.
 - **`<URL>/up` fails with `Could not resolve host` right after `cloudflared` printed the address.** A new quick tunnel
   can take up to 2 minutes to resolve. Wait and retry. Starting another tunnel does not help and counts against
   Cloudflare's limit on new tunnels (429 or error 1015).
