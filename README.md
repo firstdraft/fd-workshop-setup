@@ -36,7 +36,7 @@ Plan on:
 
 ## Part 2: Sign in to your accounts
 
-Have your workshop handout ready: First Draft asks for the workshop username and password from it.
+When you first try to sign in to First Draft, you'll hit a username/password wall. Ask your instructor for that.
 
 6. Open a new session in Claude Desktop. Choose `WSL` &rarr; `Ubuntu-24.04` instead of `Local`.
    For "Choose folder", select the folder with the name of your project (`home` &rarr; `appdev` &rarr;

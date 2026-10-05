@@ -306,7 +306,7 @@ Symptoms and their fixes, including this rehearsal's, are in
   already set) and, read-only, against a real signed-in CLI (v2.22.0, which
   has the same `workspace set|current` and `workspaces -o json` as v2.28.0).
 - First Draft's sign-in pages are behind the pre-alpha username and password
-  (HTTP basic auth). Attendees get them on a handout; the skill tells them a
+  (HTTP basic auth). Attendees ask the instructor; the skill tells them a
   username-and-password box appears and never handles the values. Current
   browsers do not show the "First Draft pre-alpha" realm text in that box,
   so the skill also describes it as a "Sign in" box for firstdraft.com.
@@ -412,7 +412,7 @@ Symptoms and their fixes, including this rehearsal's, are in
 8. **The rewritten handoff on a fresh account:** that the WSL session picks up
    both skills, and that the skill's `allowed-tools` lets the helper scripts
    run without permission prompts (the rule syntax is a best guess).
-9. **First Draft device sign-in with the handout credential:** the basic-auth
+9. **First Draft device sign-in with the workshop credential:** the basic-auth
    box appears once, then GitHub, then the device approval, and the check
    passes.
 10. **Render workspace and GitHub app on a fresh Render account:**

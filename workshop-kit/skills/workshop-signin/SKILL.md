@@ -217,14 +217,14 @@ to upgrade.
 
 First Draft is what they will use to plan and build their app in this
 workshop. It is in pre-alpha, so its pages are behind a username and
-password that the attendee has on their workshop handout. Before you start
+password that the attendee gets from their instructor. Before you start
 the sign-in, tell them what they will see:
 
 1. Their browser asks for a username and password: this is the **First Draft
    pre-alpha** sign-in (the box itself usually just says "Sign in" and
-   firstdraft.com). They type the username and password from their handout
-   themselves. **Never** ask for, type, or repeat them. If they have no
-   handout, or it is refused, get the instructor.
+   firstdraft.com). They ask their instructor for the username and password
+   and type them themselves. **Never** ask for, type, or repeat them. If the
+   box refuses them, get the instructor.
 2. GitHub may ask them to sign in to First Draft: they approve.
 3. First Draft asking them to approve the sign-in for this laptop: they
    approve, then tell you.
