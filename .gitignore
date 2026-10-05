@@ -5,3 +5,6 @@ workshop-kit/state/
 # Superseded by "workshop-kit/Setup WSL without Claude.cmd"
 setup-wsl.cmd
 setup-wsl.ps1
+
+# Revyl CLI session state, written when a preview runs from the repo root
+.revyl/
