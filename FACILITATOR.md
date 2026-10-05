@@ -51,11 +51,12 @@ and does not include is in [its section there](INSTRUCTOR-NOTES.md#the-family-so
 
 ## Changing the app
 
-- **After a length limit such as README step 15's "Limit posts to 280 characters", `bin/ci` or GitHub CI fails at
-  `Schema: active_record_doctor`: "the length validator on Post.caption enforces a maximum of 280 characters but
-  there's no schema limit".** The column is `text`, which has no limit. Ask Claude to add the attribute it names
-  (`Post.caption` here) to `incorrect_length_validation`'s `ignore_attributes` in `.active_record_doctor.rb`, with a
-  one-line comment, as the app's `AGENTS.md` says.
+- **After an attendee limits the length of a longer text, such as "Limit posts to 280 characters", `bin/ci` or
+  GitHub CI fails at `Schema: active_record_doctor`: "the length validator on Post.caption enforces a maximum of 280
+  characters but there's no schema limit".** The column is `text`, which has no limit. Ask Claude to add the
+  attribute it names (`Post.caption` here) to `incorrect_length_validation`'s `ignore_attributes` in
+  `.active_record_doctor.rb`, with a one-line comment, as the app's `AGENTS.md` says. The README no longer suggests
+  this change.
 
 ## Deploying
 
