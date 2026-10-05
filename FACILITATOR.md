@@ -65,6 +65,13 @@ and does not include is in [its section there](INSTRUCTOR-NOTES.md#the-family-so
   ID from `neonctl orgs list -o json`), delete the Render
   service (`render services delete <service-id> --confirm`), and deploy again with the new project's direct
   connection string. The Render CLI cannot change a service's environment variables.
+- **Render shows the app's free services as suspended.** That workspace used up its 750 free instance hours for the
+  month, and Render suspends every free web service in it. One workspace per app avoids this, which is why the deploy
+  notes have the attendee create a Hobby workspace named after the app (dashboard workspace switcher, then **New
+  workspace**) before its first deploy.
+- **Render cannot see the repository after the attendee created the app's workspace.** A new workspace may need its
+  own GitHub connection (not yet tested): open https://github.com/apps/render/installations/new, or the workspace's
+  GitHub settings on the Render dashboard, and connect it.
 - **The live app is empty.** Expected: sample data and demo logins are development-only. Attendees sign up there.
 - **The first CI run is red, or 20 or more Dependabot pull requests appear.** Harmless; ignore them.
 

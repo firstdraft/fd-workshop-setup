@@ -58,6 +58,7 @@ Have your workshop handout ready: First Draft asks for the workshop username and
     ```text
     Deploy this app to Render's free plan with a Neon database. Give me the link when it's live.
     ```
+    Claude will ask you to create a Render workspace for this app first, so each app gets its own free hours.
     The first deploy takes a few minutes. Your live app starts with no data: the sample data is only on your laptop.
     Sign up on the live app to try it: you are signed in right away. "Forgot password" emails are not sent until an
     email provider is set up.
