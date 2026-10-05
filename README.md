@@ -10,7 +10,7 @@ Plan on:
 
 - **Setting up your laptop:** 20 to 60 minutes. It takes longer if your laptop needs to restart.
 - **Signing in to your accounts:** about 20 minutes.
-- **Building, launching and previewing your first app:** about 45 minutes.
+- **Building, launching and previewing your app:** about 45 minutes, or longer for a bigger idea.
 
 ## Part 1: Set up your laptop
 
@@ -96,35 +96,59 @@ When you first try to sign in to First Draft, you'll hit a username/password wal
 
    When Claude says you're all signed in, go on to Part 3.
 
-## Part 3: Build your first app
+## Part 3: Build your app
 
-8. Open a new session in your project folder, as in step 6.
+Build your own idea. No idea yet? Step 9 has a family social network you can build instead.
+
+8. Bring what you have. Copy any materials for your idea into your project folder: wireframes, Figma or Claude
+   Design exports, photos of hand-drawn sketches, or sample data as CSV files. Use sample or anonymized data, not
+   real people's information.
+   - **Already built a version in Lovable?** On its GitHub repository, choose **Code** &rarr; **Download ZIP**, and
+     unzip it into a folder named `lovable` inside your project folder. Don't `git clone` it into your project
+     folder: Claude saves your new app with Git there, and could push it to your Lovable repository.
+   - **Designed it in Claude Design?** Choose **Export** &rarr; **Hand off to Claude Code** there, and keep what it
+     gives you for step 9.
+
+   **Windows users:** File Explorer shows your project folder under **Linux** &rarr; `Ubuntu-24.04` &rarr; `home`
+   &rarr; `appdev` &rarr; `YOUR_PROJECT`.
+
+   **Mac users:** your project folder is in the projects folder from step 5.
+
+   When Claude builds your app, it moves these materials into `.firstdraft/design` inside the project folder.
+9. Open a new session in your project folder, as in step 6.
 
    **Windows users:** remember to choose `WSL` &rarr; `Ubuntu-24.04`.
 
    **Mac users:** keep `Local`.
 
-   Then type:
+   Then describe your idea in a sentence or two:
+   ```text
+   /create-full-stack-app A place for my book club to pick the next book and vote on meeting dates. Read the materials in this folder first.
+   ```
+   Leave out the last sentence if you didn't bring any materials, and paste a Claude Design handoff after your
+   idea. No idea yet? Type this instead:
    ```text
    /create-full-stack-app Help me build a social network for just my family. It should work and look like Instagram so that it's familiar.
    ```
-9. Claude first looks up how similar apps work, then asks a few questions, one at a time. One of them is how
-   involved you want to be in technical decisions. Answer in your own words, or say "you pick". At any point you can
-   say "make the rest of the decisions for me".
-10. A few minutes in, Claude tells you what First Draft will and won't build. Then it shows you a summary of the
-    plan. Change anything you like: it's your app. When it looks right, approve it. Building takes about a minute.
-11. Start the web app:
+10. Claude first looks up how similar apps work, then asks a few questions, one at a time. One of them is how
+    involved you want to be in technical decisions. Answer in your own words, or say "you pick". At any point you can
+    say "make the rest of the decisions for me".
+11. A few minutes in, Claude tells you what First Draft will and won't build. If it can build only part of your
+    idea, that's expected: continue with what it builds, or switch to the family social network from step 9. Then
+    Claude shows you a summary of the plan. Change anything you like: it's your app. When it looks right, approve
+    it. Building takes about a minute.
+12. Start the web app:
     ```text
     Start the web app.
     ```
     Open `http://localhost:3000` in your browser. If your app has sign-in, use the demo login Claude shows you.
-    Try posting a photo, liking a post, and following someone.
-12. Save your work to GitHub:
+    Try each thing your app lets people do.
+13. Save your work to GitHub:
     ```text
     Commit the app and push it to a new private repository on my GitHub account. Give me the link.
     ```
     Pushing also starts GitHub building your iPhone and Android apps. That takes about five minutes, so carry on.
-13. Put your app on the internet:
+14. Put your app on the internet:
     ```text
     Deploy this app to Render's free plan with a Neon database. Give me the link when it's live.
     ```
@@ -134,7 +158,7 @@ When you first try to sign in to First Draft, you'll hit a username/password wal
     email provider is set up.
 
     ![In Render, click the workspace name at the top left, then New Workspace. Choose the free Hobby plan and name it after your app.](images/render-new-workspace.png)
-14. Try your app on a phone, in your browser:
+15. Try your app on a phone, in your browser:
     ```text
     Show me the Android app in Revyl.
     ```
@@ -144,44 +168,27 @@ When you first try to sign in to First Draft, you'll hit a username/password wal
     ```
     The link opens a phone in your browser. If Revyl asks you to sign in, use the same account as before. Inside your
     app, sign in with the same demo login as on your laptop.
-15. Make it yours. Ask for one change at a time, then try it on your laptop. Some ideas:
+16. Make it yours. Ask for one change at a time, then try it on your laptop. Some ideas, with the examples swapped
+    for your own:
     ```text
-    Style it similar to Instagram.
+    Style it similar to Airbnb.
     ```
     ```text
-    Limit how many people someone can follow to 50.
+    Limit how many posts each person can create to 50.
     ```
     ```text
-    Only allow sign-ups from @YOURFAMILY.com email addresses.
+    Only allow sign-ups from @MYCOMPANY.com email addresses.
     ```
     When you like a change, say `Commit and push.` Render updates the live app a minute or two later.
 
-## Part 4: Start over with your own idea
+## Part 4: Try another idea
 
-16. Ask Claude for a new project folder:
+17. Ask Claude for a new project folder:
     ```text
-    Make a new project folder called MY_IDEA next to this one.
+    Make a new project folder called ANOTHER_IDEA next to this one.
     ```
-17. Have sketches, notes, design documents or spreadsheets for your idea? Copy them into the new folder. If you
-    designed your app in Claude Design, choose **Export** &rarr; **Hand off to Claude Code** there and copy what it
-    gives you.
-
-    **Windows users:** File Explorer shows the folder under **Linux** &rarr; `Ubuntu-24.04` &rarr; `home` &rarr;
-    `appdev` &rarr; `MY_IDEA`.
-
-    **Mac users:** the folder is `MY_IDEA` in the projects folder from step 5.
-18. Open a new session in the new folder.
-
-    **Windows users:** remember to choose `WSL` &rarr; `Ubuntu-24.04`.
-
-    **Mac users:** keep `Local`.
-
-    Then describe your idea:
-    ```text
-    /create-full-stack-app A place for my book club to pick the next book and vote on meeting dates.
-    ```
-    Mention any files you copied in, and paste your Claude Design handoff after your idea. Your sign-ins carry over,
-    so you can go straight to building.
+    Then repeat steps 8 to 16 with that folder, starting with a new session. Your sign-ins carry over, so you can go
+    straight to building.
 
 ## If something goes wrong
 
