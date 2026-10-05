@@ -22,6 +22,12 @@ Plan on:
    Extract it to your Documents folder or someplace you can easily find.
    **On a Mac:** double-click the zip file instead. It unzips into a folder next to it.
 3. Open Claude Desktop, go to the Code tab, and open the extracted "workshop-kit" folder.
+
+   ![At the top left of Claude Desktop, click the Code tab, the button marked with angle brackets.](images/open-code-tab.png)
+
+   ![Below the message box, click No folder, then Open folder.](images/open-folder-menu.png)
+
+   ![In the folder you extracted, select workshop-kit, then click Open.](images/choose-workshop-kit.png)
 4. Start the setup. Type:
    ```text
    Set up my laptop for the workshop
@@ -49,6 +55,12 @@ When you first try to sign in to First Draft, you'll hit a username/password wal
 
    **On a Mac:** first quit Claude Desktop (Cmd-Q) and open it again. Then keep `Local`, and choose the folder you
    chose in step 5 (`appdev` in your home folder, unless you picked another), then `YOUR_PROJECT`.
+
+   ![On a Mac, after reopening Claude Desktop, click the folder button below the message box, then Open folder.](images/mac-change-folder.png)
+
+   ![Click your home folder in the sidebar, then the projects folder you chose in step 5.](images/mac-home-folder.png)
+
+   ![Inside the projects folder, select your project's folder, then click Open.](images/mac-project-folder.png)
 7. Type `/workshop-signin` and press Enter. Claude opens each sign-in page in your browser and copies any code you
    need to your clipboard. Approve each one and tell Claude when you are done, until every account is signed in.
    - **Cloudinary** stores your app's photos and has nothing to approve. After you sign up, Claude opens its
