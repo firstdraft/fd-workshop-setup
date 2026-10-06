@@ -61,6 +61,10 @@ Plan on:
 
 When you first try to sign in to First Draft, you'll hit a username/password wall. Ask your instructor for that.
 
+Every service in this part has a free plan, and the free plan is all you need for the workshop. Some sites make
+it hard to find, or push a paid trial first: don't be fooled. Look for **Free**, **Hobby**, or a way to skip the
+upgrade.
+
 6. Open a new session in Claude Desktop, in your project's folder.
 
    **Windows users:** choose `WSL` &rarr; `Ubuntu-24.04` instead of `Local`. Then click "Select folder..." and pick
