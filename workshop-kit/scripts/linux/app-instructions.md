@@ -1,6 +1,7 @@
 # Workshop apps on this laptop (Ubuntu in WSL on Windows, or a Mac)
 
-Added by the workshop kit. Where these notes differ from an app's own guides or a Neon skill, follow these notes.
+Added by the workshop kit. Where these notes differ from an app's own guides or a Neon skill, follow these notes,
+except on testing, where the app's `AGENTS.md` and README govern.
 
 ## Files the user downloaded
 - On Windows, files the user downloads are in their Windows Downloads folder:
@@ -10,8 +11,16 @@ Added by the workshop kit. Where these notes differ from an app's own guides or 
 - Unzip a design into the project folder before the first Compile. Compiling into the current folder keeps it
   under `.firstdraft/design/`.
 
+## Setup and specs
+- After Compile, set up the app, build its assets and run its specs as its README says, before the first preview.
+  In that first run, a `NotImplementedError` that names behavior listed under the README's **Behavior to write** is
+  work to do: write that behavior until its specs pass. If Chrome itself cannot start, this laptop's setup is
+  missing something; any other failure in that run is a First Draft defect. Either way, tell the user which spec
+  failed and its error. Never edit or delete a generated spec to make it pass.
+- System specs drive Chrome on this laptop directly; there is no Selenium container to start or stop.
+
 ## Web app
-- Start the web app in the background and keep it running all session:
+- Once the specs have run after Compile, start the web app in the background and keep it running all session:
   `RAILS_DEVELOPMENT_HOSTS=.trycloudflare.com bin/dev </dev/null >log/bin-dev.log 2>&1`.
   The variable lets the preview tunnel reach the app. If the web app is already running without it, stop it and
   start it this way, once.
