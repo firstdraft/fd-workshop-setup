@@ -135,9 +135,8 @@ Build your own idea. No idea yet? Step 9 has a family social network you can bui
    ```text
    /create-full-stack-app Help me build a social network for just my family. It should work and look like Instagram so that it's familiar.
    ```
-10. Claude first looks up how similar apps work, then asks a few questions, one at a time. One of them is how
-    involved you want to be in technical decisions. Answer in your own words, or say "you pick". At any point you can
-    say "make the rest of the decisions for me".
+10. Claude first looks up how similar apps work, then asks a few questions, one at a time. Answer in your own words,
+    or say "you pick". At any point you can say "make the rest of the decisions for me".
 11. A few minutes in, Claude tells you what First Draft will and won't build. If it can build only part of your
     idea, that's expected: continue with what it builds, or switch to the family social network from step 9. Then
     Claude shows you a summary of the plan. Change anything you like: it's your app. When it looks right, approve
