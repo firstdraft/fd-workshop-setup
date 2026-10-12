@@ -13,10 +13,11 @@ except on testing, where the app's `AGENTS.md` and README govern.
 
 ## Setup and specs
 - After Compile, set up the app, build its assets and run its specs as its README says, before the first preview.
-  In that first run, a `NotImplementedError` that names behavior listed under the README's **Behavior to write** is
-  work to do: write that behavior until its specs pass. If Chrome itself cannot start, this laptop's setup is
-  missing something; any other failure in that run is a First Draft defect. Either way, tell the user which spec
-  failed and its error. Never edit or delete a generated spec to make it pass.
+  In that first run, a spec that fails through behavior the README's **Behavior to write** lists is work to do:
+  write that behavior until its specs pass. A stub raises `NotImplementedError`, and a deletion outcome First Draft
+  left out fails its spec with `RecordNotDestroyed`. If Chrome itself cannot start, this laptop's setup is missing
+  something; any other failure in that run is a First Draft defect. Either way, tell the user which spec failed and
+  its error. Never edit or delete a generated spec to make it pass.
 - System specs drive Chrome on this laptop directly; there is no Selenium container to start or stop.
 
 ## Web app
