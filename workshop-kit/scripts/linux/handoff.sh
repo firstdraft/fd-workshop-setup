@@ -118,10 +118,20 @@ firstdraft_package_skill() {
     echo "$(npm root --global)/@firstdraft.com/claude-code/skills/create-full-stack-app"
 }
 
+# On a Mac: is the Skill folder a link that an earlier kit made into the
+# plugin's npm package? (Its target may be gone already.) Any other link or
+# folder of that name is the attendee's own.
+earlier_kit_skill_link() {
+    case "$(readlink "$FIRSTDRAFT_SKILL_LINK" 2>/dev/null)" in
+        */@firstdraft.com/claude-code/skills/create-full-stack-app) return 0 ;;
+    esac
+    return 1
+}
+
 check_firstdraft_skill() {
     if [ -n "$MAC" ]; then
         # The plugin (tools.sh) provides /firstdraft:create-full-stack-app.
-        [ ! -L "$FIRSTDRAFT_SKILL_LINK" ] || { echo "an earlier kit's link is still in $SKILLS_DIR"; return 1; }
+        ! earlier_kit_skill_link || { echo "an earlier kit's link is still in $SKILLS_DIR"; return 1; }
         echo "/firstdraft:create-full-stack-app, from the plugin"
         return
     fi
@@ -241,8 +251,7 @@ apply_all() {
     copy_from_kit "$kit/scripts/linux/firstdraft.sh" "$WORKSHOP_DIR/firstdraft.sh"
     copy_from_kit "$kit/skills/workshop-signin" "$SKILLS_DIR/workshop-signin"
     if [ -n "$MAC" ]; then
-        # Only a link: a folder of that name is the attendee's own.
-        [ ! -L "$FIRSTDRAFT_SKILL_LINK" ] || rm "$FIRSTDRAFT_SKILL_LINK"
+        ! earlier_kit_skill_link || rm "$FIRSTDRAFT_SKILL_LINK"
     else
         ln -sfn "$firstdraft_skill" "$FIRSTDRAFT_SKILL_LINK"
     fi

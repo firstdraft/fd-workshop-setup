@@ -166,6 +166,14 @@ expect "and passes on its lines" grep -qxF 'This computer has no saved login for
 rm -rf "$home/.claude/plugins"
 out=$(run "$home" Darwin "$log" bash "$kit/scripts/linux/firstdraft.sh" start 2>&1)
 expect "without the plugin, it says what to do in one line" says_unavailable "$?" "$out"
+out=$(run "$home" Darwin "$log" bash "$kit/scripts/linux/handoff.sh" check)
+expect "the handoff check finds the earlier kit's Skill link" \
+    grep -qF '[FAIL] firstdraft-skill: an earlier kit' <<<"$out"
+mkdir -p "$home/dotfiles/create-full-stack-app"
+ln -sfn "$home/dotfiles/create-full-stack-app" "$home/.claude/skills/create-full-stack-app"
+out=$(run "$home" Darwin "$log" bash "$kit/scripts/linux/handoff.sh" check)
+expect "and leaves a link of the attendee's own alone" \
+    grep -qxF '[PASS] firstdraft-skill: /firstdraft:create-full-stack-app, from the plugin' <<<"$out"
 
 
 echo "== Ubuntu (WSL)"

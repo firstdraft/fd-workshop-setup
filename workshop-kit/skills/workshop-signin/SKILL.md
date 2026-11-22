@@ -64,7 +64,8 @@ one of:
 
 Never run `auth.sh check` or `login.sh start` right after an approval: the
 sign-in saves a few seconds later, and starting again would cancel it. If
-`login.sh wait` ends in `[FAIL]`, run `login.sh status <service>` to see why.
+`login.sh wait` ends in `[FAIL]`, run `login.sh status <service>` to see why
+(for First Draft, follow step 5 instead).
 `WAITING` means the approval has not reached the sign-in yet: ask whether
 they finished approving, then run `login.sh wait <service>` again. Only after
 `ENDED` or `TIMED OUT`, run `login.sh start <service>` again: each start makes

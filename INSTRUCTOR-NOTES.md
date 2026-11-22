@@ -392,8 +392,9 @@ Symptoms and their fixes, including this rehearsal's, are in
   without uploads, and refused a folder where Git does not ignore that file.
   `handoff.sh apply` (stubbed `npm`) installed the helper, and sourcing the
   saved file filled `--env-var "CLOUDINARY_URL=$CLOUDINARY_URL"`.
-- (History: FACILITATOR.md no longer has this cancel command, because every
-  First Draft plugin's CLI has `compilation cancel`.) FACILITATOR.md's
+- (History: FACILITATOR.md no longer has this cancel command, because the
+  kit now relies on plugin 0.10.0 or later, whose CLI has
+  `compilation cancel`.) FACILITATOR.md's
   cancel command (same container): it read the Project ID
   and token from sample files and sent the token only as the `Authorization`
   header, to a local server, without printing it, also with a verbose
