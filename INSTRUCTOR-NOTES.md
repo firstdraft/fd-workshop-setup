@@ -44,8 +44,8 @@ again since. In Ubuntu, `tools.sh` installs the plugin's own npm package,
 `@firstdraft.com/claude-code`, which holds the Skill and the CLI it was
 tested with; nothing installs the CLI by itself. The handoff installs both
 skills as user skills in Ubuntu's `~/.claude/skills`, which was tested and
-needs no plugin install, so it works whether or not a WSL session loads
-plugins: `workshop-signin` (only loads when typed) and a link to the
+needs no plugin install, so it does not depend on whether a WSL session
+loads plugins: `workshop-signin` (only loads when typed) and a link to the
 plugin's one skill in that package, so the command is
 `/create-full-stack-app`. If an attendee also has the First Draft plugin
 enabled, the session may list that skill twice. The package also puts the

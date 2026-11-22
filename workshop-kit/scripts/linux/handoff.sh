@@ -17,9 +17,10 @@
 #   - installs the sign-in skill to ~/.claude/skills/workshop-signin (it only
 #     loads when the attendee types /workshop-signin)
 #   - in Ubuntu, links the First Draft Skill from the plugin's npm package
-#     (tools.sh) into ~/.claude/skills, because a linked Skill works whether
-#     or not a WSL session loads plugins (Anthropic's pages say such sessions
-#     cannot; a test on 2026-10-03 found they can). On a Mac the plugin
+#     (tools.sh) into ~/.claude/skills, because linking needs no plugin
+#     install, so it does not depend on whether a WSL session loads plugins
+#     (Anthropic's pages say such sessions cannot; a test on 2026-10-03 found
+#     they can). On a Mac the plugin
 #     itself provides the Skill, so this removes the link an earlier kit made
 #     there.
 #   - adds the workshop's notes for app sessions (native preview, deploys) to

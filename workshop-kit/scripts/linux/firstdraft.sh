@@ -12,8 +12,9 @@
 # On a Mac, Claude Code installed the plugin from First Draft's catalog, and
 # its folder changes with every plugin update, so this asks Claude Code where
 # the plugin is now. In Ubuntu (WSL) the kit installed the plugin's npm
-# package and linked its Skill into ~/.claude/skills, which works whether or
-# not a WSL session loads plugins; the CLI is in the package beside the Skill.
+# package and linked its Skill into ~/.claude/skills, which needs no plugin
+# install, so it does not depend on whether a WSL session loads plugins; the
+# CLI is in the package beside the Skill.
 
 set -uo pipefail
 
