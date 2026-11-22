@@ -218,8 +218,8 @@ Build your own idea. No idea yet? Step 9 has a family social network you can bui
     zip again and do Part 1 once with its `workshop-kit` folder. It replaces an earlier First Draft setup, and on a
     laptop that has the current one it changes nothing.
   - **Windows users:** run the kit again: open the `workshop-kit` folder of a current download in Claude Desktop
-    with `Local`, as in step 3, and type `continue`. Claude Desktop's WSL sessions cannot load plugins, so on
-    Windows the kit installs First Draft in Ubuntu itself, and running the kit again updates it.
+    with `Local`, as in step 3, and type `continue`. On Windows the kit links the First Draft skill into Ubuntu
+    rather than installing the plugin, so running the kit again is how it updates.
   - **Mac users:** nothing more to do. The kit installed First Draft as a Claude plugin and turned on its automatic
     updates.
 - Render's free plan sleeps when nobody visits, so the first visit afterwards takes about a minute.

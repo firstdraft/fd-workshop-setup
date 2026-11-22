@@ -36,8 +36,8 @@ UPDATING FIRST DRAFT LATER
 ==========================
 
 Windows: open this folder in Claude Desktop again and type:  continue
-   Claude Desktop cannot load plugins in its WSL sessions, so on Windows
-   this kit installs First Draft itself, and running it again updates it.
+   On Windows this kit links the First Draft skill into Ubuntu rather
+   than installing the plugin, so running the kit again updates it.
 
 Mac: nothing to do. This kit installed First Draft as a Claude plugin
    and turned on its automatic updates.

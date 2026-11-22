@@ -121,9 +121,10 @@ line per component. If it prints `STOPPED`, run it once more (network
 failures are common); if the same component fails again, show the attendee
 the error lines and get the instructor.
 
-The `firstdraft` component is First Draft's plugin package. Claude
-Desktop's WSL sessions cannot load plugins, so the kit installs the
-package in Ubuntu and the handoff links its skill. On a laptop that is
+The `firstdraft` component is First Draft's plugin package. On Windows
+the kit links the First Draft skill into Ubuntu rather than installing
+the plugin: this step installs the package, and the handoff links its
+skill, whose command is `/create-full-stack-app`. On a laptop that is
 already set up, this step is how First Draft updates: the check fails when
 npm has a newer package, and installing it again updates it. On a laptop
 set up by an earlier kit, it also removes that kit's separate First Draft

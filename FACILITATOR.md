@@ -6,9 +6,10 @@ terminal. On a Mac, ask their Claude session or use Terminal; their app folders 
 and does not include is in [its section there](INSTRUCTOR-NOTES.md#the-family-social-network-readme-part-3).
 
 First Draft is one plugin, which holds its skill and the CLI it was tested with. On a Mac it is a Claude plugin with
-automatic updates turned on, and its command is `/firstdraft:create-full-stack-app`. Claude Desktop's WSL sessions
-cannot load plugins, so on Windows the kit installs the plugin's npm package in Ubuntu and links its skill, the command
-is `/create-full-stack-app`, and running the kit again updates it. In an Ubuntu terminal, or Terminal on a Mac, run
+automatic updates turned on, and its command is `/firstdraft:create-full-stack-app`. On Windows the kit installs the
+plugin's npm package in Ubuntu and links its skill, because a linked skill works whether or not a WSL session loads
+plugins (Anthropic's pages say such sessions cannot; a test on 2026-10-03 found they can). There the command is
+`/create-full-stack-app`, and running the kit again updates it. In an Ubuntu terminal, or Terminal on a Mac, run
 First Draft commands as `bash ~/.workshop/firstdraft.sh <arguments>`; in a Claude session, Claude runs them through
 the skill.
 
@@ -112,8 +113,8 @@ the skill.
   `~/.claude/skills/create-full-stack-app` link, with no plugin updates). Typing `continue` in the `workshop-kit`
   folder of a current zip, in a Local session, removes them and installs First Draft as the kit does now.
 - **The command is unknown: `/firstdraft:create-full-stack-app` on Windows, or `/create-full-stack-app` on a Mac.**
-  Each kind of laptop has one name: Windows links the skill as `/create-full-stack-app`, because Claude Desktop's WSL
-  sessions cannot load plugins, and a Mac has the plugin's `/firstdraft:create-full-stack-app`.
+  Each kind of laptop has one name: Windows links the skill as `/create-full-stack-app`, because a linked skill works
+  whether or not a WSL session loads plugins, and a Mac has the plugin's `/firstdraft:create-full-stack-app`.
 
 ## On a Mac
 

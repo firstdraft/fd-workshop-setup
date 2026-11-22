@@ -23,9 +23,11 @@ NPM_PACKAGES="neonctl"
 
 # First Draft is one plugin, which holds the Skill and the CLI it was tested
 # with; nothing installs the CLI by itself. On a Mac, Claude Code installs it
-# from First Draft's catalog and updates it. Claude Desktop's WSL sessions
-# cannot load plugins, so in Ubuntu the kit installs the plugin's npm package
-# and handoff.sh links its Skill; running the kit again updates the package.
+# from First Draft's catalog and updates it. In Ubuntu the kit installs the
+# plugin's npm package and handoff.sh links its Skill, because a linked Skill
+# works whether or not a WSL session loads plugins (Anthropic's pages say
+# such sessions cannot; a test on 2026-10-03 found they can); running the
+# kit again updates the package.
 # Maintainers can point FIRSTDRAFT_PLUGIN_CATALOG (Mac) or
 # FIRSTDRAFT_PLUGIN_PACKAGE (Ubuntu) at a staged plugin to try one that
 # neither the catalog nor npm offers yet.

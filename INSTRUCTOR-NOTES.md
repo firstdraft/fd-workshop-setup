@@ -32,20 +32,25 @@ Claude Desktop, WSL session (WSL > Ubuntu-24.04 > /home/appdev/<app>):
 new WSL session  -> /create-full-stack-app <app idea>
 ```
 
-WSL sessions in Claude Desktop use the Desktop app's Claude sign-in. They
-cannot load plugins: Anthropic's [WSL page](https://code.claude.com/docs/en/desktop-wsl)
-lists "Plugins: not available in WSL sessions", and its
-[Desktop page](https://code.claude.com/docs/en/desktop) says the same. (Testing
-on 2026-10-03 recorded plugins as available when WSL was selected; the kit
-follows Anthropic's pages instead.) So in Ubuntu, `tools.sh` installs the
-plugin's own npm package, `@firstdraft.com/claude-code`, which holds the
-Skill and the CLI it was tested with; nothing installs the CLI by itself.
-The handoff installs both skills as user
-skills in Ubuntu's `~/.claude/skills`, which was tested and needs no plugin
-install: `workshop-signin` (only loads when typed) and a link to the
+WSL sessions in Claude Desktop use the Desktop app's Claude sign-in. (An
+earlier version of these notes said WSL sessions do not support plugins; the
+owner's testing on 2026-10-03 showed plugins are available when WSL is
+selected.) Anthropic's pages say the opposite today: the
+[WSL page](https://code.claude.com/docs/en/desktop-wsl) lists "Plugins: not
+available in WSL sessions", and the
+[Desktop page](https://code.claude.com/docs/en/desktop) says "Plugins aren't
+available in WSL sessions." The two disagree, and neither has been checked
+again since. In Ubuntu, `tools.sh` installs the plugin's own npm package,
+`@firstdraft.com/claude-code`, which holds the Skill and the CLI it was
+tested with; nothing installs the CLI by itself. The handoff installs both
+skills as user skills in Ubuntu's `~/.claude/skills`, which was tested and
+needs no plugin install, so it works whether or not a WSL session loads
+plugins: `workshop-signin` (only loads when typed) and a link to the
 plugin's one skill in that package, so the command is
-`/create-full-stack-app`. The package also puts the same CLI on Ubuntu's
-PATH as `firstdraft`. Running the kit again is how Windows updates: the
+`/create-full-stack-app`. If an attendee also has the First Draft plugin
+enabled, the session may list that skill twice. The package also puts the
+same CLI on Ubuntu's PATH as `firstdraft`. Running the kit again is how
+Windows updates: the
 `firstdraft` tools check fails when npm has a newer package, which sends
 `check-status` to INSTALL_TOOLS. On a laptop set up by an earlier kit, that
 step also removes the separate `@firstdraft.com/cli` package.
