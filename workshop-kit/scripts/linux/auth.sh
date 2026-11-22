@@ -10,7 +10,8 @@
 
 set -uo pipefail
 
-. "$(dirname "${BASH_SOURCE[0]}")/platform.sh"
+helpers=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd) || exit 1
+. "$helpers/platform.sh"
 
 # No 'claude' check: the workshop runs in Claude Desktop, which handles its own
 # sign-in. (The Claude Code CLI is installed too, as a fallback; 'claude auth
@@ -94,11 +95,34 @@ check_revyl() {
 }
 
 check_firstdraft() {
-    # The CLI has no status command; 'firstdraft login' saves a token per
-    # origin in this file (the token itself is never printed).
-    local credentials="${XDG_CONFIG_HOME:-$HOME/.config}/firstdraft/credentials.json"
-    grep -qF 'https://firstdraft.com' "$credentials" 2>/dev/null || { echo "not signed in"; return 1; }
-    echo "signed in"
+    # The plugin's 'firstdraft start' says whether this computer has a saved
+    # login and whether First Draft accepts it, in fixed sentences that never
+    # include the token.
+    local output errors status error
+    errors=$(mktemp)
+    output=$(bash "$helpers/firstdraft.sh" start 2>"$errors")
+    status=$?
+    if [ "$status" -eq 0 ]; then
+        rm -f "$errors"
+        echo "signed in"
+        return 0
+    fi
+    # Only authentication_required calls for a login: then the reason is
+    # First Draft refusing a login or a token, or else no saved login. Any
+    # other handled error, such as First Draft being unavailable or requiring
+    # an update, is the reason itself, with the CLI's detail that says what
+    # to do. Without a handled error, the helper's own line (no plugin) is.
+    error=$(firstdraft_error "$errors")
+    case "$error" in
+        authentication_required | authentication_required:*)
+            printf '%s\n' "$output" | grep -m 1 '^Not logged in: ' ||
+                printf '%s\n' "$output" | grep -m 1 '^This computer has no saved login' ||
+                echo "not signed in" ;;
+        "") echo "firstdraft start failed: $(grep -m 1 -v -e '^[[:space:]]*$' -e '^First Draft: ' "$errors")" ;;
+        *) echo "firstdraft start failed: $error" ;;
+    esac
+    rm -f "$errors"
+    return 1
 }
 
 

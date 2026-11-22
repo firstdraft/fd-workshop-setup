@@ -5,24 +5,29 @@ terminal. On a Mac, ask their Claude session or use Terminal; their app folders 
 (`~/appdev` by default; `cat ~/.workshop/apps-dir` shows it). Background is in [INSTRUCTOR-NOTES.md](INSTRUCTOR-NOTES.md), and what the family social network app does
 and does not include is in [its section there](INSTRUCTOR-NOTES.md#the-family-social-network-readme-part-3).
 
+First Draft is one plugin, which holds its skill and the CLI it was tested with. On a Mac it is a Claude plugin with
+automatic updates turned on, and its command is `/firstdraft:create-full-stack-app`. Claude Desktop's WSL sessions
+cannot load plugins, so on Windows the kit installs the plugin's npm package in Ubuntu and links its skill, the command
+is `/create-full-stack-app`, and running the kit again updates it. In an Ubuntu terminal, or Terminal on a Mac, run
+First Draft commands as `bash ~/.workshop/firstdraft.sh <arguments>`; in a Claude session, Claude runs them through
+the skill.
+
 ## Building
 
 - **A compile is stuck, or compiling again (or saving the Plan) fails with `409` and `compilation_active`.** A compile
   normally takes 30 to 45 seconds. The error names the Compilation, as `current.compilation.id` or in the 409's
   `response.detail` ("Compilation `<id>` is already active..." or "Cancel active Compilation `<id>`..."). Run these in
   the app folder (or in its `.firstdraft/design` if the app was already compiled once):
-  1. Once CLI 0.8.2 is installed (`firstdraft --version`; `npm install --global @firstdraft.com/cli@latest` updates
-     it): `firstdraft compilation cancel <id>`, then compile again.
-  2. CLI 0.8.1 has no cancel. Wait 3 minutes, then `firstdraft compilation status <id> --wait` (it returns when the
-     Compilation finishes, or after 10 minutes). `succeeded`: `firstdraft compilation download <id> --output .`.
-     `failed` or `cancelled`: compile again.
-  3. Still `queued` or `running`: start a [fresh Project](#fresh-project) in a new folder, or
-     [cancel it with the attendee's token](#cancel-with-the-attendees-token).
+  1. `bash ~/.workshop/firstdraft.sh compilation cancel <id>`, then compile again.
+  2. If the cancel fails, wait 3 minutes, then `bash ~/.workshop/firstdraft.sh compilation status <id> --wait` (it
+     returns when the Compilation finishes, or after 10 minutes). `succeeded`:
+     `bash ~/.workshop/firstdraft.sh compilation download <id> --output .`. `failed` or `cancelled`: compile again.
+  3. Still `queued` or `running`: start a [fresh Project](#fresh-project) in a new folder.
 - **A compile ends with a 502, a timeout, `request_outcome_unknown` or `compilation_status_unavailable`.** Do not
   compile again while it may still be running. With `current.compilation.id` in the error, wait a minute, then run
-  `firstdraft compilation status <id> --wait` and download it as above once it succeeds. With no ID, compiling once
-  more is safe: while the first one is active, First Draft refuses with `409 compilation_active` and names it (row
-  above). If anything else keeps the Project blocked, start a [fresh Project](#fresh-project).
+  `bash ~/.workshop/firstdraft.sh compilation status <id> --wait` and download it as above once it succeeds. With no
+  ID, compiling once more is safe: while the first one is active, First Draft refuses with `409 compilation_active`
+  and names it (row above). If anything else keeps the Project blocked, start a [fresh Project](#fresh-project).
 - **`analyzer_release_mismatch`** (`foundation_plan.analysis.analyzer_release_mismatch`) right after a First Draft
   deploy: the Plan was analyzed while the deploy was switching releases. Compile again once. Do not deploy First
   Draft during the workshop.
@@ -92,12 +97,22 @@ and does not include is in [its section there](INSTRUCTOR-NOTES.md#the-family-so
   up from an older zip. Download the zip again, open its `workshop-kit` folder in a Local session, type `continue`
   (it redoes the handoff; give the same app name), then run `/workshop-signin` again in a WSL session (on a Mac, a
   Local session).
-- **An attendee may have old First Draft packages.** In Ubuntu (on a Mac, Terminal), `firstdraft --version` shows the
-  CLI (0.8.2 today) and `npm ls -g @firstdraft.com/claude-code` shows the plugin (0.8.7 today). If either is older,
-  run `npm install --global @firstdraft.com/cli@latest @firstdraft.com/claude-code@latest` there, then start a new
-  session. With a kit zip downloaded on 2026-10-05 or later, typing `continue` in a Local session in its
-  `workshop-kit` folder also works: setup sends old packages back to the install step (on a Mac,
-  `bash scripts/mac/setup.sh install-tools` from that folder does the same). Older zips do not check for updates.
+- **First Draft says it is out of date, or an attendee may have an old First Draft.** The first line of
+  `bash ~/.workshop/firstdraft.sh start` names the plugin's version. On Windows, the attendee updates by opening the
+  `workshop-kit` folder of a current zip in a Local session and typing `continue`: setup's install step installs
+  npm's newest plugin package. Then they start a new WSL session. On a Mac, the kit turned on Claude Code's automatic
+  updates for the plugin. To update at once, run these in Terminal, then quit and reopen Claude Desktop:
+
+  ```sh
+  claude plugin marketplace update firstdraft-skills
+  claude plugin update firstdraft@firstdraft-skills --scope user
+  ```
+- **An attendee set up with a kit from before 2026-11-22** has First Draft's separate CLI package (and, on a Mac, the
+  plugin's npm package and a `~/.claude/skills/create-full-stack-app` link). Typing `continue` in the `workshop-kit`
+  folder of a current zip, in a Local session, removes them and installs First Draft as the kit does now.
+- **The command is unknown: `/firstdraft:create-full-stack-app` on Windows, or `/create-full-stack-app` on a Mac.**
+  Each kind of laptop has one name: Windows links the skill as `/create-full-stack-app`, because Claude Desktop's WSL
+  sessions cannot load plugins, and a Mac has the plugin's `/firstdraft:create-full-stack-app`.
 
 ## On a Mac
 
@@ -138,27 +153,12 @@ lines pick that copy when it exists:
 PLAN=~/APP/.firstdraft/design/.firstdraft/foundation-plan.json &&
 { [ -f "$PLAN" ] || PLAN=~/APP/.firstdraft/foundation-plan.json; } &&
 mkdir ~/APP-2 && cd ~/APP-2 &&
-firstdraft plan init --name "Fresh Project" &&
+bash ~/.workshop/firstdraft.sh plan init --name "Fresh Project" &&
 cp "$PLAN" .firstdraft/ &&
-firstdraft plan compile
+bash ~/.workshop/firstdraft.sh plan compile
 ```
 
 `plan init` only creates the new Project's ID; the copied Plan replaces its name. Then the attendee opens a new session
 in `/home/appdev/APP-2` (WSL, Ubuntu-24.04) and continues from README step 12. On a Mac, use the projects folder
-(`~/appdev` by default) in place of `~` in the commands, and open a Local session in its `APP-2`.
-
-### Cancel with the attendee's token
-
-For CLI 0.8.1. Run it where the stuck-compile commands run (the app folder, or its `.firstdraft/design`) after
-replacing `COMPILATION_ID`. It reads the Project ID and the attendee's saved First Draft token from their files, sends
-the token to First Draft only, and never prints it (`-q` ignores any `~/.curlrc`, which could turn on verbose output):
-
-```sh
-P=$(python3 -c 'import json; print(json.load(open(".firstdraft/state.json"))["project_id"])') &&
-T=$(python3 -c 'import json, os; print(json.load(open(os.path.expanduser("~/.config/firstdraft/credentials.json")))["origins"]["https://firstdraft.com"]["access_token"])') &&
-printf 'Authorization: Bearer %s\n' "$T" | curl -q -sS -X POST -H @- \
-  "https://firstdraft.com/v1/projects/$P/compilations/COMPILATION_ID/cancel"
-```
-
-A reply with `"status":"cancelled"` frees the Project: compile again. `compilation_not_cancellable` means it had
-already finished: check it with `firstdraft compilation status`.
+(`~/appdev` by default) in place of `~` in the commands (the `~/.workshop/firstdraft.sh` helper stays), and open a
+Local session in its `APP-2`.

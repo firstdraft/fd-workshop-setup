@@ -9,11 +9,13 @@
 # Installed to ~/.workshop/login.sh by handoff.sh; used by the sign-in skill.
 #
 #   bash login.sh start <service>    github | github-refresh | render | neon | revyl
-#                                    | firstdraft | firstdraft-device
-#   bash login.sh stop <service>     cancel a sign-in that is still waiting
+#                                    | firstdraft
+#   bash login.sh stop <service>     cancel a sign-in that is still waiting (not firstdraft)
 #   bash login.sh status <service>   is it still waiting, or did it finish / time out?
+#                                    (not firstdraft)
 #   bash login.sh wait <service>     after the approval: give the sign-in up to 30
-#                                    seconds to save, then run its auth.sh check
+#                                    seconds to save (firstdraft: finish it), then
+#                                    run its auth.sh check
 #
 # Starting again cancels the previous attempt for that service, because its
 # link no longer works once a new one is created.
@@ -21,7 +23,8 @@
 
 set -uo pipefail
 
-. "$(dirname "${BASH_SOURCE[0]}")/platform.sh"
+helpers=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd) || exit 1
+. "$helpers/platform.sh"
 
 export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$HOME/.revyl/bin:$PATH"
 # Stop the CLIs from opening a browser themselves (most ignore this setting
@@ -41,6 +44,60 @@ service=${2:-}
 opens_browser_itself=""   # set for CLIs that open the link whatever BROWSER says
 expires_after=""          # set for CLIs whose sign-in gives up quickly
 
+# First Draft's device login is two short commands of the plugin's CLI, so
+# nothing waits in the background: start gets a link and a code, and wait
+# finishes the login once it is approved. Each prints only the link, the code
+# and First Draft's answer, because the CLI's own next steps name CLI
+# commands that the sign-in skill replaces with these.
+if [ "$service" = firstdraft ]; then
+    case "$action" in
+        start)
+            output=$(bash "$helpers/firstdraft.sh" login --no-wait 2>&1)
+            status=$?
+            # The link is the line that holds only a URL, and usually
+            # includes the code, which First Draft prints as ABCD-EFGH. The
+            # first line names the origin, which is not the link.
+            url=$(printf '%s\n' "$output" | grep -m 1 -xE 'https?://[^ ]+')
+            if [ "$status" -ne 0 ] || [ -z "$url" ]; then
+                echo "NO LINK: First Draft's login did not start. Its output:"
+                printf '%s\n' "$output" | tail -n 20
+                exit 1
+            fi
+            code=$(printf '%s\n' "$output" | grep -m 1 -oE '\b[A-Z0-9]{4}(-[A-Z0-9]{4})+\b')
+            echo "URL: $url"
+            [ -n "$code" ] && echo "CODE: $code"
+            if [ "${WORKSHOP_NO_OPEN:-}" != 1 ]; then
+                open_link "$url" && echo "OPENED: the sign-in page in the default browser" \
+                    || echo "NOT OPENED: could not open the browser; the attendee must open the link"
+                if [ -n "$code" ] && [[ "$url" != *"$code"* ]]; then
+                    copy_text "$code" && echo "COPIED: the code, ready to paste into the page"
+                else
+                    copy_text "$url" && echo "COPIED: the link, ready to paste into a browser"
+                fi
+            fi
+            printf '%s\n' "$output" | grep -m 1 '^The link and the code expire'
+            echo "After the attendee approves it, run: bash ~/.workshop/login.sh wait firstdraft"
+            exit 0 ;;
+        wait)
+            errors=$(mktemp)
+            output=$(bash "$helpers/firstdraft.sh" login --finish 2>"$errors")
+            # First Draft's answer is the CLI's first sentence. When the CLI
+            # prints none, its handled error, such as a login it could not
+            # save, says what happened and what to do instead.
+            if [ -n "$output" ]; then
+                printf '%s\n' "$output" | head -n 1
+            else
+                error=$(firstdraft_error "$errors")
+                echo "NOT FINISHED: ${error:-$(grep -m 1 -v -e '^[[:space:]]*$' -e '^First Draft: ' "$errors")}"
+            fi
+            rm -f "$errors"
+            exec bash "$helpers/auth.sh" check firstdraft ;;
+        *)
+            echo "usage: login.sh start|wait firstdraft"
+            exit 2 ;;
+    esac
+fi
+
 case "$service" in
     github)
         # --skip-ssh-key: the skill uploads the key itself, which needs the
@@ -56,22 +113,15 @@ case "$service" in
         # after 60 seconds, which cannot be changed.
         command=(neonctl auth); opens_browser_itself=1; expires_after=60 ;;
     revyl)  command=(revyl auth login) ;;
-    # The browser sends the approval back to a local address, which WSL does
-    # not forward from Windows on some laptops, so the skill tries this second.
-    firstdraft) command=(firstdraft login) ;;
-    # Approve with a code instead (the skill's first choice): nothing has to
-    # reach this laptop's local address from the browser.
-    firstdraft-device) command=(firstdraft login --device) ;;
     *)
-        echo "usage: login.sh start|stop|status|wait github|github-refresh|render|neon|revyl|firstdraft|firstdraft-device"
+        echo "usage: login.sh start|stop|status|wait github|github-refresh|render|neon|revyl, or login.sh start|wait firstdraft"
         exit 2 ;;
 esac
 
 log="$LOG_DIR/$service.log"
 pid_file="$LOG_DIR/$service.pid"
-# The auth.sh check for this service: github-refresh -> github, firstdraft-device -> firstdraft.
+# The auth.sh check for this service: github-refresh -> github.
 check_service=${service%-refresh}
-check_service=${check_service%-device}
 
 # Is the sign-in still running? An exited sign-in that nothing has reaped yet
 # is a zombie, which kill -0 still reports as alive. WSL's init has left
@@ -131,11 +181,10 @@ pid=$!
 echo "$pid" > "$pid_file"
 
 # The sign-in link in the output:
-#   - a link that already includes the code, if there is one (First Draft's
-#     device sign-in prints the link both without and with the code);
+#   - a link that already includes the code, if there is one;
 #   - otherwise the longest link: sign-in links carry long parameters, while
-#     other links in the text are short (First Draft names its plain address
-#     first; Revyl's banner links to its docs, which are skipped anyway).
+#     other links in the text are short (Revyl's banner links to its docs,
+#     which are skipped anyway).
 find_link() {
     local links
     links=$(sed "s/$ESC\\[[0-9;]*[A-Za-z]//g" "$log" | grep -oE 'https://[^ "<>]+' \

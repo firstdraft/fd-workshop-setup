@@ -54,10 +54,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/<name>.ps1
 | `restart.ps1` | Restarts Windows in 60 seconds | No |
 | `prepare-bios.ps1` | Suspends BitLocker, restarts into the BIOS | Yes |
 | `setup-ubuntu.ps1` | Installs Ubuntu 24.04, creates the `appdev` user | No |
-| `install-tools.ps1` | Installs the development tools inside Ubuntu (10-30 min; run in the background) | No |
+| `install-tools.ps1` | Installs the development tools inside Ubuntu, including the First Draft plugin's npm package (10-30 min; run in the background) | No |
 | `configure.ps1` | Sets git defaults, creates an SSH key, trusts github.com | No |
 | `verify.ps1` | Final check, prints `RESULT: READY` / `NOT READY` | No |
-| `handoff.ps1` | Creates the app folder, installs the sign-in and First Draft skills and the app-session notes in Ubuntu | No |
+| `handoff.ps1` | Creates the app folder, installs the sign-in skill, links the First Draft skill from the plugin's package, and installs the app-session notes in Ubuntu | No |
 
 **Admin prompt:** when a script needs administrator rights it prints
 `WAITING FOR PERMISSION`. Before running it, tell the attendee: *"A Windows
@@ -121,6 +121,14 @@ line per component. If it prints `STOPPED`, run it once more (network
 failures are common); if the same component fails again, show the attendee
 the error lines and get the instructor.
 
+The `firstdraft` component is First Draft's plugin package. Claude
+Desktop's WSL sessions cannot load plugins, so the kit installs the
+package in Ubuntu and the handoff links its skill. On a laptop that is
+already set up, this step is how First Draft updates: the check fails when
+npm has a newer package, and installing it again updates it. On a laptop
+set up by an earlier kit, it also removes that kit's separate First Draft
+CLI package.
+
 **CONFIGURE**: run `configure.ps1` (no questions). It sets git defaults,
 creates an SSH key and trusts github.com. Their git name and email are set
 later from their GitHub account, and the SSH key is uploaded then too, when
@@ -133,8 +141,10 @@ they sign in to GitHub.
    Suggest `firstdraft-workshop`; any name of lowercase letters, numbers and
    dashes works (turn "My Cool App" into `my-cool-app` and confirm it).
 3. Run `handoff.ps1 -AppName "<name>"`. It creates `/home/appdev/<name>` in
-   Ubuntu and installs the sign-in and First Draft skills and the notes for
-   the app sessions there. Exit code 41 means the name is not valid.
+   Ubuntu, installs the sign-in skill, links the First Draft skill
+   (`/create-full-stack-app`) from the plugin's package, and installs the
+   notes for the app sessions there. Exit code 41 means the name is not
+   valid.
 4. Go to DONE.
 
 **DONE**: everything on this side is finished. The rest of the workshop
@@ -185,6 +195,8 @@ start (for example "the device is managed"), get the instructor.
 - `Setup WSL without Claude.cmd`: double-click fallback that runs the same steps.
 - `scripts/mac/setup.sh`: the Mac setup (see below). It runs the same
   `scripts/linux/*.sh` phases, which use Homebrew on a Mac.
+- `scripts/linux/firstdraft.sh`: runs the First Draft plugin's CLI from a
+  plain shell, installed to `~/.workshop` by the handoff. Not used by you.
 
 ## On a Mac
 
@@ -223,11 +235,11 @@ bash scripts/mac/setup.sh <step>
 |---|---|---|
 | `status` | Read-only. Prints every check and the `NEXT STEP` | No |
 | `install-homebrew` | Opens a Terminal window with Homebrew's installer, which also installs Apple's Command Line Tools if they are missing, and waits for it (up to 30 min; run in the background) | Yes, typed into Terminal |
-| `install-tools` | Installs the development tools with Homebrew and mise (10-30 min; run in the background) | No |
+| `install-tools` | Installs the development tools with Homebrew and mise, and the First Draft plugin with Claude's own plugin commands (10-30 min; run in the background) | No |
 | `configure` | Sets git defaults, creates an SSH key, trusts github.com | No |
 | `verify` | Final check, prints `RESULT: READY` / `NOT READY` | No |
 | `folder <path>` | Records the folder for workshop projects and creates it; warns about a cloud-synced folder (exit 42) | No |
-| `handoff <name>` | Creates `<projects folder>/<name>`, installs the sign-in and First Draft skills and the app-session notes | No |
+| `handoff <name>` | Creates `<projects folder>/<name>`, installs the sign-in skill and the app-session notes | No |
 
 ### What to do for each NEXT STEP
 
@@ -259,6 +271,13 @@ which is expected. If it prints `STOPPED`, run it once more (network
 failures are common); if the same component fails again, show the attendee
 the error lines and get the instructor.
 
+The `firstdraft` component installs the First Draft plugin from First
+Draft's catalog with Claude's own plugin commands and turns on its
+automatic updates, so the plugin updates itself; its command is
+`/firstdraft:create-full-stack-app`. On a Mac set up by an earlier kit, it
+first removes that kit's two First Draft npm packages, which the plugin
+replaces, and the handoff removes that kit's link to their skill.
+
 **CONFIGURE**: run `configure` (no questions). It sets git defaults, creates
 an SSH key if they do not have one (an existing key is kept) and trusts
 github.com. Their git name and email are set later from their GitHub
@@ -280,9 +299,9 @@ account, for workshop projects only, when they sign in to GitHub.
    `firstdraft-workshop`; any name of lowercase letters, numbers and dashes
    works (turn "My Cool App" into `my-cool-app` and confirm it).
 4. Run `handoff <name>`. It creates `<name>` in the projects folder,
-   installs the sign-in and First Draft skills, and writes the notes for the
-   app sessions to `CLAUDE.md` in the projects folder, which only sessions in
-   folders under it read. Exit code 41 means the name is not valid.
+   installs the sign-in skill, and writes the notes for the app sessions to
+   `CLAUDE.md` in the projects folder, which only sessions in folders under
+   it read. Exit code 41 means the name is not valid.
 5. Go to DONE.
 
 **DONE**: everything here is finished. Give the attendee all of these steps
