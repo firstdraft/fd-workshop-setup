@@ -118,12 +118,13 @@ firstdraft_package_skill() {
     echo "$(npm root --global)/@firstdraft.com/claude-code/skills/create-full-stack-app"
 }
 
-# On a Mac: is the Skill folder a link that an earlier kit made into the
-# plugin's npm package? (Its target may be gone already.) Any other link or
-# folder of that name is the attendee's own.
+# On a Mac: is the Skill folder the link an earlier kit made into the plugin's
+# npm package, in the global packages of a Node that mise installed? (Its
+# target may be gone already.) Any other link or folder of that name is the
+# attendee's own.
 earlier_kit_skill_link() {
     case "$(readlink "$FIRSTDRAFT_SKILL_LINK" 2>/dev/null)" in
-        */@firstdraft.com/claude-code/skills/create-full-stack-app) return 0 ;;
+        "$HOME"/.local/share/mise/installs/node/*/lib/node_modules/@firstdraft.com/claude-code/skills/create-full-stack-app) return 0 ;;
     esac
     return 1
 }

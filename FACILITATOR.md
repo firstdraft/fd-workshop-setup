@@ -107,8 +107,9 @@ the skill.
   claude plugin marketplace update firstdraft-skills
   claude plugin update firstdraft@firstdraft-skills --scope user
   ```
-- **An attendee set up with a kit from before 2026-11-22** has First Draft's separate CLI package (and, on a Mac, the
-  plugin's npm package and a `~/.claude/skills/create-full-stack-app` link). Typing `continue` in the `workshop-kit`
+- **An attendee set up with an earlier kit**, one whose `workshop-kit/scripts/linux` has no `firstdraft.sh`, has
+  First Draft's separate CLI package (and, on a Mac, the plugin's npm package and a
+  `~/.claude/skills/create-full-stack-app` link, with no plugin updates). Typing `continue` in the `workshop-kit`
   folder of a current zip, in a Local session, removes them and installs First Draft as the kit does now.
 - **The command is unknown: `/firstdraft:create-full-stack-app` on Windows, or `/create-full-stack-app` on a Mac.**
   Each kind of laptop has one name: Windows links the skill as `/create-full-stack-app`, because Claude Desktop's WSL

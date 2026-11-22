@@ -59,7 +59,7 @@ EOF
 new_home() {
     local home=$work/$1 bin root
     bin=$home/.local/bin
-    root=$home/npm/lib/node_modules
+    root=$home/.local/share/mise/installs/node/24.21.0/lib/node_modules
     mkdir -p "$bin" "$home/.claude/skills" "$root/@firstdraft.com/cli"
     touch "$home/.bashrc"
     echo '{"name":"@firstdraft.com/cli","version":"0.9.0"}' > "$root/@firstdraft.com/cli/package.json"
@@ -169,17 +169,18 @@ expect "without the plugin, it says what to do in one line" says_unavailable "$?
 out=$(run "$home" Darwin "$log" bash "$kit/scripts/linux/handoff.sh" check)
 expect "the handoff check finds the earlier kit's Skill link" \
     grep -qF '[FAIL] firstdraft-skill: an earlier kit' <<<"$out"
-mkdir -p "$home/dotfiles/create-full-stack-app"
-ln -sfn "$home/dotfiles/create-full-stack-app" "$home/.claude/skills/create-full-stack-app"
-out=$(run "$home" Darwin "$log" bash "$kit/scripts/linux/handoff.sh" check)
-expect "and leaves a link of the attendee's own alone" \
-    grep -qxF '[PASS] firstdraft-skill: /firstdraft:create-full-stack-app, from the plugin' <<<"$out"
+for own in "$home/dotfiles/create-full-stack-app" ../../my-tools/node_modules/@firstdraft.com/claude-code/skills/create-full-stack-app; do
+    ln -sfn "$own" "$home/.claude/skills/create-full-stack-app"
+    out=$(run "$home" Darwin "$log" bash "$kit/scripts/linux/handoff.sh" check)
+    expect "and leaves the attendee's own link to $own alone" \
+        grep -qxF '[PASS] firstdraft-skill: /firstdraft:create-full-stack-app, from the plugin' <<<"$out"
+done
 
 
 echo "== Ubuntu (WSL)"
 home=$(new_home wsl)
 log=$work/wsl.log
-root=$home/npm/lib/node_modules
+root=$home/.local/share/mise/installs/node/24.21.0/lib/node_modules
 refute "the earlier kit's separate CLI package fails the firstdraft check" \
     run "$home" Linux "$log" bash "$kit/scripts/linux/tools.sh" check firstdraft
 out=$(run "$home" Linux "$log" bash "$kit/scripts/linux/tools.sh" install firstdraft)

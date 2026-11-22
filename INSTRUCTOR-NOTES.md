@@ -285,8 +285,9 @@ Symptoms and their fixes, including this rehearsal's, are in
 - After the first sign-in session, `/exit` opened the second session (First
   Draft plugin) as intended.
 - Not yet tested: `github-refresh`.
-- (History, replaced on 2026-11-22 by the plugin's `firstdraft start` and
-  its two-step device login; see the end of this list.) First Draft sign-in
+- (History, replaced when First Draft became one plugin by its
+  `firstdraft start` and two-step device login; see the end of this list.)
+  First Draft sign-in
   (CLI 0.8.1, `firstdraft login`): the helper supported the default mode
   (the browser sends the approval back to a listener on 127.0.0.1 in Ubuntu,
   as Neon's does) and `firstdraft-device` (`firstdraft login --device`), and
