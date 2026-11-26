@@ -19,10 +19,9 @@ that need the attendee (permission prompts, restarts, BIOS).
    then run `check-status.ps1` again. Repeat until the next step is `DONE`.
 2. **Use the scripts; do not improvise.** Do not run your own `wsl --install`,
    `dism`, `bcdedit`, `manage-bde`, registry or BIOS commands. If a script fails
-   and the troubleshooting table below does not cover it, stop and tell the
-   attendee to raise their hand for the instructor. Show them the error text.
-3. **If the same NEXT STEP comes back after you already did it once, stop** and
-   get the instructor. Do not loop.
+   and the troubleshooting table below does not cover it, **stop** (rule 9).
+3. **If the same NEXT STEP comes back after you already did it once, stop**
+   (rule 9). Do not loop.
 4. **Never run** `wsl --unregister`, `wsl --uninstall`, `manage-bde -off`, or
    anything that deletes or resets data.
 5. **Passwords:** never ask for, type, or repeat a Windows password. If Windows
@@ -32,10 +31,15 @@ that need the attendee (permission prompts, restarts, BIOS).
    save their work, and give them the resume instructions (see RESTART below).
 7. **Windows or Mac.** On a Mac, follow [On a Mac](#on-a-mac) instead. If
    `$env:OS` is not `Windows_NT` and the laptop is not a Mac (a Linux
-   laptop), tell them this kit is for Windows and Mac laptops and to ask the
-   instructor.
+   laptop), tell them this kit is for Windows and Mac laptops, and offer the
+   Codespace guide (rule 9).
 8. Speak simply: one step at a time, no jargon, and say what they will see
    before they see it.
+9. **Stop** means: show the attendee the error text, say in a sentence what
+   it means, and tell them this kit cannot finish on this laptop as it is.
+   Offer the Codespace guide, https://github.com/firstdraft/drawing-board#readme:
+   it runs in the browser and installs nothing on the laptop. They may be
+   working on their own, so never tell them to ask someone for help.
 
 ## How to run scripts
 
@@ -70,14 +74,14 @@ explain and offer to try again.
 
 **STOP_WINDOWS_TOO_OLD**: Windows must be updated first: Settings > Windows
 Update > install everything, restart, then open this folder again. If it is
-Windows 10 and still too old after updating, get the instructor.
+Windows 10 and still too old after updating, **stop**.
 
 **STOP_LOW_DISK**: help them free space (empty the Recycle Bin themselves,
 uninstall unused apps, Settings > System > Storage > Cleanup
 recommendations). Do not delete files yourself.
 
 **STOP_NESTED_VIRTUALIZATION**: Windows is running inside a virtual machine
-(for example Parallels on a Mac). Get the instructor.
+(for example Parallels on a Mac). **Stop**.
 
 **ENABLE_VIRTUALIZATION**: virtualization is off in the BIOS. This is the
 most delicate step:
@@ -91,13 +95,17 @@ most delicate step:
    encrypted: ask them to open https://aka.ms/myrecoverykey **on their phone**,
    sign in, and confirm they can see a recovery key for this laptop. Only
    when they say yes, run it again with `-RecoveryKeyConfirmed`. If they
-   cannot find a key, stop and get the instructor.
-4. Give the resume instructions (below). The laptop restarts 60 seconds after
-   the script succeeds.
+   cannot find a key, **stop**: never restart into the BIOS without one.
+4. Give the resume instructions (below), and add: if they could not change
+   the setting, they type **I could not change the BIOS setting** instead
+   of continue. The laptop restarts 60 seconds after the script succeeds.
 5. Exit code **30/31**: it cannot restart into the BIOS automatically. Walk
    them through the manual route printed by the script and the BIOS guide.
-   Exit code **21**: BitLocker could not be suspended. Do not continue; get the
-   instructor.
+   Exit code **21**: BitLocker could not be suspended. Do not continue;
+   **stop**.
+6. If they say they could not change the setting (they could not find it,
+   or the BIOS asked for a password), do not run `prepare-bios.ps1` again:
+   **stop**.
 
 **INSTALL_WSL**: run `install-wsl.ps1` (admin prompt, a few minutes). If it
 prints `RESTART REQUIRED`, go to RESTART.
@@ -118,8 +126,7 @@ laptop must stay plugged in, awake, and on Wi-Fi (no lid closing). Run
 command is allowed to) and wait for it to finish; you can read its output
 file to report progress. It installs one component at a time and prints a
 line per component. If it prints `STOPPED`, run it once more (network
-failures are common); if the same component fails again, show the attendee
-the error lines and get the instructor.
+failures are common); if the same component fails again, **stop**.
 
 The `firstdraft` component is First Draft's plugin package. On Windows
 the kit links First Draft's two skills into Ubuntu rather than installing
@@ -141,13 +148,29 @@ they sign in to GitHub.
    do not continue.
 2. On `RESULT: READY`, ask what they want to call the app they will build.
    Suggest `firstdraft-workshop`; any name of lowercase letters, numbers and
-   dashes works (turn "My Cool App" into `my-cool-app` and confirm it).
+   dashes works (turn "My Cool App" into `my-cool-app` and confirm it). On
+   a laptop set up before, ask as below instead.
 3. Run `handoff.ps1 -AppName "<name>"`. It creates `/home/appdev/<name>` in
    Ubuntu, installs the sign-in skill, links First Draft's two skills
    (`/create-full-stack-app` and `/maintain-app`) from the plugin's
    package, and installs the notes for the app sessions there. Exit code
    41 means the name is not valid.
 4. Go to DONE.
+
+**A laptop set up before** already has an app folder: the Handoff to
+Ubuntu line of `check-status.ps1` ends with `app-folder:` and that folder's
+path, usually `/home/appdev/<name>`. Its name is the last part of the path.
+The attendee may be back for a new app, or only to bring the setup up to
+date. In HANDOFF's step 2, ask whether they want a folder for a new app. If
+they do, the name must not be that one, nor one they used for another app
+on this laptop (ask them), so do not suggest `firstdraft-workshop` if
+either has it; HANDOFF creates the new folder. If not, use that name, and
+HANDOFF leaves the folder as it is. In DONE, they choose the folder on the
+`app-folder` line that HANDOFF printed. Their other app folders stay as
+they are. If you reach DONE without having run HANDOFF since the
+attendee's latest request to set up the laptop or to continue, do HANDOFF
+once more first, in this way: it installs the current sign-in skill and
+notes.
 
 **DONE**: everything on this side is finished. The rest of the workshop
 happens in a **new Claude Desktop session running inside Ubuntu**, which the
@@ -166,7 +189,7 @@ attendee opens themselves. Walk them through it, one step at a time:
    recent folders) and tell Claude what they want to build.
 
 If "WSL" is missing from the environment picker or the session will not
-start (for example "the device is managed"), get the instructor.
+start (for example "the device is managed"), **stop**.
 
 ## Troubleshooting
 
@@ -175,9 +198,9 @@ start (for example "the device is managed"), get the instructor.
 | `0x80370102` | Virtualization not running | Run `check-status.ps1`; it will point to BIOS or INSTALL_WSL |
 | `0x8007019e`, `0x8000000d` | WSL feature not enabled yet | Run `install-wsl.ps1`, then restart |
 | `0x80072efd`, `0x80072ee2`, timeouts during download | Network problem | Check Wi-Fi, turn off VPN, run the step again |
-| Store / `0x80073cf9`, `0x803f8001` | Microsoft Store blocked | The scripts already retry with `--web-download`; if it still fails, get the instructor |
-| `HTTPS download failed` in verify | Proxy or SSL inspection (often company laptops) | Get the instructor |
-| `Permission was not granted`, and the attendee has no admin password | Not an administrator on this laptop | Get the instructor (usually a company-managed laptop) |
+| Store / `0x80073cf9`, `0x803f8001` | Microsoft Store blocked | The scripts already retry with `--web-download`; if it still fails, **stop** |
+| `HTTPS download failed` in verify | Proxy or SSL inspection (often company laptops) | **Stop** |
+| `Permission was not granted`, and the attendee has no admin password | Not an administrator on this laptop | **Stop** (usually a company-managed laptop) |
 | `ASK:` in output | The script needs a decision from the attendee | Explain it and ask them; do not decide for them |
 | A script times out | Slow network or a stuck download | Run `check-status.ps1` and continue from its NEXT STEP |
 
@@ -217,15 +240,20 @@ rest of the workshop happens in a new **Local** Claude Desktop session in
 2. **Use the script; do not improvise.** Do not run your own `brew`, `sudo`,
    `xcode-select`, `chsh` or installer commands, and do not edit their
    shell startup files. If a step fails and the troubleshooting table below
-   does not cover it, stop and get the instructor. Show them the error text.
+   does not cover it, **stop** (rule 7).
 3. **If the same NEXT STEP comes back after you already did it once, stop**
-   and get the instructor. Do not loop.
+   (rule 7). Do not loop.
 4. **Never** uninstall anything, or delete or reset data.
 5. **Passwords:** never ask for, type, or repeat the attendee's Mac
    password. Homebrew's installer asks for it in a Terminal window, and the
    attendee types it there themselves.
 6. Speak simply: one step at a time, no jargon, and say what they will see
    before they see it.
+7. **Stop** means: show the attendee the error text, say in a sentence what
+   it means, and tell them this kit cannot finish on this Mac as it is.
+   Offer the Codespace guide, https://github.com/firstdraft/drawing-board#readme:
+   it runs in the browser and installs nothing on the Mac. They may be
+   working on their own, so never tell them to ask someone for help.
 
 Run every step from this folder, with a **10-minute timeout** (600000 ms):
 
@@ -250,7 +278,11 @@ empty the Trash themselves, and System Settings > General > Storage shows
 what is large. Do not delete files yourself.
 
 **STOP_NOT_ADMIN**: their Mac account is not an administrator, which
-Homebrew's installer needs. Get the instructor.
+Homebrew's installer needs, and the kit then installs the tools with
+Homebrew as this account. If someone with an administrator account on this
+Mac makes this account an administrator (System Settings > Users &
+Groups), the attendee logs out and back in, opens this folder again and
+types continue. Otherwise, **stop**.
 
 **INSTALL_HOMEBREW**: before running it, tell the attendee: *"A Terminal
 window will open with Homebrew's installer. Homebrew installs developer
@@ -270,8 +302,7 @@ Mac must stay plugged in, awake, and on Wi-Fi (no lid closing). Run
 `install-tools` **in the background** and wait for it; it prints a line per
 component. macOS may show a "Background Items Added" notice for PostgreSQL,
 which is expected. If it prints `STOPPED`, run it once more (network
-failures are common); if the same component fails again, show the attendee
-the error lines and get the instructor.
+failures are common); if the same component fails again, **stop**.
 
 The `firstdraft` component installs the First Draft plugin from First
 Draft's catalog with Claude's own plugin commands and turns on its
@@ -296,15 +327,29 @@ account, for workshop projects only, when they sign in to GitHub.
    fights with the many files an app writes, and GitHub is your backup
    anyway."* Then run `folder "<path>"`. If it prints `WARN:` (exit 42), the
    folder looks synced: repeat the warning once, and only if they still
-   want it, run the command it prints, with `--synced-ok`.
+   want it, run the command it prints, with `--synced-ok`. On a Mac set up
+   before, skip this step: they keep their projects folder.
 3. Ask what they want to call the app they will build. Suggest
    `firstdraft-workshop`; any name of lowercase letters, numbers and dashes
-   works (turn "My Cool App" into `my-cool-app` and confirm it).
+   works (turn "My Cool App" into `my-cool-app` and confirm it). On a Mac
+   set up before, ask as below instead.
 4. Run `handoff <name>`. It creates `<name>` in the projects folder,
    installs the sign-in skill, and writes the notes for the app sessions to
    `CLAUDE.md` in the projects folder, which only sessions in folders under
    it read. Exit code 41 means the name is not valid.
 5. Go to DONE.
+
+**A Mac set up before** already has an app folder: `status` showed
+`[PASS] app-folder`. The attendee may be back for a new app, or only to
+bring the setup up to date. In HANDOFF's step 3, ask whether they want a
+folder for a new app. If they do, the name must be one that no folder in
+their projects folder has, so do not suggest `firstdraft-workshop` if they
+used it; HANDOFF creates the new folder. If not, use the name of the app
+folder they already have (the `app-folder` line shows it), which HANDOFF
+leaves as it is. Their other app folders stay as they are. If you reach
+DONE without having run HANDOFF since the attendee's latest request to set
+up the Mac or to continue, do HANDOFF once more first, in this way: it
+installs the current sign-in skill and notes.
 
 **DONE**: everything here is finished. Give the attendee all of these steps
 at once, because the first one closes this chat:
@@ -325,10 +370,10 @@ at once, because the first one closes this chat:
 
 | Symptom | Meaning | What to do |
 |---|---|---|
-| `Need sudo access`, `not in the sudoers file` or `Insufficient permissions` in Homebrew's output | Not an administrator | Get the instructor |
+| `Need sudo access`, `not in the sudoers file` or `Insufficient permissions` in Homebrew's output | Not an administrator | As for STOP_NOT_ADMIN |
 | `Failed during: git fetch`, `curl: (6)`, `Could not download`, timeouts | Network problem | Check Wi-Fi, turn off VPN, run the step again |
-| `[FAIL] xcode-clt: installed but clang does not run` | Xcode is installed but its license was never accepted | Get the instructor |
-| `[FAIL] postgres: server is version ...` | Another PostgreSQL (Postgres.app, or another Homebrew version) is already running on this Mac | Get the instructor |
-| `[FAIL] Login shell is ...` | The account uses a shell other than zsh | Get the instructor |
+| `[FAIL] xcode-clt: installed but clang does not run` | Xcode is installed but its license was never accepted | In Terminal, the attendee runs `sudo xcodebuild -license accept` and types their Mac password themselves; then run `status` again |
+| `[FAIL] postgres: server is version ...` | Another PostgreSQL (Postgres.app, or another Homebrew version) is already running on this Mac | Ask whether they still use it for other projects. If not, they quit Postgres.app, or stop it in Terminal with `brew services stop postgresql@<version>` (it then also stops starting at login), and you run `status` again. If they do, **stop** |
+| `[FAIL] Login shell is ...` | The account uses a shell other than zsh | **Stop** |
 | macOS asks whether Claude may access the Downloads or Documents folder | The kit is in that folder | The attendee clicks **Allow** |
-| `HTTPS download failed` in verify | Proxy or SSL inspection (often company laptops) | Get the instructor |
+| `HTTPS download failed` in verify | Proxy or SSL inspection (often company laptops) | **Stop** |

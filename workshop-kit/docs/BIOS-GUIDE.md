@@ -51,7 +51,7 @@ Where it usually is:
 | ASUS | Advanced > CPU Configuration > Intel Virtualization Technology / SVM Mode (press F7 for Advanced Mode first) |
 | Acer | Advanced (or Main) > Intel Virtualization Technology / AMD-V |
 | MSI | OC (or Advanced) > CPU Features > Intel Virtualization Tech / SVM Mode |
-| Microsoft Surface | Usually already on. Tell the instructor. |
+| Microsoft Surface | Usually already on. Exit without saving, as below. |
 
 Set it to **Enabled**.
 
@@ -68,4 +68,9 @@ Then open Claude, open the workshop folder, and type **continue**.
   https://aka.ms/myrecoverykey on your phone (use the one whose Key ID matches
   the ID on the screen).
 - **You cannot find the setting, or the BIOS asks for a password:** choose
-  "Exit without saving" and ask the instructor.
+  "Exit without saving". When Windows is back, open Claude, open the workshop
+  folder, and type **I could not change the BIOS setting**. Claude then
+  stops and explains what you can do instead; typing continue would only
+  start the BIOS step again. Or follow the Codespace guide directly
+  (https://github.com/firstdraft/drawing-board#readme): it installs nothing
+  on this laptop.

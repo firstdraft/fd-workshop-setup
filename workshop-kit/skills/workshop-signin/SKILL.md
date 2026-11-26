@@ -25,8 +25,10 @@ before they see it. They are already signed in to Claude.
 - Use the two helper scripts below rather than running sign-in commands
   yourself: a sign-in command run directly waits for the browser, and you
   would never see its link.
-- If the same step fails twice, stop and tell the attendee to raise their hand
-  for the instructor. Show them the error.
+- If the same step fails twice, stop that step. Show them the error, explain
+  it in a sentence, and go on to the next sign-in. Tell them they can run
+  `/workshop-signin` again later: it redoes only what is missing. They may be
+  working on their own, so never tell them to ask someone for help.
 
 ## Helpers
 
@@ -109,8 +111,16 @@ Upload the key the setup created:
 gh ssh-key add ~/.ssh/id_ed25519.pub --title "workshop-$(hostname)"
 ```
 
-- "key is already in use": the key is on a different GitHub account. Get the
-  instructor.
+- "key is already in use": this laptop's key already belongs to another
+  GitHub account or repository, so GitHub will not add it here, and trying
+  again will not help while it stays there. Do not ask them to remove it
+  there: other projects may use it. Tell them what still works: the other
+  sign-ins, and planning, building and running their app on this laptop.
+  Pushing the app to GitHub will not work, and neither will the deploy and
+  the phone preview, which start from GitHub. For those, offer the Codespace
+  guide, https://github.com/firstdraft/drawing-board#readme. Then go on to
+  the next sign-in, without suggesting they run `/workshop-signin` again for
+  this one.
 - An error mentioning `admin:public_key` or missing scopes: run
   `login.sh start github-refresh` (same code-and-approve flow, then
   `login.sh wait github-refresh`), then retry.
@@ -205,8 +215,9 @@ before `login.sh start revyl`:
    the one where the phone preview opens later.
 3. Only then run `login.sh start revyl`; they approve in that same browser.
 
-If Revyl's sign-up page shows an error or a security check, have them raise
-their hand: the instructor may move them to a phone hotspot.
+If Revyl's sign-up page shows an error or a security check, the network may
+be blocking it: suggest they try again on another network, such as their
+phone's hotspot.
 
 Once the check passes, tell them in a few sentences how the phone preview
 works later: the link opens a phone in this browser; one phone runs at a
@@ -218,22 +229,24 @@ to upgrade.
 
 ### 5. First Draft (`firstdraft`)
 
-First Draft is what they will use to plan and build their app in this
-workshop. It is in pre-alpha, so its pages are behind a username and
-password that the attendee gets from their instructor. Before you start
-the sign-in, tell them what they will see:
+First Draft is what they will use to plan and build their app. They sign
+in with their GitHub account. Before you start the sign-in, tell them what
+they will see:
 
-1. Their browser asks for a username and password: this is the **First Draft
-   pre-alpha** sign-in (the box itself usually just says "Sign in" and
-   firstdraft.com). They ask their instructor for the username and password
-   and type them themselves. **Never** ask for, type, or repeat them. If the
-   box refuses them, get the instructor.
-2. GitHub may ask them to sign in to First Draft: they approve.
-3. First Draft asking them to approve the sign-in for this laptop: they
-   check that the page shows the code you showed them, approve, then tell
-   you. First Draft may also ask whether their coding agent may send it
-   reports about the code it generates: that is their choice, and they can
-   change it later on their account page.
+1. If this browser is not signed in to First Draft, a First Draft page asks
+   them to sign in with GitHub, and GitHub may ask them to authorize First
+   Draft: they do.
+2. The first time, First Draft asks them to agree to its terms of service
+   and privacy notice. They read them and decide themselves; never agree for
+   them.
+3. A page shows the code, usually already filled in: they check that it
+   matches the code you showed them and choose **Continue**. If the box is
+   empty, they type the code.
+4. The next page shows the code again and asks them to approve the sign-in
+   for this laptop: they approve, then tell you. Until they have answered
+   it once, this page also asks a question about what their coding agent
+   may send to First Draft. Either answer works, and they can change it
+   later on their account page, https://firstdraft.com/account.
 
 The `firstdraft` check asks the First Draft plugin's `firstdraft start`. If
 it names a token variable First Draft did not accept, do not start a login;
@@ -241,14 +254,19 @@ see the last item below. If it says `firstdraft start failed:`, First Draft
 did not answer the check, or the First Draft plugin is missing: do not
 start a login either. For `account_unavailable` or
 `rate_limited`, wait as long as it says (a minute when it names no time)
-and run the check again; for anything else, such as `update_required` or
-`First Draft CLI is unavailable`, show them what it says and get the
-instructor. Otherwise run `login.sh start firstdraft`. It runs the First
-Draft plugin's own CLI and returns at once: nothing waits in the
-background. It prints `URL:` and `CODE:`, then `OPENED` and `COPIED`, then
-when the link and the code expire, or `NO LINK` as above. Show them as
-above; the link usually includes the code, so they only approve, and if the
-page asks for the code, it is the `CODE:`. When they say they approved, run
+and run the check again. For anything else, show them what it says and
+explain it in a sentence. `update_required` or `Unknown command` means
+First Draft on this laptop is too old: they update it with the steps for a
+laptop set up with this kit on https://firstdraft.com/update. `First Draft
+CLI is unavailable` says itself what to do. After either, they start a new
+session in their app folder and run `/workshop-signin` again. Any other
+error ends this step as when it fails twice (below). Otherwise run
+`login.sh start firstdraft`. It runs the First Draft plugin's own CLI and
+returns at once: nothing waits in the background. It prints `URL:` and
+`CODE:`, then `OPENED` and `COPIED`, then when the link and the code
+expire, or `NO LINK` as above. Show them as above, with the `CODE:` in
+**bold**: the link usually fills the code in, and they check it against
+yours (item 3 above). When they say they approved, run
 `login.sh wait firstdraft`. It finishes the login and prints First Draft's
 answer, then the check. An answer that starts `NOT FINISHED:` is the CLI's
 error and says what to do: always show it to them and follow it, for
@@ -267,13 +285,16 @@ above it. With `[FAIL]`:
   of any login, so signing in again does not help until they replace or
   remove it.
 
-If it fails twice, get the instructor. `stop` and `status` do not apply to
-First Draft.
+If it fails twice, show the error and tell them that without the First
+Draft sign-in they cannot build an app on this laptop yet. They can run
+`/workshop-signin` again later, or follow the Codespace guide,
+https://github.com/firstdraft/drawing-board#readme, which runs in the
+browser. `stop` and `status` do not apply to First Draft.
 
 ## Finishing
 
-Run `bash ~/.workshop/auth.sh check all`. When every line shows [PASS], tell
-the attendee:
+Run `bash ~/.workshop/auth.sh check all`. When every line shows [PASS] and
+you did not stop **Render on GitHub**, tell the attendee:
 
 > You're all signed in! To start building, open a **new session** in Claude
 > Desktop: choose **WSL > Ubuntu-24.04** and your app folder again (it is
@@ -281,3 +302,14 @@ the attendee:
 > instructions.
 
 On a Mac, say **Local** instead of **WSL > Ubuntu-24.04**.
+
+When some lines still show [FAIL], or you stopped **Render on GitHub** (it
+has no check), tell them which sign-ins passed and which are missing, with
+what each missing one is for; Render on GitHub is needed before the first
+deploy. If First Draft passed, they can start Part 3 now, in a new session
+as above, and run `/workshop-signin` again later for the rest (except an
+SSH key already in use; see step 3). It also comes back to Render on
+GitHub. If First Draft is missing, they cannot build an app on this laptop
+yet. They can run `/workshop-signin` again later, or follow the Codespace
+guide, https://github.com/firstdraft/drawing-board#readme, which runs in
+the browser.

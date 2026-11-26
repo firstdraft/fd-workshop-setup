@@ -364,11 +364,13 @@ Symptoms and their fixes, including this rehearsal's, are in
   `render-workspace`. Tested against a stubbed `render` (one, several, none,
   already set) and, read-only, against a real signed-in CLI (v2.22.0, which
   has the same `workspace set|current` and `workspaces -o json` as v2.28.0).
-- First Draft's sign-in pages are behind the pre-alpha username and password
-  (HTTP basic auth). Attendees ask the instructor; the skill tells them a
-  username-and-password box appears and never handles the values. Current
+- (History, replaced when sign-in opened to any GitHub account: the sign-in
+  skill now lists First Draft's pages with no password box.) First Draft's
+  sign-in pages were behind the pre-alpha username and password (HTTP basic
+  auth). Attendees asked the instructor; the skill told them a
+  username-and-password box appeared and never handled the values. Current
   browsers do not show the "First Draft pre-alpha" realm text in that box,
-  so the skill also describes it as a "Sign in" box for firstdraft.com.
+  so the skill also described it as a "Sign in" box for firstdraft.com.
 - 2026-10-03 rehearsal on a Mac, acting as an attendee's agent (compile,
   GitHub, Render and Neon, Revyl Android and iOS, one iteration), changed the
   app-session notes:
@@ -510,18 +512,19 @@ Symptoms and their fixes, including this rehearsal's, are in
    match as intended (the wildcard syntax for the PowerShell tool is a guess).
 5. **Windows 10 22H2:** the `wsl --install --no-distribution` and
    `--web-download` fallbacks.
-6. **A company-managed laptop:** confirm it fails clearly and points to the
-   instructor.
+6. **A company-managed laptop:** confirm it fails clearly and offers the
+   Codespace guide.
 7. **Laptop with VT-x off:** `shutdown /r /fw` lands in the UEFI screen.
 8. **The rewritten handoff on a fresh account:** that the WSL session picks up
    its three skills (`/workshop-signin`, `/create-full-stack-app` and
    `/maintain-app`), and that the sign-in skill's `allowed-tools` lets the
    helper scripts run without permission prompts (the rule syntax is a best
    guess).
-9. **First Draft device sign-in with the workshop credential:** the basic-auth
-   box appears once, then GitHub, then the device approval from
-   `login.sh start firstdraft`, and `login.sh wait firstdraft` passes the
-   check.
+9. **First Draft device sign-in on a new account:** from the link that
+   `login.sh start firstdraft` prints, Sign in with GitHub, GitHub's
+   authorization, the terms and privacy agreement, the page with the code
+   and Continue, then the approval with its question about what the coding
+   agent may send, and `login.sh wait firstdraft` passes the check.
 10. **Render workspace and GitHub app on a fresh Render account:**
     `render-workspace.sh` sets the only workspace, and installing the Render
     GitHub app from GitHub's page links it to that Render account.
