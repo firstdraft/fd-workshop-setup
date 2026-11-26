@@ -7,7 +7,8 @@
 . "$PSScriptRoot\lib\common.ps1"
 
 function Invoke-Step([string]$Script, [string[]]$Arguments = @()) {
-    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot $Script) @Arguments
+    # Out-Host shows the step's output and keeps it out of the return value, which is only the exit code.
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot $Script) @Arguments | Out-Host
     return $LASTEXITCODE
 }
 
@@ -51,8 +52,9 @@ while ($true) {
                 $arguments = @('-RecoveryKeyConfirmed')
             }
             $code = Invoke-Step 'prepare-bios.ps1' $arguments
-            if ($code -eq 0) { Stop-Here 'The computer will restart into the BIOS in 60 seconds. After Windows starts again, run this again.' }
-            Stop-Here 'Could not restart into the BIOS automatically. If this window said your drive may be encrypted, do not change BIOS settings. Otherwise, see docs\BIOS-GUIDE.md for the manual route.' -Failed
+            if ($code -eq 0) { Stop-Here 'If the lines above say the computer is restarting into the BIOS, change the setting there and run this again after Windows starts. If they say virtualization is already on, run this again now.' }
+            if ($code -eq 30 -or $code -eq 31) { Stop-Here 'Could not restart into the BIOS automatically. See docs\BIOS-GUIDE.md for the manual route.' }
+            Stop-Here 'The BIOS step stopped before restarting (see above). Do not change BIOS settings.' -Failed
         }
         'INSTALL_WSL' {
             if ((Invoke-Step 'install-wsl.ps1') -ne 0) { Stop-Here 'Installing WSL failed.' -Failed }

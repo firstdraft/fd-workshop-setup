@@ -153,21 +153,23 @@ function Invoke-Elevated {
         '-LaunchedBy', "`"$env:USERNAME`""
     ) + $ExtraArguments
 
-    Write-Output 'WAITING FOR PERMISSION: Windows is asking "Do you want to allow this app to make changes to your device?"'
-    Write-Output 'The attendee must click Yes (or type an administrator password if asked).'
+    # Callers run 'exit (Invoke-Elevated ...)', so everything here goes to the host: anything written to the output
+    # stream would join the return value, and exit would get an array instead of the exit code.
+    Write-Host 'WAITING FOR PERMISSION: Windows is asking "Do you want to allow this app to make changes to your device?"'
+    Write-Host 'The attendee must click Yes (or type an administrator password if asked).'
     try {
         $process = Start-Process powershell.exe -Verb RunAs -ArgumentList ($argumentList -join ' ') -Wait -PassThru
     }
     catch {
-        Write-Output '[FAIL] Permission was not granted (the Windows prompt was declined or closed).'
+        Write-Host '[FAIL] Permission was not granted (the Windows prompt was declined or closed).'
         return 10
     }
 
     if (Test-Path $logPath) {
-        Get-Content $logPath | Write-Output
+        Get-Content $logPath | Out-Host
     }
     else {
-        Write-Output "[WARN] The administrator window did not write a log ($logPath)."
+        Write-Host "[WARN] The administrator window did not write a log ($logPath)."
     }
     return $process.ExitCode
 }
