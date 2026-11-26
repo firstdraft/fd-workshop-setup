@@ -260,10 +260,16 @@ handoff() {
         echo "[FAIL] '$name' is not a valid app name. Use lowercase letters, numbers and dashes, starting with a letter (e.g. my-first-app)."
         return 41
     fi
-    apps_dir=$(cat "$APPS_DIR_FILE" 2>/dev/null) || {
+    # A Mac set up before apps-dir existed has only app-dir; platform.sh and
+    # handoff.sh take its parent the same way.
+    if [ -f "$APPS_DIR_FILE" ]; then
+        apps_dir=$(cat "$APPS_DIR_FILE")
+    elif [ -f "$HOME/.workshop/app-dir" ]; then
+        apps_dir=$(dirname "$(cat "$HOME/.workshop/app-dir")")
+    else
         echo "ASK: choose the folder for workshop projects first: bash scripts/mac/setup.sh folder <path>"
         return 43
-    }
+    fi
     WORKSHOP_APP_NAME=$name WORKSHOP_KIT_DIR=$KIT_DIR bash "$LINUX/handoff.sh" apply \
         || { echo ""; echo "STOPPED: the handoff is not complete (see [FAIL] above)."; return 1; }
     echo ""

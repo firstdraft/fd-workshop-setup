@@ -11,9 +11,13 @@ function Invoke-Step([string]$Script, [string[]]$Arguments = @()) {
     return $LASTEXITCODE
 }
 
-function Stop-Here([string]$Message) {
+function Stop-Here([string]$Message, [switch]$Failed) {
     Write-Host ''
     Write-Host $Message -ForegroundColor Yellow
+    if ($Failed) {
+        Write-Host 'To build an app without installing anything on this laptop, follow the Codespace guide instead:'
+        Write-Host 'https://github.com/firstdraft/drawing-board#readme'
+    }
     Write-Host ''
     Read-Host 'Press Enter to close this window'
     exit 1
@@ -28,14 +32,14 @@ while ($true) {
     Write-Host "Next step: $next" -ForegroundColor Cyan
 
     if ($next -eq $previous) {
-        Stop-Here "The step '$next' did not complete. Please ask the instructor for help."
+        Stop-Here "The step '$next' did not complete." -Failed
     }
     $previous = $next
 
     switch ($next) {
-        'STOP_WINDOWS_TOO_OLD' { Stop-Here 'This version of Windows is too old. Install all Windows updates (Settings > Windows Update), restart, then run this again.' }
+        'STOP_WINDOWS_TOO_OLD' { Stop-Here 'This version of Windows is too old. Install all Windows updates (Settings > Windows Update), restart, then run this again.' -Failed }
         'STOP_LOW_DISK' { Stop-Here "Free up at least $MinimumFreeGB GB of disk space, then run this again." }
-        'STOP_NESTED_VIRTUALIZATION' { Stop-Here 'This Windows is a virtual machine. Turn on nested virtualization in the host software, or ask the instructor.' }
+        'STOP_NESTED_VIRTUALIZATION' { Stop-Here 'This Windows is a virtual machine. Turn on nested virtualization in the host software, then run this again.' -Failed }
         'RESTART' { Stop-Here 'Save your work and restart the computer (Start > Power > Restart). Then double-click "Setup WSL without Claude.cmd" again.' }
         'ENABLE_VIRTUALIZATION' {
             Write-Host 'Virtualization must be turned on in the BIOS. Read docs\BIOS-GUIDE.md first (take a photo of it with your phone).'
@@ -43,37 +47,37 @@ while ($true) {
             if ((Get-BitLockerState) -ne 'Off') {
                 Write-Host 'Your drive may be encrypted. On your PHONE, open https://aka.ms/myrecoverykey and sign in.'
                 $answer = Read-Host 'Can you see a recovery key for this computer? (yes/no)'
-                if ($answer -notmatch '^y') { Stop-Here 'Please ask the instructor for help before changing BIOS settings.' }
+                if ($answer -notmatch '^y') { Stop-Here 'Without a recovery key, do not change BIOS settings: an encrypted drive could be locked.' -Failed }
                 $arguments = @('-RecoveryKeyConfirmed')
             }
             $code = Invoke-Step 'prepare-bios.ps1' $arguments
             if ($code -eq 0) { Stop-Here 'The computer will restart into the BIOS in 60 seconds. After Windows starts again, run this again.' }
-            Stop-Here 'Could not restart into the BIOS automatically. See docs\BIOS-GUIDE.md or ask the instructor.'
+            Stop-Here 'Could not restart into the BIOS automatically. If this window said your drive may be encrypted, do not change BIOS settings. Otherwise, see docs\BIOS-GUIDE.md for the manual route.' -Failed
         }
         'INSTALL_WSL' {
-            if ((Invoke-Step 'install-wsl.ps1') -ne 0) { Stop-Here 'Installing WSL failed. Please ask the instructor for help.' }
+            if ((Invoke-Step 'install-wsl.ps1') -ne 0) { Stop-Here 'Installing WSL failed.' -Failed }
         }
         'SETUP_UBUNTU' {
             $code = Invoke-Step 'setup-ubuntu.ps1'
             if ($code -eq 40) {
                 $answer = Read-Host "Add the workshop user '$LinuxUser' and make it the default? Your existing Linux user and files are kept. (yes/no)"
-                if ($answer -notmatch '^y') { Stop-Here 'Setup stopped. Please ask the instructor.' }
+                if ($answer -notmatch '^y') { Stop-Here 'Setup stopped.' -Failed }
                 $code = Invoke-Step 'setup-ubuntu.ps1' @('-ReplaceExistingUser')
             }
-            if ($code -ne 0) { Stop-Here 'Setting up Ubuntu failed. Please ask the instructor for help.' }
+            if ($code -ne 0) { Stop-Here 'Setting up Ubuntu failed.' -Failed }
         }
         'INSTALL_TOOLS' {
             Write-Host 'Installing development tools. This can take 10-30 minutes; please keep the laptop plugged in and awake.'
-            if ((Invoke-Step 'install-tools.ps1') -ne 0) { Stop-Here 'Installing the tools failed. Please ask the instructor for help.' }
+            if ((Invoke-Step 'install-tools.ps1') -ne 0) { Stop-Here 'Installing the tools failed. Run this again once; network failures are common.' -Failed }
         }
         'CONFIGURE' {
-            if ((Invoke-Step 'configure.ps1') -ne 0) { Stop-Here 'Configuring git failed. Please ask the instructor for help.' }
+            if ((Invoke-Step 'configure.ps1') -ne 0) { Stop-Here 'Configuring git failed.' -Failed }
         }
         'HANDOFF' {
-            if ((Invoke-Step 'verify.ps1') -ne 0) { Stop-Here 'Some checks failed (see above). Please show this window to the instructor.' }
+            if ((Invoke-Step 'verify.ps1') -ne 0) { Stop-Here 'Some checks failed (see above).' -Failed }
             $appName = (Read-Host 'What do you want to call your app? Press Enter for firstdraft-workshop').Trim()
             if ($appName -eq '') { $appName = 'firstdraft-workshop' }
-            if ((Invoke-Step 'handoff.ps1' @('-AppName', $appName)) -ne 0) { Stop-Here 'The last step failed. Please ask the instructor for help.' }
+            if ((Invoke-Step 'handoff.ps1' @('-AppName', $appName)) -ne 0) { Stop-Here 'The last step failed.' -Failed }
         }
         'DONE' {
             Write-Host ''
@@ -82,6 +86,9 @@ while ($true) {
             Write-Host "  1. In the Code tab, start a new session and open the environment picker."
             Write-Host "  2. Under WSL, choose $DistroName, then the folder $appDir, and trust it."
             Write-Host '  3. Type  /workshop-signin  and press Enter.'
+            Write-Host ''
+            Write-Host 'If you set up this laptop before and want a folder for a new app, open this kit folder in'
+            Write-Host 'Claude Desktop instead and type:  Set up my laptop for the workshop'
             Read-Host 'Press Enter to close this window'
             exit 0
         }

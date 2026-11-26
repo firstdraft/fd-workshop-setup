@@ -12,6 +12,14 @@ Plan on:
 - **Signing in to your accounts:** about 20 minutes.
 - **Building, launching and previewing your app:** about 45 minutes, or longer for a bigger idea.
 
+**Built an app with First Draft before?** Start a new one. If this laptop is already set up with this kit, still
+download it again and do Part 1: Claude updates what the kit finds out of date and, when you say you want a new
+app, makes a new project folder for it, with a name you have not used for a project yet. Sign-ins you already have
+carry over. Keep an earlier app only if it has real work in it, is deployed, or has users. For that app, open a
+session in its folder and give Claude the prompt under
+[Reviewing updates](https://github.com/firstdraft/skills/blob/main/CHANGELOG.md#reviewing-updates) in First Draft's
+public changelog.
+
 ## Part 1: Set up your laptop
 
 1. Download this repo as a Zip folder.
@@ -42,7 +50,8 @@ Plan on:
    **Windows users:** Claude first turns on WSL (Windows Subsystem for Linux) and installs Ubuntu, a Linux system
    that runs inside Windows, where your apps and their tools will live. Click **Yes** when Windows asks for
    permission. If Claude asks you to restart, do so, then reopen the same folder in Claude Desktop and type
-   `continue`.
+   `continue`. If the restart took you to the BIOS and you could not change the setting there, type
+   `I could not change the BIOS setting` instead.
 
    **Mac users:** Claude opens a Terminal window to install Homebrew. When it asks for your password, type your Mac
    login password there and press Return. **Nothing appears while you type: no dots, no stars, and the cursor
@@ -58,8 +67,6 @@ Plan on:
    or another synced folder: syncing damages your app's files, and GitHub is your backup.
 
 ## Part 2: Sign in to your accounts
-
-When you first try to sign in to First Draft, you'll hit a username/password wall. Ask your instructor for that.
 
 Every service in this part has a free plan, and the free plan is all you need for the workshop. Some sites make
 it hard to find, or push a paid trial first: don't be fooled. Look for **Free**, **Hobby**, or a way to skip the
@@ -96,10 +103,15 @@ upgrade.
 
      ![Cloudinary's API Keys page. Copy 1, the API environment variable, with its copy button; 2, the API Key; 3, the API Secret, after clicking the eye to show it.](images/cloudinary-api-keys.png)
    - **Revyl** shows your iPhone and Android app on a phone in your browser.
-   - **First Draft** plans and builds your app. This is where the username and password wall appears: ask your
-     instructor.
+   - **First Draft** plans and builds your app. You sign in with your GitHub account. The first time, First Draft
+     asks you to agree to its [terms of service](https://firstdraft.com/terms) and
+     [privacy notice](https://firstdraft.com/privacy). Then it shows a code: check that it matches the one Claude
+     shows you and choose **Continue**. On the next page, approve the sign-in for this laptop. Until you have
+     answered it once, that page also asks a question about what Claude may send to First Draft. Either answer
+     works. You can change it, or delete your account, at [firstdraft.com/account](https://firstdraft.com/account).
 
-   When Claude says you're all signed in, go on to Part 3.
+   When Claude says you're all signed in, go on to Part 3. If Claude says some are still missing, you can go on
+   once First Draft is signed in, and type `/workshop-signin` again later for the rest.
 
 ## Part 3: Build your app
 
@@ -206,7 +218,14 @@ Build your own idea. No idea yet? Step 9 has a family social network you can bui
 - **Building seems stuck for more than five minutes:** type `Cancel the stuck compile and try again.`
 - **Claude asks you to approve something:** it checks before risky steps, such as deploying. Approve it if it is
   what you asked for.
-- **The same step fails twice:** raise your hand, and leave the error on screen for the instructor.
+- **First Draft says you reached a daily limit:** each account can compile 50 times and start 20 new projects in
+  any 24 hours. Try again at the time it gives.
+- **First Draft says it is out of date:** follow the steps for a laptop set up with this kit on
+  [Update First Draft](https://firstdraft.com/update).
+- **The same step fails twice:** ask Claude to explain the error and what you can do about it. If it was a sign-in,
+  you can try it again later: `/workshop-signin` redoes only what is missing. If setting up the laptop keeps
+  failing, follow the [Codespace guide](https://github.com/firstdraft/drawing-board#readme) instead: it installs
+  nothing on your laptop.
 
 ## After the workshop
 
@@ -215,13 +234,13 @@ Build your own idea. No idea yet? Step 9 has a family social network you can bui
   - **Mac users:** keep `Local`.
 - First Draft updates differently on each kind of laptop.
   - **Set up this laptop with an earlier download of this kit, or not sure? (Windows or Mac)** Download this repo's
-    zip again and do Part 1 once with its `workshop-kit` folder. It replaces an earlier First Draft setup, and on a
-    laptop that has the current one it changes nothing.
+    zip again and do Part 1 once with its `workshop-kit` folder. It replaces an earlier First Draft setup and the
+    kit's sign-in skill and notes, and your project folders stay as they are.
   - **Windows users:** run the kit again: open the `workshop-kit` folder of a current download in Claude Desktop
-    with `Local`, as in step 3, and type `continue`. On Windows the kit links First Draft's two skills
-    (`/create-full-stack-app` and `/maintain-app`) into Ubuntu rather than installing the plugin, so running the kit
-    again is how they update.
+    with `Local`, as in step 3, and type `continue`. When Claude says it is done, open a new session in your project
+    folder, as in step 9. On Windows the kit links First Draft's two skills (`/create-full-stack-app` and
+    `/maintain-app`) into Ubuntu rather than installing the plugin, so running the kit again is how they update.
   - **Mac users:** nothing more to do. The kit installed First Draft as a Claude plugin and turned on its automatic
-    updates.
+    updates. To update at once, follow the steps on [Update First Draft](https://firstdraft.com/update).
 - Render's free plan sleeps when nobody visits, so the first visit afterwards takes about a minute.
 - To remove an app from the internet, ask Claude: `Delete this app's Render service and its Neon project.`

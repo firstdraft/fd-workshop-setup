@@ -260,14 +260,18 @@ function Get-LinuxChecks {
 }
 
 
-# Summarizes one phase's Linux checks as a single status line.
+# Summarizes one phase's Linux checks as a single status line. A passing
+# $ShowItem keeps its detail on the line: Claude reads a laptop's existing
+# app folder there, because it runs only the kit's scripts.
 function Get-PhaseCheck {
-    param([string]$Id, [string]$Name, [string]$Script, [string]$DoneText)
+    param([string]$Id, [string]$Name, [string]$Script, [string]$DoneText, [string]$ShowItem = '')
     $items = @(Get-LinuxChecks $Script)
     $missing = @($items | Where-Object { $_.Status -eq 'FAIL' } | ForEach-Object { $_.Name })
+    $shown = (@($items | Where-Object { $_.Status -eq 'PASS' -and $_.Name -eq $ShowItem } |
+        ForEach-Object { "; $($_.Name): $($_.Detail)" })) -join ''
     if ($items.Count -eq 0) { return New-Check $Id $Name 'FAIL' 'could not be checked' }
-    if ($missing.Count -eq 0) { return New-Check $Id $Name 'PASS' "all $($items.Count) $DoneText" }
-    New-Check $Id $Name 'FAIL' ('missing: ' + ($missing -join ', '))
+    if ($missing.Count -eq 0) { return New-Check $Id $Name 'PASS' "all $($items.Count) $DoneText$shown" }
+    New-Check $Id $Name 'FAIL' ('missing: ' + ($missing -join ', ') + $shown)
 }
 
 
@@ -347,7 +351,7 @@ function Get-SetupStatus {
             if ($user -eq $LinuxUser) {
                 $checks.Add((Get-PhaseCheck 'tools' 'Development tools' 'tools.sh' 'components installed'))
                 $checks.Add((Get-PhaseCheck 'configure' 'Git and SSH' 'configure.sh' 'items configured'))
-                $checks.Add((Get-PhaseCheck 'handoff' 'Handoff to Ubuntu' 'handoff.sh' 'items installed'))
+                $checks.Add((Get-PhaseCheck 'handoff' 'Handoff to Ubuntu' 'handoff.sh' 'items installed' 'app-folder'))
             }
         }
     }

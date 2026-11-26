@@ -97,7 +97,7 @@ $main = {
         }
 
         if (-not $suspended) {
-            Write-Check 'FAIL' 'BitLocker' 'could not be suspended. NOT restarting. Get the instructor.'
+            Write-Check 'FAIL' 'BitLocker' 'could not be suspended. NOT restarting.'
             $result.ExitCode = 21
             return
         }

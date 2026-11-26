@@ -11,6 +11,8 @@ WORKSHOP LAPTOP SETUP (Windows or Mac)
 
 4. Claude will guide you. Your laptop may restart once or twice.
    After each restart: open Claude, open this same folder, and type:  continue
+   If you were in the BIOS and could not change the setting, type
+   instead:  I could not change the BIOS setting
 
 Before you start:
 - Plug in your charger.
@@ -35,10 +37,13 @@ shows while you type. Claude never asks for your password.
 UPDATING FIRST DRAFT LATER
 ==========================
 
-Windows: open this folder in Claude Desktop again and type:  continue
+Windows: download this kit again, open its "workshop-kit" folder in
+   Claude Desktop, and type:  continue
+   When Claude is done, start a new session in Ubuntu as it shows you.
    On Windows this kit links First Draft's two skills into Ubuntu
    rather than installing the plugin, so running the kit again updates
    them.
 
 Mac: nothing to do. This kit installed First Draft as a Claude plugin
-   and turned on its automatic updates.
+   and turned on its automatic updates. To update at once, follow the
+   steps on https://firstdraft.com/update
