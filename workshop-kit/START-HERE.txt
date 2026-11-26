@@ -36,8 +36,9 @@ UPDATING FIRST DRAFT LATER
 ==========================
 
 Windows: open this folder in Claude Desktop again and type:  continue
-   On Windows this kit links the First Draft skill into Ubuntu rather
-   than installing the plugin, so running the kit again updates it.
+   On Windows this kit links First Draft's two skills into Ubuntu
+   rather than installing the plugin, so running the kit again updates
+   them.
 
 Mac: nothing to do. This kit installed First Draft as a Claude plugin
    and turned on its automatic updates.

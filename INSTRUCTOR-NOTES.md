@@ -41,24 +41,26 @@ available in WSL sessions", and the
 [Desktop page](https://code.claude.com/docs/en/desktop) says "Plugins aren't
 available in WSL sessions." The two disagree, and neither has been checked
 again since. In Ubuntu, `tools.sh` installs the plugin's own npm package,
-`@firstdraft.com/claude-code`, which holds the Skill and the CLI it was
-tested with; nothing installs the CLI by itself. The handoff installs both
-skills as user skills in Ubuntu's `~/.claude/skills`, which was tested and
-needs no plugin install, so it does not depend on whether a WSL session
-loads plugins: `workshop-signin` (only loads when typed) and a link to the
-plugin's one skill in that package, so the command is
-`/create-full-stack-app`. If an attendee also has the First Draft plugin
-enabled, the session may list that skill twice. The package also puts the
-same CLI on Ubuntu's PATH as `firstdraft`. Running the kit again is how
+`@firstdraft.com/claude-code`, which holds the two Skills and the CLI they
+were tested with; nothing installs the CLI by itself. The handoff installs
+three skills as user skills in Ubuntu's `~/.claude/skills`, which was tested
+and needs no plugin install, so it does not depend on whether a WSL session
+loads plugins: `workshop-signin` (only loads when typed) and links to the
+plugin's two skills in that package, so the commands are
+`/create-full-stack-app` and `/maintain-app`. If an attendee also has the
+First Draft plugin enabled, the session may list those skills twice. The
+package also puts the same CLI on Ubuntu's PATH as `firstdraft`. Running
+the kit again is how
 Windows updates: the
 `firstdraft` tools check fails when npm has a newer package, which sends
 `check-status` to INSTALL_TOOLS. On a laptop set up by an earlier kit, that
 step also removes the separate `@firstdraft.com/cli` package.
 
 From a plain shell, `bash ~/.workshop/firstdraft.sh <arguments>` runs the
-plugin's CLI on either kind of laptop. In Ubuntu it follows the Skill's link
-to the package; on a Mac it asks `claude plugin list --json` where Claude
-Code installed the plugin. `auth.sh` and `login.sh` use it: the
+plugin's CLI on either kind of laptop. In Ubuntu it follows the
+`create-full-stack-app` link to the package; on a Mac it asks
+`claude plugin list --json` where Claude Code installed the plugin.
+`auth.sh` and `login.sh` use it: the
 `firstdraft` sign-in check runs `firstdraft start`, and `login.sh start|wait
 firstdraft` runs the CLI's two-step device login, `login --no-wait` then
 `login --finish`.
@@ -233,7 +235,7 @@ Symptoms and their fixes, including this rehearsal's, are in
 - `test/plugin-install.sh` (not in the zip) checks the First Draft install
   on both kinds of laptop with stand-ins for `claude`, `npm` and `mise`: the
   Mac installs the plugin from First Draft's catalog and turns on its
-  updates, Ubuntu links the Skill from the plugin's package, and an earlier
+  updates, Ubuntu links both Skills from the plugin's package, and an earlier
   kit's packages go. Run it from the repository's root with
   `docker run --rm -v "$PWD":/repo:ro node:24-bookworm bash /repo/test/plugin-install.sh`.
 - On this PC (Windows 11 Home, WSL 2.7.14 already installed, no distros):
@@ -512,8 +514,10 @@ Symptoms and their fixes, including this rehearsal's, are in
    instructor.
 7. **Laptop with VT-x off:** `shutdown /r /fw` lands in the UEFI screen.
 8. **The rewritten handoff on a fresh account:** that the WSL session picks up
-   both skills, and that the skill's `allowed-tools` lets the helper scripts
-   run without permission prompts (the rule syntax is a best guess).
+   its three skills (`/workshop-signin`, `/create-full-stack-app` and
+   `/maintain-app`), and that the sign-in skill's `allowed-tools` lets the
+   helper scripts run without permission prompts (the rule syntax is a best
+   guess).
 9. **First Draft device sign-in with the workshop credential:** the basic-auth
    box appears once, then GitHub, then the device approval from
    `login.sh start firstdraft`, and `login.sh wait firstdraft` passes the
@@ -556,7 +560,8 @@ Symptoms and their fixes, including this rehearsal's, are in
     the plugin the `firstdraft` tools step installed, and Claude Code later
     updates it from the catalog by itself.
 17. **First Draft on Windows:** a WSL session lists `/create-full-stack-app`
-    from the link, and on a laptop with an older plugin package, typing
+    and `/maintain-app` from the links, and on a laptop with an older
+    plugin package, typing
     `continue` in the `workshop-kit` folder's Local session updates it.
 
 ## Deliberate choices

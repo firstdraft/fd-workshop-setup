@@ -16,13 +16,13 @@
 #     ~/.workshop/firstdraft.sh (runs the First Draft plugin's CLI)
 #   - installs the sign-in skill to ~/.claude/skills/workshop-signin (it only
 #     loads when the attendee types /workshop-signin)
-#   - in Ubuntu, links the First Draft Skill from the plugin's npm package
-#     (tools.sh) into ~/.claude/skills, because linking needs no plugin
-#     install, so it does not depend on whether a WSL session loads plugins
-#     (Anthropic's pages say such sessions cannot; a test on 2026-10-03 found
-#     they can). On a Mac the plugin
-#     itself provides the Skill, so this removes the link an earlier kit made
-#     there.
+#   - in Ubuntu, links First Draft's two Skills, create-full-stack-app and
+#     maintain-app, from the plugin's npm package (tools.sh) into
+#     ~/.claude/skills, because linking needs no plugin install, so it does
+#     not depend on whether a WSL session loads plugins (Anthropic's pages say
+#     such sessions cannot; a test on 2026-10-03 found they can). On a Mac the
+#     plugin itself provides them, so this removes the link an earlier kit
+#     made there.
 #   - adds the workshop's notes for app sessions (native preview, deploys) to
 #     ~/.claude/CLAUDE.md, which every Claude session in Ubuntu loads. On a
 #     Mac, the attendee's own account, they go in CLAUDE.md in the projects
@@ -42,7 +42,8 @@ ITEMS="app-folder platform-layer open-helper auth-checks login-helper git-identi
 
 WORKSHOP_DIR="$HOME/.workshop"
 SKILLS_DIR="$HOME/.claude/skills"
-FIRSTDRAFT_SKILL_LINK="$SKILLS_DIR/create-full-stack-app"
+# The plugin's Skills, each linked as ~/.claude/skills/<name> in Ubuntu.
+FIRSTDRAFT_SKILLS="create-full-stack-app maintain-app"
 CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 if [ "$(uname -s)" = Darwin ]; then
     MAC=1
@@ -116,35 +117,41 @@ check_signin_skill() {
     echo "/workshop-signin"
 }
 
-# The Skill inside the plugin's npm package that tools.sh installed.
+# A Skill inside the plugin's npm package that tools.sh installed.
+#   firstdraft_package_skill <name>
 firstdraft_package_skill() {
-    echo "$(npm root --global)/@firstdraft.com/claude-code/skills/create-full-stack-app"
+    echo "$(npm root --global)/@firstdraft.com/claude-code/skills/$1"
 }
 
-# On a Mac: is the Skill folder the link an earlier kit made into the plugin's
-# npm package, in the global packages of a Node that mise installed? (Its
-# target may be gone already.) Any other link or folder of that name is the
-# attendee's own.
+# On a Mac: is ~/.claude/skills/create-full-stack-app the link an earlier kit
+# made into the plugin's npm package, in the global packages of a Node that
+# mise installed? (Its target may be gone already.) Any other link or folder
+# of that name is the attendee's own. Earlier kits linked no other Skill on a
+# Mac, so a maintain-app link there is the attendee's own too.
 earlier_kit_skill_link() {
-    case "$(readlink "$FIRSTDRAFT_SKILL_LINK" 2>/dev/null)" in
+    case "$(readlink "$SKILLS_DIR/create-full-stack-app" 2>/dev/null)" in
         "$HOME"/.local/share/mise/installs/node/*/lib/node_modules/@firstdraft.com/claude-code/skills/create-full-stack-app) return 0 ;;
     esac
     return 1
 }
 
 check_firstdraft_skill() {
+    local skill
     if [ -n "$MAC" ]; then
-        # The plugin (tools.sh) provides /firstdraft:create-full-stack-app.
+        # The plugin (tools.sh) provides its Skills, such as
+        # /firstdraft:create-full-stack-app.
         ! earlier_kit_skill_link || { echo "an earlier kit's link is still in $SKILLS_DIR"; return 1; }
         echo "/firstdraft:create-full-stack-app, from the plugin"
         return
     fi
-    # The link must point into the package Node has now: a kit with a newer
+    # Each link must point into the package Node has now: a kit with a newer
     # Node installs the package again, in that Node's folder.
-    [ "$(readlink "$FIRSTDRAFT_SKILL_LINK")" = "$(firstdraft_package_skill)" ] \
-        || { echo "not linked from the First Draft plugin's npm package"; return 1; }
-    [ -f "$FIRSTDRAFT_SKILL_LINK/SKILL.md" ] || { echo "the link is broken"; return 1; }
-    echo "/create-full-stack-app, linked from the plugin's npm package"
+    for skill in $FIRSTDRAFT_SKILLS; do
+        [ "$(readlink "$SKILLS_DIR/$skill")" = "$(firstdraft_package_skill "$skill")" ] \
+            || { echo "$skill is not linked from the First Draft plugin's npm package"; return 1; }
+        [ -f "$SKILLS_DIR/$skill/SKILL.md" ] || { echo "the $skill link is broken"; return 1; }
+    done
+    echo "/create-full-stack-app and /maintain-app, linked from the plugin's npm package"
 }
 
 check_app_instructions() {
@@ -231,15 +238,22 @@ remove_terminal_flow() {
 }
 
 apply_all() {
-    local name=${WORKSHOP_APP_NAME:-} kit=${WORKSHOP_KIT_DIR:-} firstdraft_skill
+    local name=${WORKSHOP_APP_NAME:-} kit=${WORKSHOP_KIT_DIR:-} skill
     if ! printf '%s' "$name" | grep -qE '^[a-z][a-z0-9-]{0,49}$'; then
         echo "[FAIL] app name '$name' must be lowercase letters, numbers and dashes, starting with a letter"
         return 1
     fi
     [ -d "$kit/skills/workshop-signin" ] || { echo "[FAIL] kit folder not found: '$kit'"; return 1; }
     if [ -z "$MAC" ]; then
-        firstdraft_skill=$(firstdraft_package_skill)
-        [ -f "$firstdraft_skill/SKILL.md" ] || { echo "[FAIL] First Draft skill not found at $firstdraft_skill"; return 1; }
+        for skill in $FIRSTDRAFT_SKILLS; do
+            [ -f "$(firstdraft_package_skill "$skill")/SKILL.md" ] \
+                || { echo "[FAIL] First Draft skill not found at $(firstdraft_package_skill "$skill")"; return 1; }
+            # ln would put the link inside a real folder of that name.
+            if [ -e "$SKILLS_DIR/$skill" ] && [ ! -L "$SKILLS_DIR/$skill" ]; then
+                echo "[FAIL] $SKILLS_DIR/$skill is a folder, not the kit's link: move it out of $SKILLS_DIR, then run the handoff again"
+                return 1
+            fi
+        done
     fi
 
     mkdir -p "$APPS_DIR/$name" "$WORKSHOP_DIR" "$SKILLS_DIR"
@@ -255,9 +269,11 @@ apply_all() {
     copy_from_kit "$kit/scripts/linux/firstdraft.sh" "$WORKSHOP_DIR/firstdraft.sh"
     copy_from_kit "$kit/skills/workshop-signin" "$SKILLS_DIR/workshop-signin"
     if [ -n "$MAC" ]; then
-        ! earlier_kit_skill_link || rm "$FIRSTDRAFT_SKILL_LINK"
+        ! earlier_kit_skill_link || rm "$SKILLS_DIR/create-full-stack-app"
     else
-        ln -sfn "$firstdraft_skill" "$FIRSTDRAFT_SKILL_LINK"
+        for skill in $FIRSTDRAFT_SKILLS; do
+            ln -sfn "$(firstdraft_package_skill "$skill")" "$SKILLS_DIR/$skill"
+        done
     fi
     install_app_instructions "$kit/scripts/linux/app-instructions.md"
     set_auto_mode
