@@ -5,12 +5,12 @@ terminal. On a Mac, ask their Claude session or use Terminal; their app folders 
 (`~/appdev` by default; `cat ~/.workshop/apps-dir` shows it). Background is in [INSTRUCTOR-NOTES.md](INSTRUCTOR-NOTES.md), and what the family social network app does
 and does not include is in [its section there](INSTRUCTOR-NOTES.md#the-family-social-network-readme-part-3).
 
-First Draft is one plugin, which holds its skill and the CLI it was tested with. On a Mac it is a Claude plugin with
-automatic updates turned on, and its command is `/firstdraft:create-full-stack-app`. On Windows the kit installs the
-plugin's npm package in Ubuntu and links its skill, because linking needs no plugin install, so it does not depend on
-whether a WSL session loads plugins (Anthropic's pages say such sessions cannot; a test on 2026-10-03 found they can).
-There the command is
-`/create-full-stack-app`, and running the kit again updates it. In an Ubuntu terminal, or Terminal on a Mac, run
+First Draft is one plugin, which holds its two skills and the CLI they were tested with. On a Mac it is a Claude
+plugin with automatic updates turned on, and the command to build an app is `/firstdraft:create-full-stack-app`. On
+Windows the kit installs the plugin's npm package in Ubuntu and links its two skills, because linking needs no plugin
+install, so it does not depend on whether a WSL session loads plugins (Anthropic's pages say such sessions cannot; a
+test on 2026-10-03 found they can). There the commands are `/create-full-stack-app` and `/maintain-app`, and running
+the kit again updates them. In an Ubuntu terminal, or Terminal on a Mac, run
 First Draft commands as `bash ~/.workshop/firstdraft.sh <arguments>`; in a Claude session, Claude runs them through
 the skill.
 

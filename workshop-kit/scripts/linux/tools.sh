@@ -21,10 +21,10 @@ REVYL_VERSION=v0.1.133
 
 NPM_PACKAGES="neonctl"
 
-# First Draft is one plugin, which holds the Skill and the CLI it was tested
-# with; nothing installs the CLI by itself. On a Mac, Claude Code installs it
+# First Draft is one plugin, which holds its Skills and the CLI they were
+# tested with; nothing installs the CLI by itself. On a Mac, Claude Code installs it
 # from First Draft's catalog and updates it. In Ubuntu the kit installs the
-# plugin's npm package and handoff.sh links its Skill, because linking needs
+# plugin's npm package and handoff.sh links its Skills, because linking needs
 # no plugin install, so it does not depend on whether a WSL session loads
 # plugins (Anthropic's pages say such sessions cannot; a test on 2026-10-03
 # found they can); running the kit again updates the package.
@@ -445,7 +445,7 @@ check_firstdraft_plugin() {
     echo "$FIRSTDRAFT_PLUGIN $version with CLI $cli, automatic updates on"
 }
 
-# Ubuntu: the plugin's npm package, whose Skill handoff.sh links.
+# Ubuntu: the plugin's npm package, whose Skills handoff.sh links.
 check_firstdraft_package() {
     local version cli latest
     version=$(npm_global_version "$FIRSTDRAFT_PACKAGE")

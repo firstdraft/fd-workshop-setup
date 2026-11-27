@@ -7,7 +7,7 @@
 #     Claude Code's own plugin commands, turns on the catalog's automatic
 #     updates, and installs no First Draft npm package;
 #   - in Ubuntu (WSL), tools.sh installs the plugin's npm package and no
-#     other First Draft package, and handoff.sh links the Skill from it;
+#     other First Draft package, and handoff.sh links both of its Skills;
 #   - on both, an earlier kit's First Draft packages go, and
 #     ~/.workshop/firstdraft.sh runs the plugin's CLI, or says in one line
 #     what to do when it finds none.
@@ -32,10 +32,11 @@ refute() { if "${@:2}" >/dev/null 2>&1; then echo "FAIL $1"; failures=$((failure
 # start as the real one does without a saved login.
 cat > "$work/make-plugin.bash" <<'EOF'
 make_plugin() {
-    mkdir -p "$1/.claude-plugin" "$1/bin" "$1/skills/create-full-stack-app"
+    mkdir -p "$1/.claude-plugin" "$1/bin" "$1/skills/create-full-stack-app" "$1/skills/maintain-app"
     printf '{"name":"@firstdraft.com/claude-code","version":"%s"}\n' "$2" > "$1/package.json"
     printf '{"name":"firstdraft","version":"%s"}\n' "$2" > "$1/.claude-plugin/plugin.json"
     echo "# create-full-stack-app" > "$1/skills/create-full-stack-app/SKILL.md"
+    echo "# maintain-app" > "$1/skills/maintain-app/SKILL.md"
     cat > "$1/bin/firstdraft" <<CLI
 #!/bin/sh
 echo "cli $1 \$*" >> "\$STUB_LOG"
@@ -175,6 +176,11 @@ for own in "$home/dotfiles/create-full-stack-app" ../../my-tools/node_modules/@f
     expect "and leaves the attendee's own link to $own alone" \
         grep -qxF '[PASS] firstdraft-skill: /firstdraft:create-full-stack-app, from the plugin' <<<"$out"
 done
+ln -s "$home/.local/share/mise/installs/node/24.21.0/lib/node_modules/@firstdraft.com/claude-code/skills/maintain-app" \
+    "$home/.claude/skills/maintain-app"
+out=$(run "$home" Darwin "$log" bash "$kit/scripts/linux/handoff.sh" check)
+expect "and a maintain-app link, which no kit made on a Mac" \
+    grep -qxF '[PASS] firstdraft-skill: /firstdraft:create-full-stack-app, from the plugin' <<<"$out"
 
 
 echo "== Ubuntu (WSL)"
@@ -194,10 +200,12 @@ refute "it runs no Claude Code plugin command" grep -q '^claude ' "$log"
 # The earlier kit's link has the same target, so start as a new laptop does.
 rm "$home/.claude/skills/create-full-stack-app"
 out=$(run "$home" Linux "$log" env WORKSHOP_APP_NAME=fam WORKSHOP_KIT_DIR="$kit" bash "$kit/scripts/linux/handoff.sh" apply)
-expect "the handoff links the Skill from the plugin's package" \
-    test "$(readlink "$home/.claude/skills/create-full-stack-app")" = "$root/@firstdraft.com/claude-code/skills/create-full-stack-app"
+for skill in create-full-stack-app maintain-app; do
+    expect "the handoff links $skill from the plugin's package" \
+        test "$(readlink "$home/.claude/skills/$skill")" = "$root/@firstdraft.com/claude-code/skills/$skill"
+done
 expect "and its check passes" \
-    grep -qxF '[PASS] firstdraft-skill: /create-full-stack-app, linked from the plugin'"'"'s npm package' <<<"$out"
+    grep -qxF '[PASS] firstdraft-skill: /create-full-stack-app and /maintain-app, linked from the plugin'"'"'s npm package' <<<"$out"
 expect "and it installs ~/.workshop/firstdraft.sh" test -f "$home/.workshop/firstdraft.sh"
 out=$(run "$home" Linux "$log" bash "$home/.workshop/firstdraft.sh" start 2>&1)
 expect "firstdraft.sh runs the package's CLI through the link" grep -qxF "cli $root/@firstdraft.com/claude-code start" "$log"
@@ -208,6 +216,22 @@ rm "$home/.claude/skills/create-full-stack-app"
 out=$(run "$home" Linux "$log" bash "$home/.workshop/firstdraft.sh" start 2>&1)
 expect "without the link, it says what to do in one line" says_unavailable "$?" "$out"
 refute "and the handoff check fails" run "$home" Linux "$log" bash "$kit/scripts/linux/handoff.sh" check
+ln -s "$root/@firstdraft.com/claude-code/skills/create-full-stack-app" "$home/.claude/skills/create-full-stack-app"
+ln -sfn "$home/dotfiles/maintain-app" "$home/.claude/skills/maintain-app"
+out=$(run "$home" Linux "$log" bash "$kit/scripts/linux/handoff.sh" check)
+expect "the handoff check fails when the maintain-app link points elsewhere" \
+    grep -qxF "[FAIL] firstdraft-skill: maintain-app is not linked from the First Draft plugin's npm package" <<<"$out"
+rm "$home/.claude/skills/maintain-app"
+out=$(run "$home" Linux "$log" bash "$kit/scripts/linux/handoff.sh" check)
+expect "and when it is missing" \
+    grep -qxF "[FAIL] firstdraft-skill: maintain-app is not linked from the First Draft plugin's npm package" <<<"$out"
+mkdir "$home/.claude/skills/maintain-app"
+echo mine > "$home/.claude/skills/maintain-app/maintain-app"
+out=$(run "$home" Linux "$log" env WORKSHOP_APP_NAME=fam WORKSHOP_KIT_DIR="$kit" bash "$kit/scripts/linux/handoff.sh" apply)
+expect "the handoff stops at a folder of the attendee's own in a link's place" \
+    grep -qF "[FAIL] $home/.claude/skills/maintain-app is a folder, not the kit's link" <<<"$out"
+expect "and leaves what is in it alone" \
+    test "$(cat "$home/.claude/skills/maintain-app/maintain-app")" = mine
 
 
 echo
