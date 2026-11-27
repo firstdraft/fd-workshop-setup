@@ -57,7 +57,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/<name>.ps1
 | `install-tools.ps1` | Installs the development tools inside Ubuntu, including the First Draft plugin's npm package (10-30 min; run in the background) | No |
 | `configure.ps1` | Sets git defaults, creates an SSH key, trusts github.com | No |
 | `verify.ps1` | Final check, prints `RESULT: READY` / `NOT READY` | No |
-| `handoff.ps1` | Creates the app folder, installs the sign-in skill, links the First Draft skill from the plugin's package, and installs the app-session notes in Ubuntu | No |
+| `handoff.ps1` | Creates the app folder, installs the sign-in skill, links First Draft's two skills from the plugin's package, and installs the app-session notes in Ubuntu | No |
 
 **Admin prompt:** when a script needs administrator rights it prints
 `WAITING FOR PERMISSION`. Before running it, tell the attendee: *"A Windows
@@ -122,9 +122,10 @@ failures are common); if the same component fails again, show the attendee
 the error lines and get the instructor.
 
 The `firstdraft` component is First Draft's plugin package. On Windows
-the kit links the First Draft skill into Ubuntu rather than installing
+the kit links First Draft's two skills into Ubuntu rather than installing
 the plugin: this step installs the package, and the handoff links its
-skill, whose command is `/create-full-stack-app`. On a laptop that is
+skills, whose commands are `/create-full-stack-app` and `/maintain-app`.
+On a laptop that is
 already set up, this step is how First Draft updates: the check fails when
 npm has a newer package, and installing it again updates it. On a laptop
 set up by an earlier kit, it also removes that kit's separate First Draft
@@ -142,10 +143,10 @@ they sign in to GitHub.
    Suggest `firstdraft-workshop`; any name of lowercase letters, numbers and
    dashes works (turn "My Cool App" into `my-cool-app` and confirm it).
 3. Run `handoff.ps1 -AppName "<name>"`. It creates `/home/appdev/<name>` in
-   Ubuntu, installs the sign-in skill, links the First Draft skill
-   (`/create-full-stack-app`) from the plugin's package, and installs the
-   notes for the app sessions there. Exit code 41 means the name is not
-   valid.
+   Ubuntu, installs the sign-in skill, links First Draft's two skills
+   (`/create-full-stack-app` and `/maintain-app`) from the plugin's
+   package, and installs the notes for the app sessions there. Exit code
+   41 means the name is not valid.
 4. Go to DONE.
 
 **DONE**: everything on this side is finished. The rest of the workshop

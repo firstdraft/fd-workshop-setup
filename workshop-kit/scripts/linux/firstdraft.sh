@@ -2,9 +2,9 @@
 # firstdraft.sh
 #
 # Runs the CLI inside the First Draft plugin from a plain shell, such as a
-# terminal or these helpers. The plugin holds the First Draft Skill and the
-# CLI it was tested with, and nothing installs the CLI by itself. In an agent
-# session, the First Draft Skill runs the same CLI through its own helper.
+# terminal or these helpers. The plugin holds First Draft's Skills and the
+# CLI they were tested with, and nothing installs the CLI by itself. In an
+# agent session, a First Draft Skill runs the same CLI through its own helper.
 # Installed to ~/.workshop/firstdraft.sh by handoff.sh.
 #
 #   bash firstdraft.sh <arguments>    for example: bash firstdraft.sh start
@@ -12,9 +12,10 @@
 # On a Mac, Claude Code installed the plugin from First Draft's catalog, and
 # its folder changes with every plugin update, so this asks Claude Code where
 # the plugin is now. In Ubuntu (WSL) the kit installed the plugin's npm
-# package and linked its Skill into ~/.claude/skills, which needs no plugin
+# package and linked its Skills into ~/.claude/skills, which needs no plugin
 # install, so it does not depend on whether a WSL session loads plugins; the
-# CLI is in the package beside the Skill.
+# CLI is in the package beside them, found through the create-full-stack-app
+# link.
 
 set -uo pipefail
 
@@ -39,7 +40,7 @@ else
         # The link's physical target is the package's skills/create-full-stack-app.
         plugin_root=$(cd -P "$skill/../.." 2>/dev/null && pwd)
     fi
-    missing="First Draft CLI is unavailable: the First Draft Skill is not linked into ~/.claude/skills from its package. Run the laptop kit again: open its workshop-kit folder in a Claude Desktop Local session and type continue."
+    missing="First Draft CLI is unavailable: First Draft's create-full-stack-app Skill is not linked into ~/.claude/skills from its package. Run the laptop kit again: open its workshop-kit folder in a Claude Desktop Local session and type continue."
 fi
 
 if [ -z "$plugin_root" ] || [ ! -f "$plugin_root/.claude-plugin/plugin.json" ] || [ ! -x "$plugin_root/bin/firstdraft" ]; then
