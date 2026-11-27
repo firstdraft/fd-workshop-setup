@@ -18,14 +18,31 @@ RUBY_VERSION=4.0.5
 NODE_VERSION=24.21.0
 POSTGRES_VERSION=18
 REVYL_VERSION=v0.1.133
-FIRSTDRAFT_CLI_MIN_VERSION=0.8.1   # first version with 'firstdraft login'
 
-NPM_PACKAGES="@firstdraft.com/cli @firstdraft.com/claude-code neonctl"
+NPM_PACKAGES="neonctl"
+
+# First Draft is one plugin, which holds the Skill and the CLI it was tested
+# with; nothing installs the CLI by itself. On a Mac, Claude Code installs it
+# from First Draft's catalog and updates it. In Ubuntu the kit installs the
+# plugin's npm package and handoff.sh links its Skill, because linking needs
+# no plugin install, so it does not depend on whether a WSL session loads
+# plugins (Anthropic's pages say such sessions cannot; a test on 2026-10-03
+# found they can); running the kit again updates the package.
+# Maintainers can point FIRSTDRAFT_PLUGIN_CATALOG (Mac) or
+# FIRSTDRAFT_PLUGIN_PACKAGE (Ubuntu) at a staged plugin to try one that
+# neither the catalog nor npm offers yet.
+FIRSTDRAFT_PLUGIN=firstdraft@firstdraft-skills
+FIRSTDRAFT_CATALOG=${FIRSTDRAFT_PLUGIN_CATALOG:-firstdraft/skills}
+FIRSTDRAFT_PACKAGE=@firstdraft.com/claude-code
+FIRSTDRAFT_PACKAGE_SPEC=${FIRSTDRAFT_PLUGIN_PACKAGE:-$FIRSTDRAFT_PACKAGE@latest}
+# An earlier kit installed the CLI's own package everywhere and, on a Mac,
+# the plugin's package too; running the kit again removes them.
+FIRSTDRAFT_CLI_PACKAGE=@firstdraft.com/cli
 
 # Installed in this order; later components depend on earlier ones.
 if [ "$(uname -s)" = Darwin ]; then
     MAC=1
-    COMPONENTS="xcode-clt homebrew brew-packages postgres mise ruby node claude npm-packages render neon-skills revyl"
+    COMPONENTS="xcode-clt homebrew brew-packages postgres mise ruby node claude npm-packages firstdraft render neon-skills revyl"
     # The apt list's tools and build libraries; macOS and Apple's Command
     # Line Tools provide the compilers, zlib, libffi, curl, git and unzip.
     BREW_PACKAGES="gh cloudflared postgresql@$POSTGRES_VERSION openssl@3 libyaml gmp rust"
@@ -46,7 +63,7 @@ if [ "$(uname -s)" = Darwin ]; then
     export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$HOME/.revyl/bin:$POSTGRES_BIN:$BREW_PREFIX/bin:$PATH"
 else
     MAC=""
-    COMPONENTS="apt-repos apt-packages postgres mise ruby node claude npm-packages render neon-skills revyl"
+    COMPONENTS="apt-repos apt-packages postgres mise ruby node claude npm-packages firstdraft render neon-skills revyl"
     APT_PACKAGES="build-essential rustc libssl-dev libyaml-dev zlib1g-dev libgmp-dev libffi-dev
     unzip curl git ca-certificates gnupg wslu gh cloudflared postgresql-$POSTGRES_VERSION libpq-dev"
     SHELL_NAME=bash
@@ -369,40 +386,7 @@ check_npm_packages() {
         npm ls --global --depth=0 "$package" >/dev/null 2>&1 || missing="$missing $package"
     done
     [ -z "$missing" ] || { echo "missing:$missing"; return 1; }
-
-    # An older First Draft CLI (e.g. installed as pre-work) cannot sign in.
-    local version
-    version=$(firstdraft --version 2>/dev/null)
-    if [ "$(printf '%s\n%s\n' "$FIRSTDRAFT_CLI_MIN_VERSION" "$version" | sort -V | head -n 1)" != "$FIRSTDRAFT_CLI_MIN_VERSION" ]; then
-        echo "First Draft CLI '$version' is older than $FIRSTDRAFT_CLI_MIN_VERSION"; return 1
-    fi
-
-    # install_npm_packages installs @latest, but a laptop set up earlier
-    # keeps what it got then, so compare with npm. An unreachable registry
-    # only warns: setup must not depend on it. The result stays on one
-    # line because callers parse each check's [PASS]/[FAIL] line.
-    local root label installed latest stale="" unchecked=""
-    root=$(npm root --global 2>/dev/null)
-    for package in @firstdraft.com/cli @firstdraft.com/claude-code; do
-        case "$package" in
-            @firstdraft.com/cli) label="First Draft CLI" ;;
-            *) label="First Draft plugin" ;;
-        esac
-        installed=$(node -p 'require(process.argv[1]).version' "$root/$package/package.json" 2>/dev/null)
-        latest=$(npm view "$package" version --fetch-retries=0 --fetch-timeout=10000 2>/dev/null)
-        if [ -z "$installed" ] || [ -z "$latest" ]; then
-            unchecked="$unchecked $package"
-        elif [ "$installed" != "$latest" ] &&
-             [ "$(printf '%s\n%s\n' "$installed" "$latest" | sort -V | head -n 1)" = "$installed" ]; then
-            stale="$stale; $label $installed is older than $latest"
-        fi
-    done
-    [ -z "$stale" ] || { echo "${stale#; }"; return 1; }
-    if [ -n "$unchecked" ]; then
-        echo "$NPM_PACKAGES (First Draft CLI $version; WARNING: could not compare with npm's latest:$unchecked)"
-    else
-        echo "$NPM_PACKAGES (First Draft CLI $version, up to date)"
-    fi
+    echo "$NPM_PACKAGES"
 }
 
 install_npm_packages() {
@@ -411,6 +395,104 @@ install_npm_packages() {
     # shellcheck disable=SC2086
     npm install --global $packages
     mise reshim
+}
+
+
+# --- firstdraft: the First Draft plugin --------------------------------------
+# Each check's result stays on one line because callers parse each check's
+# [PASS]/[FAIL] line.
+
+# Prints a global npm package's version, or nothing when it is not installed.
+npm_global_version() {
+    node -p 'require(process.argv[1]).version' "$(npm root --global 2>/dev/null)/$1/package.json" 2>/dev/null
+}
+
+# Prints the earlier kit's First Draft packages that are still installed.
+earlier_firstdraft_packages() {
+    local package packages=$FIRSTDRAFT_CLI_PACKAGE
+    [ -z "$MAC" ] || packages="$packages $FIRSTDRAFT_PACKAGE"
+    for package in $packages; do
+        [ -z "$(npm_global_version "$package")" ] || printf ' %s' "$package"
+    done
+}
+
+check_firstdraft() {
+    local old
+    old=$(earlier_firstdraft_packages)
+    [ -z "$old" ] || { echo "an earlier kit's First Draft npm packages are installed:$old"; return 1; }
+    if [ -n "$MAC" ]; then check_firstdraft_plugin; else check_firstdraft_package; fi
+}
+
+# Mac: the plugin from First Draft's catalog, enabled in Claude Code, with
+# the catalog's automatic updates on.
+check_firstdraft_plugin() {
+    local plugin version root cli settings="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.json"
+    # A plugin from a local catalog loads in place from readFromFolder.
+    plugin=$(claude plugin list --json 2>/dev/null | FIRSTDRAFT_PLUGIN=$FIRSTDRAFT_PLUGIN node -e '
+        let text = "";
+        process.stdin.on("data", (chunk) => (text += chunk)).on("end", () => {
+            const plugin = JSON.parse(text).find((entry) => entry.id === process.env.FIRSTDRAFT_PLUGIN && entry.enabled);
+            if (plugin) console.log(`${plugin.folderVersion || plugin.version}\t${plugin.readFromFolder || plugin.installPath}`);
+        });' 2>/dev/null)
+    [ -n "$plugin" ] || { echo "$FIRSTDRAFT_PLUGIN is not installed and enabled in Claude Code"; return 1; }
+    version=${plugin%%$'\t'*}
+    root=${plugin#*$'\t'}
+    cli=$("$root/bin/firstdraft" --version 2>/dev/null) || { echo "the CLI in $FIRSTDRAFT_PLUGIN $version does not run"; return 1; }
+    node -e '
+        const settings = JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8"));
+        process.exit(settings.extraKnownMarketplaces?.["firstdraft-skills"]?.autoUpdate === true ? 0 : 1);
+    ' "$settings" 2>/dev/null || { echo "automatic updates are off for the firstdraft-skills catalog in $settings"; return 1; }
+    echo "$FIRSTDRAFT_PLUGIN $version with CLI $cli, automatic updates on"
+}
+
+# Ubuntu: the plugin's npm package, whose Skill handoff.sh links.
+check_firstdraft_package() {
+    local version cli latest
+    version=$(npm_global_version "$FIRSTDRAFT_PACKAGE")
+    [ -n "$version" ] || { echo "$FIRSTDRAFT_PACKAGE is not installed"; return 1; }
+    cli=$("$(npm root --global)/$FIRSTDRAFT_PACKAGE/bin/firstdraft" --version 2>/dev/null) \
+        || { echo "the CLI in $FIRSTDRAFT_PACKAGE $version does not run"; return 1; }
+    # Running the kit again is how this laptop updates First Draft, so
+    # compare with npm. An unreachable registry only warns: setup must not
+    # depend on it.
+    latest=$(npm view "$FIRSTDRAFT_PACKAGE" version --fetch-retries=0 --fetch-timeout=10000 2>/dev/null)
+    if [ -z "$latest" ]; then
+        echo "First Draft plugin $version with CLI $cli (WARNING: could not compare with npm's latest)"
+    elif [ "$version" != "$latest" ] &&
+         [ "$(printf '%s\n%s\n' "$version" "$latest" | sort -V | head -n 1)" = "$version" ]; then
+        echo "First Draft plugin $version is older than $latest"; return 1
+    else
+        echo "First Draft plugin $version with CLI $cli, up to date"
+    fi
+}
+
+install_firstdraft() {
+    local old
+    old=$(earlier_firstdraft_packages)
+    if [ -n "$old" ]; then
+        # shellcheck disable=SC2086
+        npm uninstall --global $old
+    fi
+    if [ -z "$MAC" ]; then
+        npm install --global "$FIRSTDRAFT_PACKAGE_SPEC"
+        mise reshim
+        return
+    fi
+    [ -z "$old" ] || mise reshim
+    claude plugin marketplace add "$FIRSTDRAFT_CATALOG" --scope user
+    claude plugin install "$FIRSTDRAFT_PLUGIN" --scope user
+    # Claude Code updates a third-party catalog's plugins only when that
+    # catalog's settings entry turns on autoUpdate; 'marketplace add' has
+    # just written the entry.
+    node -e '
+        const fs = require("node:fs");
+        const file = process.argv[1];
+        const settings = JSON.parse(fs.readFileSync(file, "utf8"));
+        const catalog = settings.extraKnownMarketplaces?.["firstdraft-skills"];
+        if (!catalog) throw new Error(`${file} does not declare the firstdraft-skills catalog.`);
+        catalog.autoUpdate = true;
+        fs.writeFileSync(file, JSON.stringify(settings, null, 2) + "\n");
+    ' "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/settings.json"
 }
 
 check_render() {

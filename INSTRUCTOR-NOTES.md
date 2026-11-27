@@ -35,11 +35,33 @@ new WSL session  -> /create-full-stack-app <app idea>
 WSL sessions in Claude Desktop use the Desktop app's Claude sign-in. (An
 earlier version of these notes said WSL sessions do not support plugins; the
 owner's testing on 2026-10-03 showed plugins are available when WSL is
-selected.) The handoff still installs both skills as user skills in Ubuntu's
-`~/.claude/skills`, which was tested and needs no plugin install:
-`workshop-signin` (only loads when typed) and a link to the First Draft
-plugin's one skill in its npm package. If an attendee also has the First
-Draft plugin enabled, the session may list that skill twice.
+selected.) Anthropic's pages say the opposite today: the
+[WSL page](https://code.claude.com/docs/en/desktop-wsl) lists "Plugins: not
+available in WSL sessions", and the
+[Desktop page](https://code.claude.com/docs/en/desktop) says "Plugins aren't
+available in WSL sessions." The two disagree, and neither has been checked
+again since. In Ubuntu, `tools.sh` installs the plugin's own npm package,
+`@firstdraft.com/claude-code`, which holds the Skill and the CLI it was
+tested with; nothing installs the CLI by itself. The handoff installs both
+skills as user skills in Ubuntu's `~/.claude/skills`, which was tested and
+needs no plugin install, so it does not depend on whether a WSL session
+loads plugins: `workshop-signin` (only loads when typed) and a link to the
+plugin's one skill in that package, so the command is
+`/create-full-stack-app`. If an attendee also has the First Draft plugin
+enabled, the session may list that skill twice. The package also puts the
+same CLI on Ubuntu's PATH as `firstdraft`. Running the kit again is how
+Windows updates: the
+`firstdraft` tools check fails when npm has a newer package, which sends
+`check-status` to INSTALL_TOOLS. On a laptop set up by an earlier kit, that
+step also removes the separate `@firstdraft.com/cli` package.
+
+From a plain shell, `bash ~/.workshop/firstdraft.sh <arguments>` runs the
+plugin's CLI on either kind of laptop. In Ubuntu it follows the Skill's link
+to the package; on a Mac it asks `claude plugin list --json` where Claude
+Code installed the plugin. `auth.sh` and `login.sh` use it: the
+`firstdraft` sign-in check runs `firstdraft start`, and `login.sh start|wait
+firstdraft` runs the CLI's two-step device login, `login --no-wait` then
+`login --finish`.
 
 The handoff also writes a block of notes for the app sessions into Ubuntu's
 `~/.claude/CLAUDE.md` (from `scripts/linux/app-instructions.md`), because
@@ -90,11 +112,34 @@ Claude Desktop, Local session (this folder):
 setup.sh status -> INSTALL_HOMEBREW -> Terminal window: Homebrew's installer (+ Command Line Tools);
                                        the attendee types their Mac password there
                 -> INSTALL_TOOLS    -> brew: gh cloudflared postgresql@18 (service) openssl@3 libyaml gmp rust;
-                                       then mise, Ruby, Node, the CLIs, Revyl, as on Windows
+                                       then mise, Ruby, Node, the CLIs, Revyl, as on Windows, except
+                                       First Draft: its plugin from First Draft's catalog
                 -> CONFIGURE        -> configure.sh (an existing SSH key is kept)
                 -> HANDOFF          -> verify, ask projects folder (~/appdev) and app name, handoff
                 -> DONE             -> quit and reopen Claude Desktop, new Local session in <folder>/<app>
+                                       (/workshop-signin, then /firstdraft:create-full-stack-app)
 ```
+
+A Mac's Local sessions load plugins, so there the `firstdraft` tools step
+installs First Draft as a plugin with Claude Code's own commands and turns
+on Claude Code's automatic updates for First Draft's catalog, as the
+Codespace template does:
+
+```sh
+claude plugin marketplace add firstdraft/skills --scope user
+claude plugin install firstdraft@firstdraft-skills --scope user
+# then "autoUpdate": true on extraKnownMarketplaces["firstdraft-skills"] in ~/.claude/settings.json
+```
+
+No npm package and no linked skill: the plugin provides the skill, as
+`/firstdraft:create-full-stack-app`, and Claude Code keeps it current. On a
+Mac set up by an earlier kit, that step first removes the global
+`@firstdraft.com/cli` and `@firstdraft.com/claude-code` packages, and the
+handoff removes the old `~/.claude/skills/create-full-stack-app` link.
+To try a plugin the catalog does not offer yet, set
+`FIRSTDRAFT_PLUGIN_CATALOG` to a local catalog folder for `tools.sh install
+firstdraft` on a Mac, or `FIRSTDRAFT_PLUGIN_PACKAGE` to a package file in
+Ubuntu.
 
 This is the attendee's own account, so the Mac handoff keeps its changes
 narrow:
@@ -108,10 +153,10 @@ narrow:
   syncing corrupts git repositories and fights with the many files an app
   writes, and GitHub is the backup. A Mac set up before this has no record,
   so the scripts use its app folder's parent (`~/workshop`).
-- The sign-in skill, the First Draft skill link and the Neon skills are
-  user skills, as on Windows. Project skills in a parent folder are found
-  only up to the repository root, and each app folder becomes a repository.
-  The sign-in skill only loads when typed.
+- The sign-in skill and the Neon skills are user skills, as on Windows, and
+  the First Draft plugin is installed for the user. Project skills in a
+  parent folder are found only up to the repository root, and each app
+  folder becomes a repository. The sign-in skill only loads when typed.
 - Git's name and email from the GitHub account go in
   `~/.workshop/gitconfig`, which the global config includes only for
   repositories in the projects folder. Global git defaults (`main`, gh over
@@ -185,6 +230,12 @@ Symptoms and their fixes, including this rehearsal's, are in
 
 - All `.ps1` files parse under Windows PowerShell 5.1 and are ASCII-only; the
   `.sh` files pass `bash -n`.
+- `test/plugin-install.sh` (not in the zip) checks the First Draft install
+  on both kinds of laptop with stand-ins for `claude`, `npm` and `mise`: the
+  Mac installs the plugin from First Draft's catalog and turns on its
+  updates, Ubuntu links the Skill from the plugin's package, and an earlier
+  kit's packages go. Run it from the repository's root with
+  `docker run --rm -v "$PWD":/repo:ro node:24-bookworm bash /repo/test/plugin-install.sh`.
 - On this PC (Windows 11 Home, WSL 2.7.14 already installed, no distros):
   `check-status` reported SETUP_UBUNTU; `setup-ubuntu` installed Ubuntu-24.04
   and created `appdev` on the first try; `check-status` then reported VERIFY;
@@ -239,16 +290,15 @@ Symptoms and their fixes, including this rehearsal's, are in
 - After the first sign-in session, `/exit` opened the second session (First
   Draft plugin) as intended.
 - Not yet tested: `github-refresh`.
-- First Draft sign-in (CLI 0.8.1, `firstdraft login`): the helper supports the
-  default mode (the browser sends the approval back to a listener on
-  127.0.0.1 in Ubuntu, as Neon's does) and `firstdraft-device`
-  (`firstdraft login --device`). The skill now starts with the device code
-  and falls back to the default mode, because WSL2's 127.0.0.1 forwarding
-  fails on some machines. The CLI has no status
-  command, so the check looks for `https://firstdraft.com` in
-  `~/.config/firstdraft/credentials.json`. Link capture tested for both modes
-  (not yet an approved sign-in). The Install phase now requires First Draft
-  CLI 0.8.1 or newer, so a machine set up earlier gets updated.
+- (History, replaced when First Draft became one plugin by its
+  `firstdraft start` and two-step device login; see the end of this list.)
+  First Draft sign-in
+  (CLI 0.8.1, `firstdraft login`): the helper supported the default mode
+  (the browser sends the approval back to a listener on 127.0.0.1 in Ubuntu,
+  as Neon's does) and `firstdraft-device` (`firstdraft login --device`), and
+  the skill started with the device code. The check looked for
+  `https://firstdraft.com` in `~/.config/firstdraft/credentials.json`, and
+  the Install phase required a separate First Draft CLI 0.8.1 or newer.
 - Revyl CLI pin: v0.1.133, bumped from v0.1.109 on 2026-10-03. It waits up
   to 35 minutes for a busy device queue (v0.1.109 gave up after 2) and no
   longer reports success for a stop the server did not confirm. The
@@ -348,7 +398,10 @@ Symptoms and their fixes, including this rehearsal's, are in
   without uploads, and refused a folder where Git does not ignore that file.
   `handoff.sh apply` (stubbed `npm`) installed the helper, and sourcing the
   saved file filled `--env-var "CLOUDINARY_URL=$CLOUDINARY_URL"`.
-- FACILITATOR.md's cancel command (same container): it read the Project ID
+- (History: FACILITATOR.md no longer has this cancel command, because the
+  kit now relies on plugin 0.10.0 or later, whose CLI has
+  `compilation cancel`.) FACILITATOR.md's
+  cancel command (same container): it read the Project ID
   and token from sample files and sent the token only as the `Authorization`
   header, to a local server, without printing it, also with a verbose
   `~/.curlrc`. Production answers that route with
@@ -407,6 +460,36 @@ Symptoms and their fixes, including this rehearsal's, are in
   sibling folder (README Part 4), not elsewhere. A Mac set up by the
   earlier kit (`~/workshop/<app>`, no record) kept `~/workshop`. The WSL
   path's stub run matched `origin/main`. Not run on a real Mac.
+- First Draft as one plugin (2026-11-22), with plugin 0.10.0 staged from
+  its source, which neither the catalog nor npm offered yet (both had
+  0.9.3, whose CLI has no `start`):
+  - Ubuntu 24.04 container, as `appdev`, with the kit's real mise and Node
+    24.21.0: an earlier kit's `@firstdraft.com/cli` 0.9.0 and plugin package
+    0.9.3 failed the `firstdraft` check; `tools.sh install firstdraft`
+    removed the CLI package and installed the staged package file, and the
+    check passed with plugin and CLI 0.10.0. The handoff linked the Skill
+    from the package, and the Skill's own helper ran its CLI through the
+    link. `firstdraft.sh start` printed the no-saved-login lines without a
+    request, `auth.sh check firstdraft` reported them, and `login.sh wait
+    firstdraft` with no login started reported "No login is waiting".
+    Against a loopback stand-in for First Draft's login and account read,
+    `login.sh start firstdraft` printed the link and code, `wait` said
+    "Still waiting" before the approval and "Logged in" with `[PASS]` after
+    it. `firstdraft` on PATH was the package's own launcher.
+  - This Mac, with a scratch `HOME`, Claude Code settings and npm prefix,
+    real Claude Code 2.1.330 and npm, under `/bin/bash` 3.2: after an
+    earlier kit's two npm packages and link, `tools.sh install firstdraft`
+    with a local catalog of the staged plugin removed both packages, added
+    the catalog, installed the plugin, and set `autoUpdate`; a second run
+    passed without changes. The handoff removed the old link, no
+    `firstdraft` was on PATH, and `firstdraft.sh` found the CLI through
+    `claude plugin list --json`; the same `start`, check and loopback
+    login results as in Ubuntu followed. After `claude plugin uninstall`, `firstdraft.sh`
+    printed its one line and exited 127. Against the real catalog in
+    another scratch home, the two plugin commands installed plugin 0.9.3.
+  - Not run: a Windows laptop, a Claude Desktop WSL session, or a Local
+    session on a clean Mac using the plugin, and Claude Code's automatic
+    update of the plugin.
 
 ## Test before the workshop (not yet verified)
 
@@ -432,8 +515,9 @@ Symptoms and their fixes, including this rehearsal's, are in
    both skills, and that the skill's `allowed-tools` lets the helper scripts
    run without permission prompts (the rule syntax is a best guess).
 9. **First Draft device sign-in with the workshop credential:** the basic-auth
-   box appears once, then GitHub, then the device approval, and the check
-   passes.
+   box appears once, then GitHub, then the device approval from
+   `login.sh start firstdraft`, and `login.sh wait firstdraft` passes the
+   check.
 10. **Render workspace and GitHub app on a fresh Render account:**
     `render-workspace.sh` sets the only workspace, and installing the Render
     GitHub app from GitHub's page links it to that Render account.
@@ -467,6 +551,13 @@ Symptoms and their fixes, including this rehearsal's, are in
     `allowed-tools` lets the helpers run without prompts.
 15. **A Mac with existing tools:** another PostgreSQL on port 5432, asdf or
     rbenv ahead of mise on PATH, or a passphrase on an existing SSH key.
+16. **The First Draft plugin on a Mac:** after quitting and reopening Claude
+    Desktop, a Local session lists `/firstdraft:create-full-stack-app` from
+    the plugin the `firstdraft` tools step installed, and Claude Code later
+    updates it from the catalog by itself.
+17. **First Draft on Windows:** a WSL session lists `/create-full-stack-app`
+    from the link, and on a laptop with an older plugin package, typing
+    `continue` in the `workshop-kit` folder's Local session updates it.
 
 ## Deliberate choices
 

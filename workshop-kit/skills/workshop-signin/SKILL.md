@@ -34,9 +34,9 @@ before they see it. They are already signed in to Claude.
 bash ~/.workshop/auth.sh check all          # one [PASS]/[FAIL] line per service
 bash ~/.workshop/auth.sh check <service>
 bash ~/.workshop/login.sh start <service>   # github | github-refresh | render | neon | revyl
-                                            # | firstdraft | firstdraft-device
-bash ~/.workshop/login.sh stop <service>
-bash ~/.workshop/login.sh status <service>  # still waiting, ended, or timed out?
+                                            # | firstdraft
+bash ~/.workshop/login.sh stop <service>    # not for firstdraft
+bash ~/.workshop/login.sh status <service>  # still waiting, ended, or timed out? (not for firstdraft)
 bash ~/.workshop/login.sh wait <service>    # after the approval: let it save, then check
 bash ~/.workshop/render-workspace.sh        # after the Render sign-in (step 4)
 bash ~/.workshop/cloudinary.sh save         # after each Cloudinary copy (step 4)
@@ -44,7 +44,8 @@ bash ~/.workshop/open.sh <link>             # open any page in their browser
 ```
 
 `login.sh start` starts the sign-in in the background and returns within
-about 30 seconds. It prints one of:
+about 30 seconds (First Draft's works differently; see step 5). It prints
+one of:
 
 - `URL:` (and sometimes `CODE:`), then `OPENED` and `COPIED`, then `WAITING`.
   The sign-in page is already open in their browser, and the link (or
@@ -63,7 +64,8 @@ about 30 seconds. It prints one of:
 
 Never run `auth.sh check` or `login.sh start` right after an approval: the
 sign-in saves a few seconds later, and starting again would cancel it. If
-`login.sh wait` ends in `[FAIL]`, run `login.sh status <service>` to see why.
+`login.sh wait` ends in `[FAIL]`, run `login.sh status <service>` to see why
+(for First Draft, follow step 5 instead).
 `WAITING` means the approval has not reached the sign-in yet: ask whether
 they finished approving, then run `login.sh wait <service>` again. Only after
 `ENDED` or `TIMED OUT`, run `login.sh start <service>` again: each start makes
@@ -228,22 +230,45 @@ the sign-in, tell them what they will see:
    box refuses them, get the instructor.
 2. GitHub may ask them to sign in to First Draft: they approve.
 3. First Draft asking them to approve the sign-in for this laptop: they
-   approve, then tell you.
+   check that the page shows the code you showed them, approve, then tell
+   you. First Draft may also ask whether their coding agent may send it
+   reports about the code it generates: that is their choice, and they can
+   change it later on their account page.
 
-Then run `login.sh start firstdraft-device`, and after they approve,
-`login.sh wait firstdraft-device`. The link includes the code, so they only
-approve; if the page asks for the code, it is the `CODE:`.
+The `firstdraft` check asks the First Draft plugin's `firstdraft start`. If
+it names a token variable First Draft did not accept, do not start a login;
+see the last item below. If it says `firstdraft start failed:`, First Draft
+did not answer the check, or the First Draft plugin is missing: do not
+start a login either. For `account_unavailable` or
+`rate_limited`, wait as long as it says (a minute when it names no time)
+and run the check again; for anything else, such as `update_required` or
+`First Draft CLI is unavailable`, show them what it says and get the
+instructor. Otherwise run `login.sh start firstdraft`. It runs the First
+Draft plugin's own CLI and returns at once: nothing waits in the
+background. It prints `URL:` and `CODE:`, then `OPENED` and `COPIED`, then
+when the link and the code expire, or `NO LINK` as above. Show them as
+above; the link usually includes the code, so they only approve, and if the
+page asks for the code, it is the `CODE:`. When they say they approved, run
+`login.sh wait firstdraft`. It finishes the login and prints First Draft's
+answer, then the check. An answer that starts `NOT FINISHED:` is the CLI's
+error and says what to do: always show it to them and follow it, for
+example running `login.sh wait firstdraft` again when it says to retry.
+Otherwise a `[PASS]` check means First Draft is done, whatever the answer
+above it. With `[FAIL]`:
 
-If `login.sh wait firstdraft-device` still fails after they approved, run
-`login.sh status firstdraft-device`. After `WAITING`, follow the steps above.
-After `ENDED` or `TIMED OUT`, try the browser sign-in instead:
-`login.sh start firstdraft`, then `login.sh wait firstdraft` once they
-approve. After approving, the browser is sent back to a page on `127.0.0.1`.
-If that page cannot be reached ("This site can't be reached"), this sign-in
-does not work on this laptop: get the instructor.
+- `Still waiting:`: First Draft has not seen the approval yet. Ask whether
+  they finished approving, then run `login.sh wait firstdraft` again.
+- `Expired:` or `No login is waiting:`, or a `NOT FINISHED:` error that
+  does not say to retry: run `login.sh start firstdraft` again and give
+  them only the new link.
+- `Refused:`: they denied it. Ask them before you start another.
+- A check that names a token variable First Draft did not accept: show them
+  what it says. A token set in this session's environment takes the place
+  of any login, so signing in again does not help until they replace or
+  remove it.
 
-If `login.sh` shows "Unknown command", their First Draft CLI is too old to
-sign in: tell them to raise their hand for the instructor.
+If it fails twice, get the instructor. `stop` and `status` do not apply to
+First Draft.
 
 ## Finishing
 

@@ -8,3 +8,6 @@ setup-wsl.ps1
 
 # Revyl CLI session state, written when a preview runs from the repo root
 .revyl/
+
+# Maintainers' scratch space, such as a staged plugin to try
+/tmp/

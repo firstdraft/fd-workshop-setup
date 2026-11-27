@@ -2,9 +2,9 @@
 # platform.sh
 #
 # The few commands that differ between a Windows laptop, where the helpers
-# run in Ubuntu in WSL, and a Mac. login.sh, auth.sh, cloudinary.sh and
-# open.sh source this file. Installed to ~/.workshop/platform.sh by
-# handoff.sh.
+# run in Ubuntu in WSL, and a Mac, and reading the First Draft CLI's errors.
+# login.sh, auth.sh, cloudinary.sh and open.sh source this file. Installed
+# to ~/.workshop/platform.sh by handoff.sh.
 #
 # Every helper must also run under macOS's /bin/bash, which is bash 3.2:
 # no mapfile, no ${var,,}, no associative arrays.
@@ -78,4 +78,20 @@ run_with_timeout() {
         return
     fi
     timeout "$@"
+}
+
+# Prints the handled error that the First Draft CLI wrote to a file of its
+# standard error, as '<error>: <detail>', or nothing when it wrote none. The
+# error is one JSON object, after any 'First Draft: ' update line.
+#   firstdraft_error <file>
+firstdraft_error() {
+    grep -v '^First Draft: ' "$1" 2>/dev/null | node -e '
+        let text = "";
+        process.stdin.on("data", (chunk) => (text += chunk)).on("end", () => {
+            let error;
+            try { error = JSON.parse(text); } catch { return; }
+            if (error && typeof error.error === "string") {
+                console.log([error.error, error.detail].filter((part) => typeof part === "string" && part).join(": "));
+            }
+        });' 2>/dev/null
 }
