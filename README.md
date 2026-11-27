@@ -126,14 +126,19 @@ Build your own idea. No idea yet? Step 9 has a family social network you can bui
 
    **Mac users:** keep `Local`.
 
-   Then describe your idea in a sentence or two:
+   Then describe your idea in a sentence or two, after First Draft's command. **Windows users:** the command is
+   `/create-full-stack-app`:
    ```text
    /create-full-stack-app A place for my book club to pick the next book and vote on meeting dates. Read the materials in this folder first.
    ```
-   Leave out the last sentence if you didn't bring any materials, and paste a Claude Design handoff after your
-   idea. No idea yet? Type this instead:
+   **Mac users:** the command is `/firstdraft:create-full-stack-app`:
    ```text
-   /create-full-stack-app Help me build a social network for just my family. It should work and look like Instagram so that it's familiar.
+   /firstdraft:create-full-stack-app A place for my book club to pick the next book and vote on meeting dates. Read the materials in this folder first.
+   ```
+   Leave out the last sentence if you didn't bring any materials, and paste a Claude Design handoff after your
+   idea. No idea yet? Type your command, then this:
+   ```text
+   Help me build a social network for just my family. It should work and look like Instagram so that it's familiar.
    ```
 10. Claude first looks up how similar apps work, then asks a few questions, one at a time. Answer in your own words,
     or say "you pick". At any point you can say "make the rest of the decisions for me".
@@ -208,5 +213,14 @@ Build your own idea. No idea yet? Step 9 has a family social network you can bui
 - To come back to a project, open a session and choose its folder.
   - **Windows users:** choose `WSL` &rarr; `Ubuntu-24.04`.
   - **Mac users:** keep `Local`.
+- First Draft updates differently on each kind of laptop.
+  - **Set up this laptop with an earlier download of this kit, or not sure? (Windows or Mac)** Download this repo's
+    zip again and do Part 1 once with its `workshop-kit` folder. It replaces an earlier First Draft setup, and on a
+    laptop that has the current one it changes nothing.
+  - **Windows users:** run the kit again: open the `workshop-kit` folder of a current download in Claude Desktop
+    with `Local`, as in step 3, and type `continue`. On Windows the kit links the First Draft skill into Ubuntu
+    rather than installing the plugin, so running the kit again is how it updates.
+  - **Mac users:** nothing more to do. The kit installed First Draft as a Claude plugin and turned on its automatic
+    updates.
 - Render's free plan sleeps when nobody visits, so the first visit afterwards takes about a minute.
 - To remove an app from the internet, ask Claude: `Delete this app's Render service and its Neon project.`

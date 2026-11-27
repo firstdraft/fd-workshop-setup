@@ -11,12 +11,18 @@
 #     opener to ~/.workshop/open.sh, the sign-in checks to ~/.workshop/auth.sh, the sign-in helper
 #     to ~/.workshop/login.sh, ~/.workshop/git-identity.sh (sets git's
 #     name and email from the GitHub account),
-#     ~/.workshop/render-workspace.sh (sets the Render CLI's workspace) and
-#     ~/.workshop/cloudinary.sh (saves the Cloudinary key, puts it in apps)
+#     ~/.workshop/render-workspace.sh (sets the Render CLI's workspace),
+#     ~/.workshop/cloudinary.sh (saves the Cloudinary key, puts it in apps) and
+#     ~/.workshop/firstdraft.sh (runs the First Draft plugin's CLI)
 #   - installs the sign-in skill to ~/.claude/skills/workshop-signin (it only
 #     loads when the attendee types /workshop-signin)
-#   - links the First Draft skill from the npm package into ~/.claude/skills,
-#     so the WSL session has it without installing the plugin
+#   - in Ubuntu, links the First Draft Skill from the plugin's npm package
+#     (tools.sh) into ~/.claude/skills, because linking needs no plugin
+#     install, so it does not depend on whether a WSL session loads plugins
+#     (Anthropic's pages say such sessions cannot; a test on 2026-10-03 found
+#     they can). On a Mac the plugin
+#     itself provides the Skill, so this removes the link an earlier kit made
+#     there.
 #   - adds the workshop's notes for app sessions (native preview, deploys) to
 #     ~/.claude/CLAUDE.md, which every Claude session in Ubuntu loads. On a
 #     Mac, the attendee's own account, they go in CLAUDE.md in the projects
@@ -32,10 +38,11 @@
 
 set -uo pipefail
 
-ITEMS="app-folder platform-layer open-helper auth-checks login-helper git-identity-helper render-workspace-helper cloudinary-helper signin-skill firstdraft-skill app-instructions auto-mode"
+ITEMS="app-folder platform-layer open-helper auth-checks login-helper git-identity-helper render-workspace-helper cloudinary-helper firstdraft-helper signin-skill firstdraft-skill app-instructions auto-mode"
 
 WORKSHOP_DIR="$HOME/.workshop"
 SKILLS_DIR="$HOME/.claude/skills"
+FIRSTDRAFT_SKILL_LINK="$SKILLS_DIR/create-full-stack-app"
 CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 if [ "$(uname -s)" = Darwin ]; then
     MAC=1
@@ -99,15 +106,45 @@ check_cloudinary_helper() {
     echo "$WORKSHOP_DIR/cloudinary.sh"
 }
 
+check_firstdraft_helper() {
+    [ -f "$WORKSHOP_DIR/firstdraft.sh" ] || { echo "not installed"; return 1; }
+    echo "$WORKSHOP_DIR/firstdraft.sh"
+}
+
 check_signin_skill() {
     [ -f "$SKILLS_DIR/workshop-signin/SKILL.md" ] || { echo "not installed"; return 1; }
     echo "/workshop-signin"
 }
 
+# The Skill inside the plugin's npm package that tools.sh installed.
+firstdraft_package_skill() {
+    echo "$(npm root --global)/@firstdraft.com/claude-code/skills/create-full-stack-app"
+}
+
+# On a Mac: is the Skill folder the link an earlier kit made into the plugin's
+# npm package, in the global packages of a Node that mise installed? (Its
+# target may be gone already.) Any other link or folder of that name is the
+# attendee's own.
+earlier_kit_skill_link() {
+    case "$(readlink "$FIRSTDRAFT_SKILL_LINK" 2>/dev/null)" in
+        "$HOME"/.local/share/mise/installs/node/*/lib/node_modules/@firstdraft.com/claude-code/skills/create-full-stack-app) return 0 ;;
+    esac
+    return 1
+}
+
 check_firstdraft_skill() {
-    # A link into the npm package: it breaks if Node is reinstalled elsewhere.
-    [ -f "$SKILLS_DIR/create-full-stack-app/SKILL.md" ] || { echo "not linked (or the link is broken)"; return 1; }
-    echo "create-full-stack-app"
+    if [ -n "$MAC" ]; then
+        # The plugin (tools.sh) provides /firstdraft:create-full-stack-app.
+        ! earlier_kit_skill_link || { echo "an earlier kit's link is still in $SKILLS_DIR"; return 1; }
+        echo "/firstdraft:create-full-stack-app, from the plugin"
+        return
+    fi
+    # The link must point into the package Node has now: a kit with a newer
+    # Node installs the package again, in that Node's folder.
+    [ "$(readlink "$FIRSTDRAFT_SKILL_LINK")" = "$(firstdraft_package_skill)" ] \
+        || { echo "not linked from the First Draft plugin's npm package"; return 1; }
+    [ -f "$FIRSTDRAFT_SKILL_LINK/SKILL.md" ] || { echo "the link is broken"; return 1; }
+    echo "/create-full-stack-app, linked from the plugin's npm package"
 }
 
 check_app_instructions() {
@@ -200,8 +237,10 @@ apply_all() {
         return 1
     fi
     [ -d "$kit/skills/workshop-signin" ] || { echo "[FAIL] kit folder not found: '$kit'"; return 1; }
-    firstdraft_skill="$(npm root --global)/@firstdraft.com/claude-code/skills/create-full-stack-app"
-    [ -f "$firstdraft_skill/SKILL.md" ] || { echo "[FAIL] First Draft skill not found at $firstdraft_skill"; return 1; }
+    if [ -z "$MAC" ]; then
+        firstdraft_skill=$(firstdraft_package_skill)
+        [ -f "$firstdraft_skill/SKILL.md" ] || { echo "[FAIL] First Draft skill not found at $firstdraft_skill"; return 1; }
+    fi
 
     mkdir -p "$APPS_DIR/$name" "$WORKSHOP_DIR" "$SKILLS_DIR"
     printf '%s\n' "$APPS_DIR/$name" > "$WORKSHOP_DIR/app-dir"
@@ -213,8 +252,13 @@ apply_all() {
     copy_from_kit "$kit/scripts/linux/git-identity.sh" "$WORKSHOP_DIR/git-identity.sh"
     copy_from_kit "$kit/scripts/linux/render-workspace.sh" "$WORKSHOP_DIR/render-workspace.sh"
     copy_from_kit "$kit/scripts/linux/cloudinary.sh" "$WORKSHOP_DIR/cloudinary.sh"
+    copy_from_kit "$kit/scripts/linux/firstdraft.sh" "$WORKSHOP_DIR/firstdraft.sh"
     copy_from_kit "$kit/skills/workshop-signin" "$SKILLS_DIR/workshop-signin"
-    ln -sfn "$firstdraft_skill" "$SKILLS_DIR/create-full-stack-app"
+    if [ -n "$MAC" ]; then
+        ! earlier_kit_skill_link || rm "$FIRSTDRAFT_SKILL_LINK"
+    else
+        ln -sfn "$firstdraft_skill" "$FIRSTDRAFT_SKILL_LINK"
+    fi
     install_app_instructions "$kit/scripts/linux/app-instructions.md"
     set_auto_mode
 

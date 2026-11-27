@@ -31,3 +31,13 @@ Claude opens a Terminal window to install Homebrew. When it asks for
 your password, type your Mac password there and press Return. Nothing
 shows while you type. Claude never asks for your password.
 "Setup WSL without Claude.cmd" is for Windows only.
+
+UPDATING FIRST DRAFT LATER
+==========================
+
+Windows: open this folder in Claude Desktop again and type:  continue
+   On Windows this kit links the First Draft skill into Ubuntu rather
+   than installing the plugin, so running the kit again updates it.
+
+Mac: nothing to do. This kit installed First Draft as a Claude plugin
+   and turned on its automatic updates.
